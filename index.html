@@ -169,6 +169,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .io-active-no{background:var(--rs)!important;border-color:var(--rs)!important;box-shadow:0 0 8px rgba(244,63,94,.5)}
 .io-replace{cursor:pointer}
 .io-replace input{position:absolute;width:1px;height:1px;overflow:hidden}
+.io-del:hover{background:var(--rs)!important;border-color:var(--rs)!important}
 
 /* Slot border colors for feedback status */
 .fb-slot-ok{border:2px solid var(--gn)!important;box-shadow:0 0 6px rgba(16,185,129,.15)}
@@ -440,7 +441,15 @@ async function removeImage(mid,pose){
     await sb.storage.from(STORAGE_BUCKET).remove([path]);
     await sb.from('model_images').delete().match({model_id:mid,pose:pose});
   }
-  fGal();renderLiveGallery();toast('תמונה הוסרה');
+  fGal();renderLiveGallery();renderDataTable();toast('תמונה נמחקה');
+}
+
+function confirmDelete(mid,pose){
+  const m=MD.find(x=>x.id===mid);
+  if(confirm(`למחוק את התמונה של ${m?m.nm:mid} — ${pose}?`)){
+    removeImage(mid,pose);
+    closeFBModal();
+  }
 }
 
 // ── FEEDBACK SYSTEM ──
@@ -511,6 +520,7 @@ function openModelPage(mid){
             <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="saveFeedback(${m.id},'${p}','approved','');openModelPage(${m.id})" title="מאושר">✅</span>
             <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
             <label class="io-btn io-replace" title="החלף תמונה">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}');setTimeout(()=>openModelPage(${m.id}),1500)" style="display:none"/></label>
+            <span class="io-btn io-del" onclick="confirmDelete(${m.id},'${p}')" title="מחק תמונה">🗑️</span>
           </div>
           ${fb&&fb.note?`<div class="fb-note">💬 ${fb.note}</div>`:''}
         `:`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:6px;color:var(--tx3)">
@@ -636,6 +646,7 @@ function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(
           <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="event.stopPropagation();saveFeedback(${m.id},'${p}','approved','')" title="מאושר">✅</span>
           <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="event.stopPropagation();openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
           <label class="io-btn io-replace" title="החלף תמונה">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')" style="display:none"/></label>
+          <span class="io-btn io-del" onclick="event.stopPropagation();confirmDelete(${m.id},'${p}')" title="מחק תמונה">🗑️</span>
         </div>
         ${fb&&fb.note?`<div class="fb-note" title="${fb.note}">💬 ${fb.note}</div>`:''}
       `:`<div class="slot-label">${p}<br>📷</div><input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')"/>`}
