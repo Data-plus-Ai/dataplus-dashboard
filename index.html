@@ -200,6 +200,32 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 
 @media(max-width:900px){.cv,.cg{grid-template-columns:1fr}.ss{grid-template-columns:repeat(3,1fr)}.tg{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
 @media(max-width:600px){.ss{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══ SIZE REFERENCE TAB ═══ */
+.sr-subtabs{display:flex;gap:3px;background:var(--sf);border-radius:10px;padding:3px;margin-bottom:18px;width:fit-content;flex-wrap:wrap}
+.sr-subtab{padding:7px 14px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;color:var(--tx2);transition:all .2s;border:none;background:none;font-family:inherit}
+.sr-subtab:hover{color:var(--tx)}
+.sr-subtab.active{background:var(--ac);color:#fff}
+.sr-view{display:none}
+.sr-view.active{display:block}
+.sr-specs-table{overflow-x:auto;border-radius:12px;border:1px solid var(--bd);margin-top:10px}
+.sr-specs-table table{width:100%;border-collapse:collapse;font-size:10px;direction:ltr;text-align:left}
+.sr-specs-table th{background:var(--sf2);padding:10px 10px;font-weight:700;color:var(--ac2);font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-family:'JetBrains Mono',monospace;position:sticky;top:0;white-space:nowrap;border-bottom:2px solid var(--ac)}
+.sr-specs-table td{padding:8px 10px;border-top:1px solid var(--bd);white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10px}
+.sr-specs-table tr:hover td{background:rgba(139,92,246,.04)}
+
+/* ═══ ADVANCED QC TAB ═══ */
+.qca-controls{margin-bottom:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qca-comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.qca-left,.qca-right{background:var(--sf);border:1px solid var(--bd);padding:16px;border-radius:12px}
+.qca-checklist{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-top:16px}
+.qca-section{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+.qca-section-title{font-size:12px;font-weight:700;color:var(--ac2);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.qca-check-label{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tx2);margin-bottom:7px;cursor:pointer;transition:color .15s}
+.qca-check-label:hover{color:var(--tx)}
+.qca-check-label input[type=checkbox]{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.qca-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+@media(max-width:900px){.qca-comparison{grid-template-columns:1fr}}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card,.tc{animation:fu .3s ease both}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
@@ -233,6 +259,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     <button class="tab" data-tab="compare">השוואה</button>
     <button class="tab" data-tab="prompts">פרומפטים</button>
     <button class="tab" data-tab="qc">QC מידות</button>
+    <button class="tab" data-tab="sizeReference">📊 Size Reference</button>
+    <button class="tab" data-tab="qcAdvanced">🔍 QC מתקדם</button>
     <button class="tab" data-tab="table">טבלה</button>
   </div>
 
@@ -240,7 +268,39 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   <div id="p-overview" class="panel"><div class="ss" id="statsStrip"></div><div id="liveGallery" style="margin-bottom:18px"></div><div class="cg"><div class="cb"><h4>Size Distribution</h4><canvas id="c1"></canvas></div><div class="cb"><h4>Ethnicity</h4><canvas id="c2"></canvas></div><div class="cb"><h4>Body Type × Size</h4><canvas id="c3"></canvas></div><div class="cb"><h4>Height vs Bust</h4><canvas id="c4"></canvas></div></div><div class="cg"><div class="cb"><h4>Skin Tone</h4><canvas id="c5"></canvas></div><div class="cb"><h4>Top 15 Usage</h4><canvas id="c6"></canvas></div></div></div>
   <div id="p-profiles" class="panel"><h3 style="font-size:15px;margin-bottom:4px">מה מייחד כל מודל?</h3><p style="color:var(--tx2);font-size:11px;margin-bottom:14px">שם, סממנים, הבדלים</p><div class="tg" id="traitsGrid"></div></div>
   <div id="p-compare" class="panel"><div class="chdr"><span style="font-size:12px;color:var(--tx2)">בחרי 2 מגלריה ←</span><span class="ccnt" id="ccnt">0/2</span><button class="btn btn-ac" id="cbtn" disabled onclick="runCompare()">השווי</button><button class="btn btn-ghost" onclick="clearSel()">נקי</button></div><div id="cmpR"></div></div>
-  <div id="p-prompts" class="panel"><p style="color:var(--tx2);margin-bottom:10px;font-size:11px">פרומפטים מלאים — 5 פוזות + Close-Up. כפתור העתקה על כל פרומפט.</p><div class="filters" style="margin-bottom:10px"><div class="fg"><label>אחראי/ת</label><select id="pmsAssign" onchange="genPrompts()"><option value="">הכל</option><option value="שלומית">שלומית</option><option value="שקד">שקד</option></select></div><div class="fg"><label>מודל</label><select id="pms" onchange="genPrompts()"><option value="all">כל המודלים</option></select></div><div class="fg"><label>סטטוס</label><select id="pmsStatus" onchange="genPrompts()"><option value="">הכל</option><option value="done">הושלם</option><option value="partial">הושלם חלקית</option><option value="none">לא התחיל</option></select></div></div><div id="pCon"></div></div>
+  <div id="p-prompts" class="panel"><p style="color:var(--tx2);margin-bottom:10px;font-size:11px">פרומפטים מלאים — 5 פוזות + Close-Up. כפתור העתקה על כל פרומפט.</p><div class="filters" style="margin-bottom:10px"><div class="fg"><label>אחראי/ת</label><select id="pmsAssign" onchange="genPrompts()"><option value="">הכל</option><option value="שלומית">שלומית</option><option value="שקד">שקד</option></select></div><div class="fg"><label>מודל</label><select id="pms" onchange="genPrompts()"><option value="all">כל המודלים</option></select></div><div class="fg"><label>סטטוס</label><select id="pmsStatus" onchange="genPrompts()"><option value="">הכל</option><option value="done">הושלם</option><option value="partial">הושלם חלקית</option><option value="none">לא התחיל</option></select></div></div><div id="pCon"></div>
+    <!-- Enhanced Size-Based Prompt Generator -->
+    <div style="margin-top:24px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:16px">🎯</span><div><div style="font-size:14px;font-weight:700;color:var(--ac2)">Enhanced Size-Based Prompts</div><div style="font-size:10px;color:var(--tx3)">Generate prompts with facial structure & body composition from size_guidelines</div></div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <label style="font-size:11px;font-weight:600;color:var(--tx2)">Select Size:</label>
+        <select id="enhSizeSelector" onchange="loadEnhancedSizePrompt()" style="background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer">
+          <option value="">Choose a size...</option>
+          <option value="XS">XS (Extra Small)</option>
+          <option value="S">S (Small)</option>
+          <option value="M">M (Medium)</option>
+          <option value="L">L (Large)</option>
+          <option value="XL">XL (Extra Large)</option>
+          <option value="2XL">2XL (Double Extra Large)</option>
+          <option value="3XL">3XL (Triple Extra Large)</option>
+          <option value="4XL">4XL (Quadruple Extra Large)</option>
+        </select>
+      </div>
+      <div id="enhPromptContent" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px">
+            <h4 style="font-size:12px;font-weight:700;color:var(--ac2);margin-bottom:10px">Size Visual Reference</h4>
+            <div id="enhPromptReference"></div>
+          </div>
+          <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px">
+            <h4 style="font-size:12px;font-weight:700;color:var(--ac2);margin-bottom:10px">Enhanced Prompt Template</h4>
+            <textarea id="enhPromptTemplate" readonly style="width:100%;height:350px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:10px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.6;resize:vertical;direction:ltr;text-align:left"></textarea>
+            <button class="btn btn-ac" onclick="copyEnhancedPrompt()" style="margin-top:8px;width:100%">📋 Copy Enhanced Prompt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="p-qc" class="panel">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">QC Measurement Reference</h3><p style="color:var(--tx2);font-size:11px">Visual guide + measurement table for quality control verification</p></div>
@@ -252,6 +312,110 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     <div id="qcTableSection"></div>
   </div>
   <div id="p-table" class="panel"><div class="tw"><table id="dataTable"></table></div></div>
+
+  <!-- ═══ SIZE REFERENCE TAB ═══ -->
+  <div id="p-sizeReference" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">📊 Size Reference Guide</h3>
+      <p style="color:var(--tx2);font-size:11px">Body specs, measurements, composition & facial features per size — loaded from Supabase <code>size_guidelines</code></p></div>
+    </div>
+    <div class="sr-subtabs">
+      <button class="sr-subtab active" onclick="switchSizeView('silhouettes',this)">👤 Silhouettes</button>
+      <button class="sr-subtab" onclick="switchSizeView('measurements',this)">📏 Measurements</button>
+      <button class="sr-subtab" onclick="switchSizeView('bodyComposition',this)">🏋️ Body Composition</button>
+      <button class="sr-subtab" onclick="switchSizeView('facialFeatures',this)">😊 Facial Features</button>
+    </div>
+    <div id="srView-silhouettes" class="sr-view active">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663378099405/crQZnhQhmELVKz8h_l2PD" alt="Silhouettes Reference" style="max-width:100%;border-radius:12px;border:1px solid var(--bd)" onerror="this.style.display='none'"/>
+      </div>
+      <div id="srSpecs-silhouettes" class="sr-specs-table"></div>
+    </div>
+    <div id="srView-measurements" class="sr-view">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663378099405/crQZnhQhmELVKz8h_l2PD" alt="Measurements Reference" style="max-width:100%;border-radius:12px;border:1px solid var(--bd)" onerror="this.style.display='none'"/>
+      </div>
+      <div id="srSpecs-measurements" class="sr-specs-table"></div>
+    </div>
+    <div id="srView-bodyComposition" class="sr-view">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663378099405/crQZnhQhmELVKz8h_l2PD" alt="Body Composition Reference" style="max-width:100%;border-radius:12px;border:1px solid var(--bd)" onerror="this.style.display='none'"/>
+      </div>
+      <div id="srSpecs-bodyComposition" class="sr-specs-table"></div>
+    </div>
+    <div id="srView-facialFeatures" class="sr-view">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663378099405/crQZnhQhmELVKz8h_l2PD" alt="Facial Features Reference" style="max-width:100%;border-radius:12px;border:1px solid var(--bd)" onerror="this.style.display='none'"/>
+      </div>
+      <div id="srSpecs-facialFeatures" class="sr-specs-table"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ADVANCED QC TAB ═══ -->
+  <div id="p-qcAdvanced" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">🔍 Quality Control: AI Model Validation</h3>
+      <p style="color:var(--tx2);font-size:11px">Compare generated model against size reference specs · Saves to <code>qc_results</code></p></div>
+    </div>
+    <div class="qca-controls">
+      <label style="font-size:12px;font-weight:600;color:var(--tx2)">Select Model:</label>
+      <select id="qcaModelSelect" onchange="loadQCAModel()" style="background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-right:8px">
+        <option value="">Choose a model...</option>
+      </select>
+    </div>
+    <div id="qcaMainContent" style="display:none">
+      <div class="qca-comparison">
+        <div class="qca-left">
+          <h4 style="font-size:13px;font-weight:700;color:var(--ac2);margin-bottom:10px">AI Generated Model</h4>
+          <img id="qcaModelImage" src="" alt="Model" style="width:100%;max-width:360px;border-radius:10px;border:1px solid var(--bd);background:var(--sf3)" onerror="this.style.display='none'"/>
+          <div id="qcaModelInfo" style="margin-top:10px"></div>
+        </div>
+        <div class="qca-right">
+          <h4 style="font-size:13px;font-weight:700;color:var(--ac2);margin-bottom:10px">Size Reference Specs</h4>
+          <div id="qcaReferenceSpecs"></div>
+        </div>
+      </div>
+      <div class="qca-checklist">
+        <h4 style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px">QC Validation Checklist</h4>
+        <div class="qca-section">
+          <div class="qca-section-title">Facial Feature Validation</div>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="facial_structure"/> Bone structure matches size guidelines</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="cheekbones"/> Cheekbones match description</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="jawline"/> Jawline matches guidelines</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="lips"/> Lip fullness matches description</label>
+        </div>
+        <div class="qca-section">
+          <div class="qca-section-title">Body Composition Validation</div>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="muscle_definition"/> Muscle definition % correct</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="body_fat"/> Body fat % visually accurate</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="curves"/> Curves/hip projection matches</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="shoulder_width"/> Shoulder width proportional</label>
+        </div>
+        <div class="qca-section">
+          <div class="qca-section-title">Measurement Validation</div>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="height"/> Height visually within range</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="weight"/> Weight appears accurate</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="bust_waist_hip"/> B/W/H proportions correct</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="wh_ratio"/> Waist-to-hip ratio matches</label>
+        </div>
+        <div class="qca-section">
+          <div class="qca-section-title">Consistency Validation</div>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="six_angle_consistency"/> 6-angle consistency maintained</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="lighting_consistency"/> Lighting consistent across poses</label>
+          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="pose_consistency"/> Pose guidelines followed</label>
+        </div>
+        <div style="margin-top:16px">
+          <label style="font-size:11px;font-weight:600;color:var(--tx2);display:block;margin-bottom:6px">Notes:</label>
+          <textarea id="qcaNotes" placeholder="Add any notes or observations..." style="width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;resize:vertical;min-height:70px"></textarea>
+        </div>
+        <div class="qca-actions">
+          <button class="btn btn-ghost" onclick="saveQCAResults('pending')">💾 Save as Pending</button>
+          <button class="btn" style="background:var(--gn);color:#fff" onclick="saveQCAResults('approved')">✅ Approve</button>
+          <button class="btn" style="background:var(--am);color:#000" onclick="saveQCAResults('needs_revision')">⚠️ Needs Revision</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="fbModal"></div>
 <div class="toast" id="toast"></div>
@@ -937,6 +1101,337 @@ function renderDataTable(){
 renderDataTable();
 
 // ── BOOT ──
+// ═══════════════════════════════════════════════════
+// ═══ SIZE REFERENCE TAB — Sub-tab switching & data ═══
+// ═══════════════════════════════════════════════════
+function switchSizeView(viewName, btn) {
+  document.querySelectorAll('.sr-view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sr-subtab').forEach(el => el.classList.remove('active'));
+  const view = document.getElementById('srView-' + viewName);
+  if (view) view.classList.add('active');
+  if (btn) btn.classList.add('active');
+  loadSizeSpecs(viewName);
+}
+
+async function loadSizeSpecs(viewName) {
+  const specsDiv = document.getElementById('srSpecs-' + viewName);
+  if (!specsDiv) return;
+
+  // Try loading from Supabase
+  let data = null;
+  if (sb) {
+    try {
+      const resp = await sb.from('size_guidelines').select('*').order('size_id');
+      if (!resp.error && resp.data && resp.data.length > 0) data = resp.data;
+    } catch(e) { console.warn('size_guidelines not available:', e); }
+  }
+
+  // Fallback: build from local MD data
+  if (!data) {
+    data = SO.map(s => {
+      const ms = MD.filter(m => m.sz === s);
+      if (!ms.length) return null;
+      const avgBu = +(ms.reduce((a,m) => a+m.bu, 0)/ms.length).toFixed(1);
+      const avgWa = +(ms.reduce((a,m) => a+m.wa, 0)/ms.length).toFixed(1);
+      const avgHp = +(ms.reduce((a,m) => a+m.hp, 0)/ms.length).toFixed(1);
+      const avgH = Math.round(ms.reduce((a,m) => a+m.h, 0)/ms.length);
+      const avgW = Math.round(ms.reduce((a,m) => a+(WT[m.id]||{w:60}).w, 0)/ms.length);
+      return {
+        size_id: s, size_label: s,
+        height_min: Math.min(...ms.map(m=>m.h)), height_max: Math.max(...ms.map(m=>m.h)),
+        weight_min: Math.min(...ms.map(m=>(WT[m.id]||{w:60}).w)), weight_max: Math.max(...ms.map(m=>(WT[m.id]||{w:60}).w)),
+        bust_min: Math.min(...ms.map(m=>m.bu)), bust_max: Math.max(...ms.map(m=>m.bu)),
+        waist_min: Math.min(...ms.map(m=>m.wa)), waist_max: Math.max(...ms.map(m=>m.wa)),
+        hip_min: Math.min(...ms.map(m=>m.hp)), hip_max: Math.max(...ms.map(m=>m.hp)),
+        wh_ratio_min: +(Math.min(...ms.map(m=>m.hp?m.wa/m.hp:0))).toFixed(2),
+        wh_ratio_max: +(Math.max(...ms.map(m=>m.hp?m.wa/m.hp:0))).toFixed(2),
+        muscle_definition_percent: s==='XS'?70:s==='S'?25:s==='M'?10:s==='L'?5:0,
+        body_fat_percent_min: s==='XS'?14:s==='S'?18:s==='M'?22:s==='L'?28:32,
+        body_fat_percent_max: s==='XS'?18:s==='S'?22:s==='M'?26:s==='L'?34:40,
+        shoulder_width_cm: s==='XS'?36:s==='S'?37:s==='M'?38:s==='L'?40:42,
+        facial_structure_description: 'Angular/defined',
+        cheekbone_description: s==='XS'||s==='S'?'High, prominent':'Softened',
+        jawline_description: s==='XS'||s==='S'?'Sharp, defined':'Rounded, soft',
+        lips_description: 'Natural fullness',
+        face_proportions: 'Balanced',
+        hip_projection_description: s==='XS'||s==='S'?'Minimal':'Pronounced',
+        body_composition_summary: `Typical ${s} body composition`,
+        skin_appearance: 'Smooth, even tone'
+      };
+    }).filter(Boolean);
+  }
+
+  let html = '<table><thead><tr><th>Size</th>';
+  if (viewName === 'silhouettes') {
+    html += '<th>Height (cm)</th><th>Weight (kg)</th><th>Bust</th><th>Waist</th><th>Hips</th><th>W/H Ratio</th>';
+  } else if (viewName === 'measurements') {
+    html += '<th>Height (cm)</th><th>Weight (kg)</th><th>Bust (cm)</th><th>Waist (cm)</th><th>Hip (cm)</th><th>W/H Ratio</th>';
+  } else if (viewName === 'bodyComposition') {
+    html += '<th>Muscle Def %</th><th>Body Fat %</th><th>Hip Projection</th><th>Shoulder (cm)</th><th>Summary</th>';
+  } else if (viewName === 'facialFeatures') {
+    html += '<th>Face Structure</th><th>Cheekbones</th><th>Jawline</th><th>Lips</th><th>Proportions</th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  data.forEach(sz => {
+    const szColor = SC[sz.size_id] || 'var(--tx)';
+    html += `<tr><td><span style="color:${szColor};font-weight:800">${sz.size_label || sz.size_id}</span></td>`;
+    if (viewName === 'silhouettes' || viewName === 'measurements') {
+      html += `<td>${sz.height_min}–${sz.height_max}</td>`;
+      html += `<td>${sz.weight_min}–${sz.weight_max}</td>`;
+      html += `<td>${sz.bust_min}–${sz.bust_max}</td>`;
+      html += `<td>${sz.waist_min}–${sz.waist_max}</td>`;
+      html += `<td>${sz.hip_min}–${sz.hip_max}</td>`;
+      html += `<td>${sz.wh_ratio_min}–${sz.wh_ratio_max}</td>`;
+    } else if (viewName === 'bodyComposition') {
+      html += `<td>${sz.muscle_definition_percent || '—'}%</td>`;
+      html += `<td>${sz.body_fat_percent_min || '—'}–${sz.body_fat_percent_max || '—'}%</td>`;
+      html += `<td>${sz.hip_projection_description || '—'}</td>`;
+      html += `<td>${sz.shoulder_width_cm || '—'}</td>`;
+      html += `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${(sz.body_composition_summary||'—').substring(0,60)}${(sz.body_composition_summary||'').length>60?'...':''}</td>`;
+    } else if (viewName === 'facialFeatures') {
+      html += `<td>${(sz.facial_structure_description||'—').substring(0,35)}${(sz.facial_structure_description||'').length>35?'...':''}</td>`;
+      html += `<td>${sz.cheekbone_description || '—'}</td>`;
+      html += `<td>${sz.jawline_description || '—'}</td>`;
+      html += `<td>${sz.lips_description || '—'}</td>`;
+      html += `<td>${sz.face_proportions || '—'}</td>`;
+    }
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  specsDiv.innerHTML = html;
+}
+
+// Load initial silhouettes view
+document.addEventListener('DOMContentLoaded', () => { loadSizeSpecs('silhouettes'); });
+
+// ═══════════════════════════════════════════════════
+// ═══ ADVANCED QC TAB — Model validation with checklist ═══
+// ═══════════════════════════════════════════════════
+function populateQCAModelSelector() {
+  const select = document.getElementById('qcaModelSelect');
+  if (!select) return;
+  MD.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.id;
+    option.textContent = `${model.nm} (#${model.id}) — ${model.sz}`;
+    select.appendChild(option);
+  });
+}
+
+async function loadQCAModel() {
+  const modelId = parseInt(document.getElementById('qcaModelSelect').value);
+  if (!modelId) { document.getElementById('qcaMainContent').style.display = 'none'; return; }
+
+  const model = MD.find(m => m.id === modelId);
+  if (!model) return;
+
+  const wt = WT[modelId] || { w: '?', d: '?' };
+
+  // Show model image (from uploaded images if available)
+  const frontImg = dbImages[modelId+'_Front'] || dbImages[modelId+'_Close-Up'] || '';
+  const imgEl = document.getElementById('qcaModelImage');
+  if (frontImg) { imgEl.src = frontImg; imgEl.style.display = 'block'; }
+  else { imgEl.style.display = 'none'; }
+
+  document.getElementById('qcaModelInfo').innerHTML = `
+    <div style="margin-top:10px">
+      <div style="font-size:16px;font-weight:800;color:${model.cl}">${model.nm}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:4px">
+        Size: <span style="color:${SC[model.sz]};font-weight:700">${model.sz}</span> · 
+        Height: ${model.h}cm · Weight: ~${wt.w}kg (${wt.d})
+      </div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:4px;font-family:'JetBrains Mono',monospace">
+        B${model.bu} / W${model.wa} / H${model.hp}cm
+      </div>
+    </div>`;
+
+  // Load size guidelines for reference
+  let sizeGuide = null;
+  if (sb) {
+    try {
+      const resp = await sb.from('size_guidelines').select('*').eq('size_id', model.sz).single();
+      if (!resp.error) sizeGuide = resp.data;
+    } catch(e) {}
+  }
+
+  // Build reference specs
+  const sizeModels = MD.filter(m => m.sz === model.sz);
+  const refHtml = `
+    <div style="font-size:14px;font-weight:800;color:${SC[model.sz]};margin-bottom:10px">${model.sz} Size Specifications</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2">
+      <div><span style="color:var(--tx3);min-width:80px;display:inline-block">Height:</span> <span style="color:var(--tx)">${Math.min(...sizeModels.map(m=>m.h))}–${Math.max(...sizeModels.map(m=>m.h))}cm</span></div>
+      <div><span style="color:var(--tx3);min-width:80px;display:inline-block">Weight:</span> <span style="color:var(--tx)">${Math.min(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))}–${Math.max(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))}kg</span></div>
+      <div><span style="color:var(--tx3);min-width:80px;display:inline-block">Bust:</span> <span style="color:var(--tx)">${Math.min(...sizeModels.map(m=>m.bu))}–${Math.max(...sizeModels.map(m=>m.bu))}cm</span></div>
+      <div><span style="color:var(--tx3);min-width:80px;display:inline-block">Waist:</span> <span style="color:var(--tx)">${Math.min(...sizeModels.map(m=>m.wa))}–${Math.max(...sizeModels.map(m=>m.wa))}cm</span></div>
+      <div><span style="color:var(--tx3);min-width:80px;display:inline-block">Hips:</span> <span style="color:var(--tx)">${Math.min(...sizeModels.map(m=>m.hp))}–${Math.max(...sizeModels.map(m=>m.hp))}cm</span></div>
+      ${sizeGuide ? `
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+          <div><span style="color:var(--tx3)">Muscle Def:</span> <span style="color:var(--tx)">${sizeGuide.muscle_definition_percent}%</span></div>
+          <div><span style="color:var(--tx3)">Body Fat:</span> <span style="color:var(--tx)">${sizeGuide.body_fat_percent_min}–${sizeGuide.body_fat_percent_max}%</span></div>
+          <div><span style="color:var(--tx3)">Face:</span> <span style="color:var(--tx)">${sizeGuide.facial_structure_description||'—'}</span></div>
+          <div><span style="color:var(--tx3)">Jawline:</span> <span style="color:var(--tx)">${sizeGuide.jawline_description||'—'}</span></div>
+          <div><span style="color:var(--tx3)">Composition:</span> <span style="color:var(--tx)">${sizeGuide.body_composition_summary||'—'}</span></div>
+        </div>` : ''}
+    </div>`;
+  document.getElementById('qcaReferenceSpecs').innerHTML = refHtml;
+
+  // Show main content
+  document.getElementById('qcaMainContent').style.display = 'block';
+
+  // Load existing QC results if any
+  if (sb) {
+    try {
+      const { data: qcResults } = await sb.from('qc_results').select('*').eq('model_id', modelId).order('checked_at', { ascending: false }).limit(1);
+      if (qcResults && qcResults.length > 0) {
+        const result = qcResults[0];
+        document.getElementById('qcaNotes').value = result.overall_notes || '';
+        // Restore checkbox states
+        const fieldMap = {
+          'facial_structure': 'facial_structure_pass', 'cheekbones': 'cheekbones_pass',
+          'jawline': 'jawline_pass', 'lips': 'lips_pass', 'muscle_definition': 'muscle_definition_pass',
+          'body_fat': 'body_fat_pass', 'curves': 'curves_pass', 'shoulder_width': 'shoulder_width_pass',
+          'height': 'height_pass', 'weight': 'weight_pass', 'bust_waist_hip': 'bust_waist_hip_pass',
+          'wh_ratio': 'wh_ratio_pass', 'six_angle_consistency': 'six_angle_consistency_pass',
+          'lighting_consistency': 'lighting_consistency_pass', 'pose_consistency': 'pose_consistency_pass'
+        };
+        document.querySelectorAll('.qca-check').forEach(cb => {
+          const dbField = fieldMap[cb.dataset.item];
+          if (dbField && result[dbField]) cb.checked = true;
+          else cb.checked = false;
+        });
+      } else {
+        // Reset checkboxes
+        document.querySelectorAll('.qca-check').forEach(cb => cb.checked = false);
+        document.getElementById('qcaNotes').value = '';
+      }
+    } catch(e) { console.warn('Could not load QC results:', e); }
+  }
+}
+
+async function saveQCAResults(status) {
+  const modelId = parseInt(document.getElementById('qcaModelSelect').value);
+  if (!modelId) { toast('בחרי מודל קודם'); return; }
+
+  const checks = {};
+  document.querySelectorAll('.qca-check').forEach(cb => {
+    checks[cb.dataset.item + '_pass'] = cb.checked;
+  });
+
+  const qcData = {
+    model_id: modelId,
+    ...checks,
+    overall_notes: document.getElementById('qcaNotes').value,
+    checked_by: currentUser || 'unknown',
+    status: status
+  };
+
+  if (sb) {
+    try {
+      const { error } = await sb.from('qc_results').insert([qcData]);
+      if (error) { console.error('Error saving QC:', error); toast('שגיאה בשמירת QC: ' + error.message); return; }
+    } catch(e) { console.error('QC save exception:', e); toast('שגיאה: ' + e.message); return; }
+  }
+  toast(`QC saved as ${status} ` + (status === 'approved' ? '✅' : status === 'needs_revision' ? '⚠️' : '💾'));
+}
+
+// ═══════════════════════════════════════════════════
+// ═══ ENHANCED PROMPTS — Size-based prompt generation ═══
+// ═══════════════════════════════════════════════════
+async function loadEnhancedSizePrompt() {
+  const size = document.getElementById('enhSizeSelector').value;
+  if (!size) { document.getElementById('enhPromptContent').style.display = 'none'; return; }
+
+  // Try Supabase first
+  let sizeData = null;
+  if (sb) {
+    try {
+      const resp = await sb.from('size_guidelines').select('*').eq('size_id', size).single();
+      if (!resp.error) sizeData = resp.data;
+    } catch(e) {}
+  }
+
+  // Build reference info
+  const sizeModels = MD.filter(m => m.sz === size);
+  const avgH = sizeModels.length ? Math.round(sizeModels.reduce((a,m) => a+m.h, 0)/sizeModels.length) : '?';
+  const avgW = sizeModels.length ? Math.round(sizeModels.reduce((a,m) => a+(WT[m.id]||{w:60}).w, 0)/sizeModels.length) : '?';
+
+  const refHtml = `
+    <div style="font-size:14px;font-weight:800;color:${SC[size]};margin-bottom:10px">${size} Size Reference</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:1.9">
+      <div><strong style="color:var(--tx)">Measurements:</strong></div>
+      <div>Height: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.h))+'–'+Math.max(...sizeModels.map(m=>m.h))+'cm' : '—'}</div>
+      <div>Weight: ${sizeModels.length ? Math.min(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))+'–'+Math.max(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))+'kg' : '—'}</div>
+      <div>Bust: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.bu))+'–'+Math.max(...sizeModels.map(m=>m.bu))+'cm' : '—'}</div>
+      <div>Waist: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.wa))+'–'+Math.max(...sizeModels.map(m=>m.wa))+'cm' : '—'}</div>
+      <div>Hips: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.hp))+'–'+Math.max(...sizeModels.map(m=>m.hp))+'cm' : '—'}</div>
+      ${sizeData ? `
+        <div style="margin-top:8px"><strong style="color:var(--tx)">Body Composition:</strong></div>
+        <div>Muscle Definition: ${sizeData.muscle_definition_percent}%</div>
+        <div>Body Fat: ${sizeData.body_fat_percent_min}–${sizeData.body_fat_percent_max}%</div>
+        <div>Skin: ${sizeData.skin_appearance || '—'}</div>
+        <div style="margin-top:8px"><strong style="color:var(--tx)">Facial Features:</strong></div>
+        <div>Structure: ${sizeData.facial_structure_description || '—'}</div>
+        <div>Cheekbones: ${sizeData.cheekbone_description || '—'}</div>
+        <div>Jawline: ${sizeData.jawline_description || '—'}</div>
+        <div>Lips: ${sizeData.lips_description || '—'}</div>
+      ` : `<div style="margin-top:8px;color:var(--tx3);font-style:italic">Supabase size_guidelines table not available — showing local data only</div>`}
+    </div>`;
+
+  document.getElementById('enhPromptReference').innerHTML = refHtml;
+
+  // Build enhanced prompt template
+  let prompt;
+  if (sizeData && sizeData.prompt_template) {
+    prompt = sizeData.prompt_template;
+  } else {
+    prompt = `ENHANCED SIZE-BASED PROMPT — ${size}
+
+GOAL: Generate an AI fashion model for size ${size}. Do NOT copy a real person.
+
+BODY SPECIFICATIONS:
+- Height: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.h))+'–'+Math.max(...sizeModels.map(m=>m.h))+'cm' : 'TBD'}
+- Weight: ${sizeModels.length ? Math.min(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))+'–'+Math.max(...sizeModels.map(m=>(WT[m.id]||{w:0}).w))+'kg' : 'TBD'}
+- Bust: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.bu))+'–'+Math.max(...sizeModels.map(m=>m.bu))+'cm' : 'TBD'}
+- Waist: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.wa))+'–'+Math.max(...sizeModels.map(m=>m.wa))+'cm' : 'TBD'}
+- Hips: ${sizeModels.length ? Math.min(...sizeModels.map(m=>m.hp))+'–'+Math.max(...sizeModels.map(m=>m.hp))+'cm' : 'TBD'}
+${sizeData ? `
+FACIAL STRUCTURE:
+- Face: ${sizeData.facial_structure_description || '—'}
+- Cheekbones: ${sizeData.cheekbone_description || '—'}
+- Jawline: ${sizeData.jawline_description || '—'}
+- Chin: ${sizeData.chin_description || '—'}
+- Lips: ${sizeData.lips_description || '—'}
+- Proportions: ${sizeData.face_proportions || '—'}
+
+BODY COMPOSITION:
+- Muscle definition: ${sizeData.muscle_definition_percent}% visible
+- Body fat: ${sizeData.body_fat_percent_min}–${sizeData.body_fat_percent_max}%
+- Shoulder width: ${sizeData.shoulder_width_cm}cm
+- Ribcage: ${sizeData.ribcage_description || '—'}
+- Hip projection: ${sizeData.hip_projection_description || '—'}
+- Skin: ${sizeData.skin_appearance || '—'}
+- Overall: ${sizeData.body_composition_summary || '—'}` : `
+NOTE: Connect size_guidelines Supabase table for full facial & body composition specs.`}
+
+STUDIO: ${studio}
+WARDROBE: ${wardrobe}
+CONSISTENCY: ${consistency}`;
+  }
+
+  document.getElementById('enhPromptTemplate').value = prompt;
+  document.getElementById('enhPromptContent').style.display = 'block';
+}
+
+function copyEnhancedPrompt() {
+  const text = document.getElementById('enhPromptTemplate').value;
+  navigator.clipboard.writeText(text).then(() => toast('Enhanced prompt copied! 📋'));
+}
+
+// ── Initialize new features ──
+populateQCAModelSelector();
+
 async function boot(){
   if(sb){
     try{
