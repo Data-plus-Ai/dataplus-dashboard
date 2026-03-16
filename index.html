@@ -160,16 +160,20 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .pb-label{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
 .pb-stat{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx3)}
 
-/* Feedback badges on image slots */
-.fb-bar{display:flex;gap:2px;margin-top:3px;justify-content:center}
-.fb-btn{padding:1px 5px;border-radius:3px;font-size:8px;cursor:pointer;border:1px solid var(--bd);background:var(--sf3);color:var(--tx3);font-family:'JetBrains Mono',monospace;transition:all .15s}
-.fb-btn:hover{border-color:var(--tx2);color:var(--tx)}
-.fb-btn.fb-approved{background:var(--gnd);color:var(--gn);border-color:rgba(16,185,129,.3)}
-.fb-btn.fb-rejected{background:var(--rsd);color:var(--rs);border-color:rgba(244,63,94,.3)}
-.fb-badge{position:absolute;bottom:2px;left:2px;padding:1px 5px;border-radius:3px;font-size:7px;font-weight:700;font-family:'JetBrains Mono',monospace;z-index:2}
-.fb-badge.approved{background:var(--gn);color:#fff}
-.fb-badge.rejected{background:var(--rs);color:#fff}
-.fb-note{position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,.7);color:var(--am);padding:1px 4px;border-radius:3px;font-size:7px;z-index:2;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+/* Image overlay feedback buttons */
+.img-overlay{position:absolute;top:0;left:0;right:0;display:flex;gap:3px;padding:4px;opacity:0;transition:opacity .2s;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent);border-radius:5px 5px 0 0}
+.img-slot:hover .img-overlay{opacity:1}
+.io-btn{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);transition:all .15s}
+.io-btn:hover{transform:scale(1.15);background:rgba(0,0,0,.7)}
+.io-active-ok{background:var(--gn)!important;border-color:var(--gn)!important;box-shadow:0 0 8px rgba(16,185,129,.5)}
+.io-active-no{background:var(--rs)!important;border-color:var(--rs)!important;box-shadow:0 0 8px rgba(244,63,94,.5)}
+.io-replace{cursor:pointer}
+.io-replace input{position:absolute;width:1px;height:1px;overflow:hidden}
+
+/* Slot border colors for feedback status */
+.fb-slot-ok{border:2px solid var(--gn)!important;box-shadow:0 0 6px rgba(16,185,129,.15)}
+.fb-slot-no{border:2px solid var(--rs)!important;box-shadow:0 0 6px rgba(244,63,94,.15)}
+.fb-note{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);color:var(--am);padding:3px 6px;font-size:7px;z-index:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help;border-radius:0 0 5px 5px}
 
 /* Feedback modal */
 .fb-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
@@ -490,6 +494,87 @@ function submitFB(mid,pose){
 
 function closeFBModal(){document.getElementById('fbModal').innerHTML=''}
 
+// ── MODEL DETAIL PAGE ──
+function openModelPage(mid){
+  const m=MD.find(x=>x.id===mid);if(!m)return;
+  const st=getStatus(m.id);const dc=getDoneCount(m.id);const wt=WT[m.id]||{w:'?',d:'?'};const fbc=getFBCounts(m.id);
+
+  // Build image grid with large previews
+  const imgGrid=allPoses.map(p=>{
+    const img=dbImages[m.id+'_'+p]||'';const fb=getFB(m.id,p);
+    const fbCls=fb?(fb.status==='approved'?'fb-slot-ok':fb.status==='rejected'?'fb-slot-no':''):'';
+    const checked=st[poseDB[p]];
+    return `<div style="text-align:center">
+      <div class="img-slot ${img?'has-img':''} ${fbCls}" style="aspect-ratio:3/4;width:100%;border-radius:10px;font-size:10px">
+        ${img?`<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:9px"/>
+          <div class="img-overlay" style="opacity:1;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 60%)">
+            <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="saveFeedback(${m.id},'${p}','approved','');openModelPage(${m.id})" title="מאושר">✅</span>
+            <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
+            <label class="io-btn io-replace" title="החלף תמונה">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}');setTimeout(()=>openModelPage(${m.id}),1500)" style="display:none"/></label>
+          </div>
+          ${fb&&fb.note?`<div class="fb-note">💬 ${fb.note}</div>`:''}
+        `:`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:6px;color:var(--tx3)">
+            <div style="font-size:20px">📷</div>
+            <div style="font-size:10px">${p}</div>
+            <label class="btn btn-ghost" style="font-size:9px;padding:4px 10px;cursor:pointer">העלאה<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}');setTimeout(()=>openModelPage(${m.id}),1500)" style="display:none"/></label>
+          </div>`}
+      </div>
+      <div style="margin-top:6px;font-size:11px;font-weight:600;color:var(--tx2)">${p}</div>
+      <div style="margin-top:2px">
+        <span class="chk-group ${checked?'done':''}"><input type="checkbox" ${checked?'checked':''} onchange="updateCheck(${m.id},'${p}',this.checked);setTimeout(()=>openModelPage(${m.id}),300)"/> generated</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Build prompts
+  const promptsHtml=allPoses.map((p,i)=>`<div style="margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--ac2);margin-bottom:4px">${i+1}. ${p}</div>
+    <div class="pbox" style="font-size:9px;line-height:1.5"><button class="cpb" onclick="cpP(this)">Copy</button>${mkPrompt(m,p)}</div>
+  </div>`).join('');
+
+  document.getElementById('fbModal').innerHTML=`
+    <div class="fb-modal-overlay" onclick="if(event.target===this)closeFBModal()" style="align-items:flex-start;padding:20px;overflow-y:auto">
+      <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:1100px;padding:24px;position:relative">
+        <button onclick="closeFBModal()" style="position:absolute;top:12px;left:12px;background:var(--sf3);border:1px solid var(--bd);color:var(--tx2);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;z-index:5">✕</button>
+
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-right:40px">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+              <span style="font-size:28px;font-weight:800;color:${m.cl}">${m.nm}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--tx3)">#${m.id}</span>
+              <span class="sz" style="background:${SC[m.sz]}20;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}40;font-size:12px;padding:3px 10px">${m.sz}</span>
+            </div>
+            <div style="font-size:12px;color:var(--tx2)">${cap(m.bd)} · ${cap(m.sk)} · ${m.hr} · ${m.eth} · ${m.ey} eyes · ${m.st}</div>
+            <div style="font-size:11px;color:${m.cl};margin-top:4px;font-weight:600">${m.tr}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Progress</div>
+            <div style="font-size:24px;font-weight:800;color:${dc===6?'var(--gn)':'var(--ac)'}">${dc}/6</div>
+            <div style="font-size:9px;color:var(--tx3)">✅${fbc.approved} ❌${fbc.rejected}</div>
+          </div>
+        </div>
+
+        <!-- Measurements bar -->
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          ${[['Height',m.h+'cm'],['Weight',wt.w+'kg'],['Bust',m.bu+'cm'],['Waist',m.wa+'cm'],['Hips',m.hp+'cm'],['Inseam',(m.ins||'—')+'cm'],['Build',wt.d],['Assigned',st.assigned_to||'—']].map(([l,v])=>`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--tx)">${v}</div><div style="font-size:8px;color:var(--tx3);margin-top:2px">${l}</div></div>`).join('')}
+        </div>
+
+        <!-- Images Grid -->
+        <div style="margin-bottom:24px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--tx)">📸 Pose Images</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${imgGrid}</div>
+        </div>
+
+        <!-- All Prompts -->
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--tx)">📝 All Prompts</div>
+          ${promptsHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
 // ── REAL-TIME SUBSCRIPTION ──
 function subscribeRealtime(){
   if(!sb)return;
@@ -544,32 +629,36 @@ function fGal(){const fl={};document.querySelectorAll('[data-f]').forEach(s=>{if
 function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(m=>{
   const st=getStatus(m.id);const dc=getDoneCount(m.id);const fbc=getFBCounts(m.id);
   const slots=allPoses.map(p=>{const imgKey=m.id+'_'+p;const img=dbImages[imgKey]||'';const fb=getFB(m.id,p);
-    const fbBadge=fb?(fb.status==='approved'?`<div class="fb-badge approved">✅</div>`:fb.status==='rejected'?`<div class="fb-badge rejected">❌</div>`:''):'';
-    const fbNote=fb&&fb.note?`<div class="fb-note" title="${fb.note}">${fb.note}</div>`:'';
-    return `<div class="img-slot ${img?'has-img':''} ${fb?'fb-'+fb.status:''}" id="slot-${imgKey}">
-      ${img?`<img src="${img}"/><button class="remove-img" onclick="event.stopPropagation();removeImage(${m.id},'${p}')">&times;</button>${fbBadge}${fbNote}`:`<div class="slot-label">${p}<br>📷</div>`}
-      <input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')"/>
-    </div>
-    <div class="fb-bar">${img?`<span class="fb-btn ${fb&&fb.status==='approved'?'fb-approved':''}" onclick="event.stopPropagation();saveFeedback(${m.id},'${p}','approved','')">✅</span><span class="fb-btn ${fb&&fb.status==='rejected'?'fb-rejected':''}" onclick="event.stopPropagation();openFBModal(${m.id},'${p}')">❌</span>`:''}</div>`}).join('');
+    const fbCls=fb?(fb.status==='approved'?'fb-slot-ok':fb.status==='rejected'?'fb-slot-no':''):'';
+    return `<div class="img-slot ${img?'has-img':''} ${fbCls}" id="slot-${imgKey}">
+      ${img?`<img src="${img}"/>
+        <div class="img-overlay">
+          <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="event.stopPropagation();saveFeedback(${m.id},'${p}','approved','')" title="מאושר">✅</span>
+          <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="event.stopPropagation();openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
+          <label class="io-btn io-replace" title="החלף תמונה">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')" style="display:none"/></label>
+        </div>
+        ${fb&&fb.note?`<div class="fb-note" title="${fb.note}">💬 ${fb.note}</div>`:''}
+      `:`<div class="slot-label">${p}<br>📷</div><input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')"/>`}
+    </div>`}).join('');
   const checks=allPoses.map(p=>{const checked=st[poseDB[p]]?'checked':'';const cls=st[poseDB[p]]?'chk-group done':'chk-group';
-    return `<span class="${cls}"><input type="checkbox" ${checked} onchange="updateCheck(${m.id},'${p}',this.checked)"/>${p.replace('Profile ','P').replace('Close-Up','CU')}</span>`}).join('');
-  return `<div class="card ${sel.includes(m.id)?'selected':''}" data-mid="${m.id}">
+    return `<span class="${cls}"><input type="checkbox" ${checked} onchange="event.stopPropagation();updateCheck(${m.id},'${p}',this.checked)"/>${p.replace('Profile ','P').replace('Close-Up','CU')}</span>`}).join('');
+  return `<div class="card ${sel.includes(m.id)?'selected':''}" data-mid="${m.id}" onclick="openModelPage(${m.id})" style="cursor:pointer">
     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${m.cl};opacity:${sel.includes(m.id)?1:0}"></div>
-    <div class="card-top" onclick="tSel(${m.id})"><div><div class="card-name">${m.nm}</div><div class="card-id">#${m.id}${st.updated_by?` · עודכן ע"י ${st.updated_by}`:''}</div></div><span class="sz" style="background:${SC[m.sz]}20;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}40">${m.sz}</span></div>
+    <div class="card-top"><div><div class="card-name">${m.nm}</div><div class="card-id">#${m.id}${st.updated_by?` · עודכן ע"י ${st.updated_by}`:''}</div></div><span class="sz" style="background:${SC[m.sz]}20;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}40">${m.sz}</span></div>
     <div class="trait-badge" style="background:${m.cl}15;color:${m.cl};border:1px solid ${m.cl}28">${m.tr.split(';')[0].split('—')[0].trim()}</div>
     <div class="clbl">${m.cnt.toLocaleString()} uses · ${dc}/6 generated${fbc.approved?` · ✅${fbc.approved}`:''}${fbc.rejected?` · ❌${fbc.rejected}`:''}</div>
     <div class="cbar"><div class="cbar-f" style="width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':m.cl}"></div></div>
     <div class="attrs"><span class="attr">${m.bd}</span><span class="attr">${m.sk}</span><span class="attr">${m.hr}</span><span class="attr">${m.eth}</span><span class="attr">${m.ey}</span><span class="attr">${m.st}</span></div>
     <div class="meas"><div><div class="mv">${m.h}</div><div class="ml">Height</div></div><div><div class="mv">${(WT[m.id]||{w:'?'}).w}kg</div><div class="ml">Weight</div></div><div><div class="mv">${m.bu}</div><div class="ml">Bust</div></div><div><div class="mv">${m.wa}</div><div class="ml">Waist</div></div><div><div class="mv">${m.hp}</div><div class="ml">Hips</div></div></div>
-    <div class="card-assign">
+    <div class="card-assign" onclick="event.stopPropagation()">
       <div class="fg" style="flex-direction:row;align-items:center;gap:4px"><label>אחראי:</label><select onchange="updateAssign(${m.id},this.value)"><option value="">—</option><option value="שלומית" ${st.assigned_to==='שלומית'?'selected':''}>שלומית</option><option value="שקד" ${st.assigned_to==='שקד'?'selected':''}>שקד</option></select></div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-right:auto">${checks}</div>
     </div>
-    <div class="img-area">${slots}</div>
+    <div class="img-area" onclick="event.stopPropagation()">${slots}</div>
   </div>`}).join('')}
 
 function handleUpload(e,mid,pose){const file=e.target.files[0];if(file)uploadImage(mid,pose,file)}
-function tSel(id){if(sel.includes(id))sel=sel.filter(s=>s!==id);else if(sel.length<2)sel.push(id);else{sel.shift();sel.push(id)}document.getElementById('ccnt').textContent=sel.length+'/2';document.getElementById('cbtn').disabled=sel.length!==2;fGal()}
+function tSel(id){if(sel.includes(id))sel=sel.filter(s=>s!==id);else if(sel.length<2)sel.push(id);else{sel.shift();sel.push(id)}document.getElementById('ccnt').textContent=sel.length+'/2';document.getElementById('cbtn').disabled=sel.length!==2}
 function clearSel(){sel=[];document.getElementById('ccnt').textContent='0/2';document.getElementById('cbtn').disabled=true;fGal();document.getElementById('cmpR').innerHTML=''}
 
 // ── COMPARE ──
