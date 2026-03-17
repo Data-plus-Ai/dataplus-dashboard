@@ -964,6 +964,73 @@ function openModelPage(mid){
           <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--tx)">📝 All Prompts</div>
           ${promptsHtml}
         </div>
+
+        <!-- ═══ INLINE QC SECTION ═══ -->
+        <div style="margin-top:24px;border-top:2px solid ${SC[m.sz]}40;padding-top:20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <span style="background:${SC[m.sz]};color:#fff;padding:4px 12px;border-radius:6px;font-size:13px;font-weight:800">🔍 QC</span>
+            <span style="font-size:14px;font-weight:700;color:var(--tx)">Quality Control — ${m.nm}</span>
+          </div>
+
+          <!-- Measurement Comparison: Model vs Expected -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px">
+              <div style="font-size:11px;font-weight:700;color:${SC[m.sz]};margin-bottom:10px">📏 Model Measurements</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;font-family:'JetBrains Mono',monospace">
+                ${[['Height',m.h+'cm'],['Weight','~'+wt.w+'kg'],['Bust',m.bu+'cm'],['Waist',m.wa+'cm'],['Hips',m.hp+'cm'],['W/H',m.hp?(m.wa/m.hp).toFixed(2):'—'],['Inseam',(m.ins||'—')+'cm'],['Build',wt.d]].map(([l,v])=>`<div style="padding:4px 6px;background:var(--bg);border-radius:4px;border-left:3px solid ${SC[m.sz]}"><span style="color:var(--tx3)">${l}:</span> <span style="color:var(--tx);font-weight:600">${v}</span></div>`).join('')}
+              </div>
+            </div>
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--gn);margin-bottom:10px">✓ Expected Range (${m.sz})</div>
+              <div id="qcInlineExpected-${m.id}" style="font-size:10px;color:var(--tx2);line-height:1.8;font-family:'JetBrains Mono',monospace">
+                ${(()=>{
+                  const sm=MD.filter(x=>x.sz===m.sz);
+                  const hOk=m.h>=Math.min(...sm.map(x=>x.h))&&m.h<=Math.max(...sm.map(x=>x.h));
+                  const buOk=m.bu>=Math.min(...sm.map(x=>x.bu))&&m.bu<=Math.max(...sm.map(x=>x.bu));
+                  const waOk=m.wa>=Math.min(...sm.map(x=>x.wa))&&m.wa<=Math.max(...sm.map(x=>x.wa));
+                  const hpOk=m.hp>=Math.min(...sm.map(x=>x.hp))&&m.hp<=Math.max(...sm.map(x=>x.hp));
+                  return `
+                    <div>Height: ${Math.min(...sm.map(x=>x.h))}–${Math.max(...sm.map(x=>x.h))}cm <span style="color:${hOk?'var(--gn)':'var(--rs)'}">✓</span></div>
+                    <div>Bust: ${Math.min(...sm.map(x=>x.bu))}–${Math.max(...sm.map(x=>x.bu))}cm <span style="color:${buOk?'var(--gn)':'var(--rs)'}">✓</span></div>
+                    <div>Waist: ${Math.min(...sm.map(x=>x.wa))}–${Math.max(...sm.map(x=>x.wa))}cm <span style="color:${waOk?'var(--gn)':'var(--rs)'}">✓</span></div>
+                    <div>Hips: ${Math.min(...sm.map(x=>x.hp))}–${Math.max(...sm.map(x=>x.hp))}cm <span style="color:${hpOk?'var(--gn)':'var(--rs)'}">✓</span></div>
+                    <div>W/H: ${Math.min(...sm.map(x=>x.hp?(x.wa/x.hp):0)).toFixed(2)}–${Math.max(...sm.map(x=>x.hp?(x.wa/x.hp):0)).toFixed(2)}</div>
+                  `;
+                })()}
+              </div>
+            </div>
+          </div>
+
+          <!-- QC Checklist (compact 4-column) -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px">
+              <div style="font-size:9px;font-weight:700;color:var(--pk);margin-bottom:6px">😊 Facial</div>
+              ${['Symmetry','Eyes','Skin Texture','Features','Expression','Hairline'].map(c=>`<label style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--tx2);margin-bottom:3px;cursor:pointer"><input type="checkbox" class="qcInline-${m.id}" style="accent-color:${SC[m.sz]};width:12px;height:12px"/> ${c}</label>`).join('')}
+            </div>
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px">
+              <div style="font-size:9px;font-weight:700;color:var(--cy);margin-bottom:6px">🏋️ Body</div>
+              ${['Posture','Muscle Tone','Body Fat %','Limb Symmetry','Joints','Balance'].map(c=>`<label style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--tx2);margin-bottom:3px;cursor:pointer"><input type="checkbox" class="qcInline-${m.id}" style="accent-color:${SC[m.sz]};width:12px;height:12px"/> ${c}</label>`).join('')}
+            </div>
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px">
+              <div style="font-size:9px;font-weight:700;color:var(--am);margin-bottom:6px">📏 Measurements</div>
+              ${['Height/Weight','B/W/H Ratios','Inseam','Circumference','Anthropometric','Size Chart'].map(c=>`<label style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--tx2);margin-bottom:3px;cursor:pointer"><input type="checkbox" class="qcInline-${m.id}" style="accent-color:${SC[m.sz]};width:12px;height:12px"/> ${c}</label>`).join('')}
+            </div>
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px">
+              <div style="font-size:9px;font-weight:700;color:var(--or);margin-bottom:6px">🔄 Consistency</div>
+              ${['Uniformity','Color Match','Texture','Assembly','Finish','Packaging'].map(c=>`<label style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--tx2);margin-bottom:3px;cursor:pointer"><input type="checkbox" class="qcInline-${m.id}" style="accent-color:${SC[m.sz]};width:12px;height:12px"/> ${c}</label>`).join('')}
+            </div>
+          </div>
+
+          <!-- Notes + Actions -->
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <textarea id="qcInlineNotes-${m.id}" placeholder="QC notes..." style="flex:1;min-width:200px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px;border-radius:6px;font-size:11px;min-height:40px;resize:vertical;font-family:'Outfit',sans-serif"></textarea>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn" style="background:var(--gn);color:#fff;font-size:11px;padding:8px 16px" onclick="saveInlineQC(${m.id},'approved')">✅ Approve</button>
+              <button class="btn" style="background:var(--am);color:#000;font-size:11px;padding:8px 16px" onclick="saveInlineQC(${m.id},'needs_revision')">⚠️ Revision</button>
+              <button class="btn" style="background:var(--rs);color:#fff;font-size:11px;padding:8px 16px" onclick="saveInlineQC(${m.id},'rejected')">❌ Reject</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>`;
 }
@@ -1296,15 +1363,16 @@ function renderLiveGallery(){
     const frontImg=dbImages[m.id+'_Front']||dbImages[m.id+'_Close-Up']||dbImages[m.id+'_45L']||dbImages[m.id+'_45R']||null;
     const dc=getDoneCount(m.id);
     const hasAny=allPoses.some(p=>dbImages[m.id+'_'+p]);
+    const szC=SC[m.sz]||'var(--bd)';
 
-    html+=`<div style="background:var(--sf2);border:1px solid ${dc===6?'var(--gn)':hasAny?'var(--ac)':'var(--bd)'};border-radius:10px;overflow:hidden;transition:all .2s">
+    html+=`<div style="background:${szC}10;border:2px solid ${dc===6?'var(--gn)':hasAny?szC+'80':szC+'30'};border-radius:10px;overflow:hidden;transition:all .2s;cursor:pointer" onclick="openModelPage(${m.id})">
       <div style="aspect-ratio:3/4;background:var(--sf3);display:flex;align-items:center;justify-content:center;overflow:hidden">
         ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="font-size:24px;opacity:.15">👤</div>`}
       </div>
-      <div style="padding:8px;text-align:center">
-        <div style="font-size:11px;font-weight:700">${m.nm}</div>
-        <div style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${m.sz} · ${dc}/6</div>
-        <div style="height:3px;border-radius:2px;background:var(--sf3);margin-top:4px;overflow:hidden"><div style="height:100%;width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':'var(--ac)'};border-radius:2px"></div></div>
+      <div style="padding:8px;text-align:center;background:${szC}12">
+        <div style="font-size:11px;font-weight:700;color:${szC}">${m.nm}</div>
+        <div style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace"><span style="background:${szC};color:#fff;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:800">${m.sz}</span> · ${dc}/6</div>
+        <div style="height:3px;border-radius:2px;background:var(--sf3);margin-top:4px;overflow:hidden"><div style="height:100%;width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':szC};border-radius:2px"></div></div>
       </div>
     </div>`;
   });
@@ -1931,6 +1999,34 @@ async function saveQCAResults(status) {
     } catch(e) { console.error('QC save exception:', e); toast('שגיאה: ' + e.message); return; }
   }
   toast(`QC saved as ${status} ` + (status === 'approved' ? '✅' : status === 'needs_revision' ? '⚠️' : '💾'));
+}
+
+// Inline QC save (from model detail modal)
+async function saveInlineQC(modelId, status) {
+  const checks = {};
+  let checkedCount = 0;
+  document.querySelectorAll(`.qcInline-${modelId}`).forEach((cb, i) => {
+    checks['check_' + i + '_pass'] = cb.checked;
+    if (cb.checked) checkedCount++;
+  });
+  const notes = document.getElementById('qcInlineNotes-' + modelId)?.value || '';
+  const m = MD.find(x => x.id === modelId);
+
+  const qcData = {
+    model_id: modelId,
+    ...checks,
+    overall_notes: notes,
+    checked_by: currentUser || 'unknown',
+    status: status
+  };
+
+  if (sb) {
+    try {
+      const { error } = await sb.from('qc_results').insert([qcData]);
+      if (error) { console.error('Inline QC error:', error); toast('שגיאה: ' + error.message); return; }
+    } catch(e) { toast('שגיאה: ' + e.message); return; }
+  }
+  toast(`${m ? m.nm : '#' + modelId} — QC ${status} (${checkedCount}/24) ` + (status === 'approved' ? '✅' : status === 'rejected' ? '❌' : '⚠️'));
 }
 
 // ═══════════════════════════════════════════════════
