@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#060609;--sf:#0e0e14;--sf2:#15151e;--sf3:#1c1c28;--bd:#252535;--tx:#e4e4f0;--tx2:#8888a8;--tx3:#555578;--ac:#8b5cf6;--ac2:#a78bfa;--acd:rgba(139,92,246,.10);--gn:#10b981;--gnd:rgba(16,185,129,.12);--am:#f59e0b;--rs:#f43f5e;--rsd:rgba(244,63,94,.10);--cy:#06b6d4;--pk:#ec4899;--or:#f97316}
+:root{--bg:#060609;--sf:#0e0e14;--sf2:#15151e;--sf3:#1c1c28;--bd:#252535;--tx:#e4e4f0;--tx2:#8888a8;--tx3:#555578;--ac:#8b5cf6;--ac2:#a78bfa;--acd:rgba(139,92,246,.10);--gn:#10b981;--gnd:rgba(16,185,129,.12);--am:#f59e0b;--rs:#f43f5e;--rsd:rgba(244,63,94,.10);--cy:#06b6d4;--pk:#ec4899;--or:#f97316;--size-xs:#FF6B9D;--size-s:#C44569;--size-m:#A0522D;--size-l:#D4A574;--size-xl:#E8B4A8;--size-2xl:#F0C8B8;--size-3xl:#F5D5C8;--size-4xl:#FCDDC1}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:100px}
@@ -254,7 +254,38 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .qca-cell-toggle.on{background:rgba(139,92,246,.7);border-color:var(--ac)}
 .qca-cell-toggle.on-m{background:rgba(6,182,212,.7);border-color:var(--cy)}
 .qca-ref-panel{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px}
-@media(max-width:768px){.qca-pose-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1200px){.qca-checklist [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:768px){.qca-pose-grid{grid-template-columns:repeat(2,1fr)}.qca-checklist [style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr!important}}
+
+/* ═══ AI STUDIO ═══ */
+.ai-key-bar{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
+.ai-canvas-wrap{border:1px solid var(--bd);border-radius:14px;background:var(--bg);overflow:auto;position:relative;height:620px}
+.ai-canvas{position:relative;width:920px;height:600px;background-image:radial-gradient(circle,var(--bd) 1px,transparent 1px);background-size:20px 20px}
+.ai-node{position:absolute;min-width:250px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:box-shadow .15s}
+.ai-node:hover{box-shadow:0 6px 24px rgba(139,92,246,.15)}
+.ai-node-wide{min-width:280px}
+.ai-node-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px 9px 0 0;font-size:11px;font-weight:700;color:#fff;cursor:grab;user-select:none}
+.ai-node-header:active{cursor:grabbing}
+.ai-node-body{padding:10px 12px}
+.ai-node-body select,.ai-node-body textarea,.ai-node-body input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;width:100%;box-sizing:border-box}
+.ai-node-body textarea{resize:vertical;font-family:'JetBrains Mono',monospace;line-height:1.5}
+.ai-field-label{font-size:9px;color:var(--tx3);font-weight:600;display:block;margin-bottom:2px}
+.ai-node-port{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.2);display:inline-block;cursor:crosshair;transition:all .15s}
+.ai-node-port:hover{background:rgba(255,255,255,.6);transform:scale(1.3)}
+.ai-node-port.in{margin-left:-18px}
+.ai-node-port.out{margin-right:-18px}
+.ai-prompt-preview{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-word}
+.ai-output-placeholder{text-align:center;padding:30px;color:var(--tx3);font-size:11px}
+.ai-output-img{width:100%;border-radius:8px;border:1px solid var(--bd)}
+.ai-generating{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--ac2);font-size:12px}
+.ai-generating .spinner{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-history{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:200px;overflow-y:auto}
+.ai-hist-item{background:var(--sf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.ai-hist-item:hover{border-color:var(--ac)}
+.ai-hist-item img{width:100%;aspect-ratio:3/4;object-fit:cover}
+.ai-hist-item .ai-hist-label{padding:4px 6px;font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-error{background:var(--rsd);border:1px solid var(--rs);border-radius:8px;padding:12px;color:var(--rs);font-size:11px;margin-top:8px}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card,.tc{animation:fu .3s ease both}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
@@ -282,20 +313,18 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   <div class="progress-bar" id="progressBar"></div>
 
   <div class="tabs">
-    <button class="tab" data-tab="gallery">גלריה & ניהול</button>
     <button class="tab active" data-tab="overview">סקירה</button>
-    <button class="tab" data-tab="profiles">פרופילים</button>
+    <button class="tab" data-tab="gallery">גלריה & ניהול</button>
     <button class="tab" data-tab="compare">השוואה</button>
     <button class="tab" data-tab="prompts">פרומפטים</button>
-    <button class="tab" data-tab="qc">QC מידות</button>
     <button class="tab" data-tab="sizeReference">📊 Size Reference</button>
-    <button class="tab" data-tab="qcAdvanced">🔍 QC מתקדם</button>
+    <button class="tab" data-tab="qcAdvanced">🔍 QC</button>
+    <button class="tab" data-tab="aiStudio">🎨 AI Studio</button>
     <button class="tab" data-tab="table">טבלה</button>
   </div>
 
   <div id="p-gallery" class="panel"><div class="filters" id="filters"></div><div class="grid" id="galleryGrid"></div></div>
   <div id="p-overview" class="panel active"><div class="ss" id="statsStrip"></div><div id="liveGallery" style="margin-bottom:18px"></div><div class="cg"><div class="cb"><h4>Size Distribution</h4><canvas id="c1"></canvas></div><div class="cb"><h4>Ethnicity</h4><canvas id="c2"></canvas></div><div class="cb"><h4>Body Type × Size</h4><canvas id="c3"></canvas></div><div class="cb"><h4>Height vs Bust</h4><canvas id="c4"></canvas></div></div><div class="cg"><div class="cb"><h4>Skin Tone</h4><canvas id="c5"></canvas></div><div class="cb"><h4>Top 15 Usage</h4><canvas id="c6"></canvas></div></div></div>
-  <div id="p-profiles" class="panel"><h3 style="font-size:15px;margin-bottom:4px">מה מייחד כל מודל?</h3><p style="color:var(--tx2);font-size:11px;margin-bottom:14px">שם, סממנים, הבדלים</p><div class="tg" id="traitsGrid"></div></div>
   <div id="p-compare" class="panel"><div class="chdr"><span style="font-size:12px;color:var(--tx2)">בחרי 2 מגלריה ←</span><span class="ccnt" id="ccnt">0/2</span><button class="btn btn-ac" id="cbtn" disabled onclick="runCompare()">השווי</button><button class="btn btn-ghost" onclick="clearSel()">נקי</button></div><div id="cmpR"></div></div>
   <div id="p-prompts" class="panel"><p style="color:var(--tx2);margin-bottom:10px;font-size:11px">פרומפטים מלאים — 5 פוזות + Close-Up. כפתור העתקה על כל פרומפט.</p><div class="filters" style="margin-bottom:10px"><div class="fg"><label>אחראי/ת</label><select id="pmsAssign" onchange="genPrompts()"><option value="">הכל</option><option value="שלומית">שלומית</option><option value="שקד">שקד</option></select></div><div class="fg"><label>מודל</label><select id="pms" onchange="genPrompts()"><option value="all">כל המודלים</option></select></div><div class="fg"><label>סטטוס</label><select id="pmsStatus" onchange="genPrompts()"><option value="">הכל</option><option value="done">הושלם</option><option value="partial">הושלם חלקית</option><option value="none">לא התחיל</option></select></div></div><div id="pCon"></div>
     <!-- Enhanced Size-Based Prompt Generator -->
@@ -329,16 +358,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         </div>
       </div>
     </div>
-  </div>
-  <div id="p-qc" class="panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">QC Measurement Reference</h3><p style="color:var(--tx2);font-size:11px">Visual guide + measurement table for quality control verification</p></div>
-      <div class="badge" style="font-size:11px">34 Models · 8 Sizes</div>
-    </div>
-    <div id="techIllustrations"></div>
-    <div id="sizeRef"></div>
-    <div id="sizeCompareChart" class="cb" style="margin-bottom:16px;padding:18px"><h4 style="margin-bottom:12px">Average Measurements by Size</h4><canvas id="cSizeCompare"></canvas></div>
-    <div id="qcTableSection"></div>
   </div>
   <div id="p-table" class="panel"><div class="tw"><table id="dataTable"></table></div></div>
 
@@ -418,46 +437,204 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 
       <!-- QC Checklist -->
       <div class="qca-checklist">
-        <h4 style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px">QC Validation Checklist</h4>
-        <div class="qca-section">
-          <div class="qca-section-title">Facial Feature Validation</div>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="facial_structure"/> Bone structure matches size guidelines</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="cheekbones"/> Cheekbones match description</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="jawline"/> Jawline matches guidelines</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="lips"/> Lip fullness matches description</label>
-        </div>
-        <div class="qca-section">
-          <div class="qca-section-title">Body Composition Validation</div>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="muscle_definition"/> Muscle definition % correct</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="body_fat"/> Body fat % visually accurate</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="curves"/> Curves/hip projection matches</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="shoulder_width"/> Shoulder width proportional</label>
-        </div>
-        <div class="qca-section">
-          <div class="qca-section-title">Measurement Validation</div>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="height"/> Height visually within range</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="weight"/> Weight appears accurate</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="bust_waist_hip"/> B/W/H proportions correct</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="wh_ratio"/> Waist-to-hip ratio matches</label>
-        </div>
-        <div class="qca-section">
-          <div class="qca-section-title">Consistency Validation</div>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="six_angle_consistency"/> 6-angle consistency maintained</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="lighting_consistency"/> Lighting consistent across poses</label>
-          <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="pose_consistency"/> Pose guidelines followed</label>
+        <h4 style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px">QC Validation Checklist — 4 Categories × 6 Checks</h4>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div class="qca-section">
+            <div class="qca-section-title">😊 Facial Features</div>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="facial_symmetry"/> Symmetry & Proportion</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="eye_clarity"/> Eye Clarity & Alignment</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="skin_texture"/> Skin Texture & Tone (Uniformity)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="feature_definition"/> Feature Definition (Nose, Mouth)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="expression_neutrality"/> Expression Neutrality</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="hairline_grooming"/> Hairline & Grooming Standards</label>
+          </div>
+          <div class="qca-section">
+            <div class="qca-section-title">🏋️ Body Composition</div>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="posture_alignment"/> Posture & Alignment (Vertical)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="muscle_tone"/> Muscle Tone & Definition (Balanced)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="body_fat_range"/> Body Fat % (Within Range)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="limb_symmetry"/> Limb Symmetry (Arms, Legs)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="joint_integrity"/> Joint Integrity & Range of Motion</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="overall_balance"/> Overall Physique Balance</label>
+          </div>
+          <div class="qca-section">
+            <div class="qca-section-title">📏 Measurements</div>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="height_weight"/> Height & Weight (Accurate)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="bust_waist_hip"/> Bust/Chest, Waist, Hip Ratios</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="inseam_sleeve"/> Inseam & Sleeve Lengths</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="circumference"/> Circumference Checks (Biceps, Thighs)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="anthropometric"/> Anthropometric Data (Precise)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="size_chart_compliance"/> Size Chart Compliance</label>
+          </div>
+          <div class="qca-section">
+            <div class="qca-section-title">🔄 Consistency</div>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="uniformity_samples"/> Uniformity Across Samples</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="color_matching"/> Color Matching (Standard Palette)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="texture_continuity"/> Texture Continuity (Fabric/Surface)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="assembly_seams"/> Assembly & Seam Quality</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="finish_detailing"/> Finish & Detailing (Flawless)</label>
+            <label class="qca-check-label"><input type="checkbox" class="qca-check" data-item="packaging_standard"/> Packaging Presentation (Standard)</label>
+          </div>
         </div>
         <div style="margin-top:16px">
           <label style="font-size:11px;font-weight:600;color:var(--tx2);display:block;margin-bottom:6px">Notes:</label>
-          <textarea id="qcaNotes" placeholder="Add any notes or observations..." style="width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;resize:vertical;min-height:70px"></textarea>
+          <textarea id="qcaNotes" placeholder="הערות QC..." style="width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;resize:vertical;min-height:80px"></textarea>
         </div>
         <div class="qca-actions">
-          <button class="btn btn-ghost" onclick="saveQCAResults('pending')">💾 Save as Pending</button>
-          <button class="btn" style="background:var(--gn);color:#fff" onclick="saveQCAResults('approved')">✅ Approve</button>
-          <button class="btn" style="background:var(--am);color:#000" onclick="saveQCAResults('needs_revision')">⚠️ Needs Revision</button>
+          <button class="btn" style="background:var(--gn);color:#fff;font-size:13px;padding:10px 24px" onclick="saveQCAResults('approved')">✅ APPROVE</button>
+          <button class="btn" style="background:var(--am);color:#000;font-size:13px;padding:10px 24px" onclick="saveQCAResults('needs_revision')">⚠️ NEEDS REVISION</button>
+          <button class="btn" style="background:var(--rs);color:#fff;font-size:13px;padding:10px 24px" onclick="saveQCAResults('rejected')">❌ REJECT</button>
         </div>
       </div>
     </div>
   </div>
+  <!-- ═══ AI STUDIO — Node-Based Image Generator ═══ -->
+  <div id="p-aiStudio" class="panel">
+    <!-- API Key Bar -->
+    <div class="ai-key-bar" id="aiKeyBar">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        <span style="font-size:18px">🔑</span>
+        <input type="password" id="aiApiKey" placeholder="Gemini API Key (לא נשמר בקובץ)" style="flex:1;min-width:200px;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px"/>
+        <button class="btn btn-ac" onclick="connectGemini()">חיבור</button>
+      </div>
+      <div id="aiConnStatus" style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">⚪ לא מחובר</div>
+    </div>
+
+    <!-- Connected state -->
+    <div id="aiStudioMain" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">🎨 AI Fashion Model Studio</h3>
+        <p style="color:var(--tx2);font-size:11px">Node-based workflow · Gemini imagen · prompt → image</p></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" onclick="aiResetCanvas()">🗑️ נקה</button>
+          <button class="btn btn-ac" onclick="aiRunPipeline()" id="aiRunBtn">▶️ Generate</button>
+        </div>
+      </div>
+
+      <!-- Node Canvas -->
+      <div class="ai-canvas-wrap">
+        <div class="ai-canvas" id="aiCanvas">
+          <!-- Node: Model Selector -->
+          <div class="ai-node" id="aiNode-model" style="left:30px;top:30px" data-type="model">
+            <div class="ai-node-header" style="background:var(--ac)">
+              <span>👤 Model Selection</span>
+              <span class="ai-node-port out" data-port="model-out"></span>
+            </div>
+            <div class="ai-node-body">
+              <select id="aiModelSelect" onchange="aiUpdatePreview()" style="width:100%">
+                <option value="">בחרי מודל...</option>
+              </select>
+              <div id="aiModelPreview" style="margin-top:8px;font-size:9px;color:var(--tx3)"></div>
+            </div>
+          </div>
+
+          <!-- Node: Size/Body Specs -->
+          <div class="ai-node" id="aiNode-specs" style="left:30px;top:230px" data-type="specs">
+            <div class="ai-node-header" style="background:var(--cy)">
+              <span class="ai-node-port in" data-port="specs-in"></span>
+              <span>📏 Body Specs</span>
+              <span class="ai-node-port out" data-port="specs-out"></span>
+            </div>
+            <div class="ai-node-body" id="aiSpecsBody">
+              <div style="color:var(--tx3);font-size:9px">← חברי מודל כדי לטעון</div>
+            </div>
+          </div>
+
+          <!-- Node: Pose Selector -->
+          <div class="ai-node" id="aiNode-pose" style="left:320px;top:30px" data-type="pose">
+            <div class="ai-node-header" style="background:var(--gn)">
+              <span>🧍 Pose</span>
+              <span class="ai-node-port out" data-port="pose-out"></span>
+            </div>
+            <div class="ai-node-body">
+              <select id="aiPoseSelect" style="width:100%">
+                <option value="Front">Front</option>
+                <option value="45L">45° Left</option>
+                <option value="45R">45° Right</option>
+                <option value="Profile 90">Profile 90°</option>
+                <option value="Back">Back</option>
+                <option value="Close-Up">Close-Up</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Node: Studio Conditions (FIXED — identical for all models) -->
+          <div class="ai-node" id="aiNode-style" style="left:320px;top:170px" data-type="style">
+            <div class="ai-node-header" style="background:var(--am)">
+              <span>🔒 Studio Conditions (קבוע)</span>
+              <span class="ai-node-port out" data-port="style-out"></span>
+            </div>
+            <div class="ai-node-body">
+              <div style="font-size:9px;color:var(--tx2);line-height:1.7;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;direction:ltr;text-align:left">
+                <div><span style="color:var(--am);font-weight:700">BG:</span> Seamless pure white background</div>
+                <div><span style="color:var(--am);font-weight:700">LIGHT:</span> Soft even lighting, minimal shadows. Subtle grounding shadow under feet only.</div>
+                <div><span style="color:var(--am);font-weight:700">FRAME:</span> Full body head-to-toe, centered. Neutral perspective.</div>
+                <div><span style="color:var(--am);font-weight:700">WARDROBE:</span> Black ribbed tank top, black fitted biker shorts, white sneakers. No logos/accessories.</div>
+                <div><span style="color:var(--am);font-weight:700">QUALITY:</span> High sharpness, realistic casting photography.</div>
+              </div>
+              <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+                <label style="font-size:10px;color:var(--tx);font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer">
+                  <input type="checkbox" id="ai4K" checked style="accent-color:var(--ac);width:15px;height:15px"/> 4K Resolution
+                </label>
+                <span style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">3840×5120</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Node: Custom Prompt Override -->
+          <div class="ai-node" id="aiNode-custom" style="left:320px;top:420px" data-type="custom">
+            <div class="ai-node-header" style="background:var(--pk)">
+              <span>✏️ Custom Prompt</span>
+              <span class="ai-node-port out" data-port="custom-out"></span>
+            </div>
+            <div class="ai-node-body">
+              <textarea id="aiCustomPrompt" placeholder="תוספת חופשית לפרומפט (אופציונלי)..." style="width:100%;min-height:50px"></textarea>
+            </div>
+          </div>
+
+          <!-- Node: Prompt Assembly (auto) -->
+          <div class="ai-node" id="aiNode-prompt" style="left:620px;top:60px" data-type="prompt">
+            <div class="ai-node-header" style="background:var(--or)">
+              <span class="ai-node-port in" data-port="prompt-in"></span>
+              <span>📝 Assembled Prompt</span>
+              <span class="ai-node-port out" data-port="prompt-out"></span>
+            </div>
+            <div class="ai-node-body">
+              <div id="aiPromptPreview" class="ai-prompt-preview" style="max-height:220px;overflow-y:auto;font-size:9px;line-height:1.5;color:var(--tx2)">הפרומפט ייבנה אוטומטית מהנודים...</div>
+              <button class="btn btn-ghost" style="margin-top:6px;width:100%;font-size:9px" onclick="aiCopyPrompt()">📋 העתק</button>
+            </div>
+          </div>
+
+          <!-- Node: Gemini Output -->
+          <div class="ai-node ai-node-wide" id="aiNode-output" style="left:620px;top:360px" data-type="output">
+            <div class="ai-node-header" style="background:linear-gradient(135deg,var(--ac),var(--pk))">
+              <span class="ai-node-port in" data-port="output-in"></span>
+              <span>🖼️ Generated Image</span>
+            </div>
+            <div class="ai-node-body" id="aiOutputBody">
+              <div class="ai-output-placeholder">
+                <div style="font-size:32px;margin-bottom:8px">🎨</div>
+                <div>לחצי Generate כדי ליצור תמונה</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Connections (visual wires) -->
+          <svg class="ai-wires" id="aiWires" style="position:absolute;inset:0;pointer-events:none;z-index:0">
+          </svg>
+        </div>
+      </div>
+
+      <!-- Generation History -->
+      <div style="margin-top:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">📜 היסטוריית יצירות</div>
+        <div class="ai-history" id="aiHistory">
+          <div style="text-align:center;padding:20px;color:var(--tx3);font-size:10px">עדיין לא נוצרו תמונות</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 <div id="fbModal"></div>
 <div class="toast" id="toast"></div>
@@ -531,7 +708,7 @@ const MD=[
 
 const mxC=Math.max(...MD.map(m=>m.cnt));
 const SO=['XS','S','M','L','XL','2XL','3XL','4XL'];
-const SC={XS:'#06b6d4',S:'#10b981',M:'#8b5cf6',L:'#f59e0b',XL:'#f97316','2XL':'#f43f5e','3XL':'#ec4899','4XL':'#ef4444'};
+const SC={XS:'#FF6B9D',S:'#C44569',M:'#A0522D',L:'#D4A574',XL:'#E8B4A8','2XL':'#F0C8B8','3XL':'#F5D5C8','4XL':'#FCDDC1'};
 const allPoses=["Front","45L","45R","Profile 90","Back","Close-Up"];
 const poseDB={"Front":"pose_front","45L":"pose_45l","45R":"pose_45r","Profile 90":"pose_profile","Back":"pose_back","Close-Up":"pose_closeup"};
 
@@ -842,7 +1019,18 @@ function fGal(){const fl={};document.querySelectorAll('[data-f]').forEach(s=>{if
     else if(k==='status'){if(v==='done'&&dc<6)return false;if(v==='partial'&&(dc===0||dc===6))return false;if(v==='none'&&dc>0)return false}
     else if(m[k]!==v)return false}return true}))}
 
-function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(m=>{
+function rGal(l){l=l||MD;
+  // Group by size
+  let html = '';
+  SO.forEach(sz => {
+    const models = l.filter(m => m.sz === sz);
+    if (!models.length) return;
+    const c = SC[sz];
+    html += `<div style="grid-column:1/-1;margin-top:${html?'16px':'0'};padding:10px 16px;border-radius:10px;background:${c}18;border:1px solid ${c}35;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px;font-weight:900;color:${c}">${sz}</span><span style="font-size:11px;color:var(--tx2)">${models.length} models</span></div>
+      <span style="font-size:9px;color:${c};font-family:'JetBrains Mono',monospace">${models[0].bd==='curvy'?'curvy':'regular'} · ${Math.min(...models.map(m=>m.h))}–${Math.max(...models.map(m=>m.h))}cm</span>
+    </div>`;
+    models.forEach(m => {
   const st=getStatus(m.id);const dc=getDoneCount(m.id);const fbc=getFBCounts(m.id);
   const slots=allPoses.map(p=>{const imgKey=m.id+'_'+p;const img=dbImages[imgKey]||'';const fb=getFB(m.id,p);
     const fbCls=fb?(fb.status==='approved'?'fb-slot-ok':fb.status==='rejected'?'fb-slot-no':''):'';
@@ -851,23 +1039,23 @@ function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(
         <div class="img-overlay">
           <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="event.stopPropagation();saveFeedback(${m.id},'${p}','approved','')" title="מאושר">✅</span>
           <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="event.stopPropagation();openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
-          <span class="io-btn" onclick="event.stopPropagation();openQCAForModel(${m.id})" title="QC מתקדם" style="background:rgba(139,92,246,.6)">🔍</span>
-          <label class="io-btn io-replace" title="החלף תמונה">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')" style="display:none"/></label>
-          <span class="io-btn io-del" onclick="event.stopPropagation();confirmDelete(${m.id},'${p}')" title="מחק תמונה">🗑️</span>
+          <span class="io-btn" onclick="event.stopPropagation();openQCAForModel(${m.id})" title="QC" style="background:rgba(139,92,246,.6)">🔍</span>
+          <label class="io-btn io-replace" title="החלף">🔄<input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')" style="display:none"/></label>
+          <span class="io-btn io-del" onclick="event.stopPropagation();confirmDelete(${m.id},'${p}')" title="מחק">🗑️</span>
         </div>
         ${fb&&fb.note?`<div class="fb-note" title="${fb.note}">💬 ${fb.note}</div>`:''}
       `:`<div class="slot-label">${p}<br>📷</div><input type="file" accept="image/*" onchange="handleUpload(event,${m.id},'${p}')"/>`}
     </div>`}).join('');
   const checks=allPoses.map(p=>{const checked=st[poseDB[p]]?'checked':'';const cls=st[poseDB[p]]?'chk-group done':'chk-group';
     return `<span class="${cls}"><input type="checkbox" ${checked} onchange="event.stopPropagation();updateCheck(${m.id},'${p}',this.checked)"/>${p.replace('Profile ','P').replace('Close-Up','CU')}</span>`}).join('');
-  return `<div class="card ${sel.includes(m.id)?'selected':''}" data-mid="${m.id}" onclick="openModelPage(${m.id})" style="cursor:pointer;border-color:${SC[m.sz]}30">
-    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${SC[m.sz]};opacity:${sel.includes(m.id)?1:.6}"></div>
-    <div class="card-top"><div><div class="card-name" style="color:${SC[m.sz]}">${m.nm}</div><div class="card-id">#${m.id}${st.updated_by?` · עודכן ע"י ${st.updated_by}`:''}</div></div><span class="sz" style="background:${SC[m.sz]}20;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}40">${m.sz}</span></div>
-    <div class="trait-badge" style="background:${SC[m.sz]}12;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}25">${m.tr.split(';')[0].split('—')[0].trim()}</div>
+  html += `<div class="card ${sel.includes(m.id)?'selected':''}" data-mid="${m.id}" onclick="openModelPage(${m.id})" style="cursor:pointer;border-color:${c}50;border-width:2px">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${c}"></div>
+    <div class="card-top"><div><div class="card-name" style="color:${c}">${m.nm}</div><div class="card-id">#${m.id}${st.updated_by?` · עודכן ע"י ${st.updated_by}`:''}</div></div><span class="sz" style="background:${c};color:#fff;border:none;font-size:11px;padding:3px 10px">${m.sz}</span></div>
+    <div class="trait-badge" style="background:${c}15;color:${c};border:1px solid ${c}30">${m.tr.split(';')[0].split('—')[0].trim()}</div>
     <div class="clbl">${m.cnt.toLocaleString()} uses · ${dc}/6 generated${fbc.approved?` · ✅${fbc.approved}`:''}${fbc.rejected?` · ❌${fbc.rejected}`:''}</div>
-    <div class="cbar"><div class="cbar-f" style="width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':SC[m.sz]}"></div></div>
+    <div class="cbar"><div class="cbar-f" style="width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':c}"></div></div>
     <div class="attrs"><span class="attr">${m.bd}</span><span class="attr">${m.sk}</span><span class="attr">${m.hr}</span><span class="attr">${m.eth}</span><span class="attr">${m.ey}</span><span class="attr">${m.st}</span></div>
-    <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${m.tg.map(t=>`<span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${SC[m.sz]}15;color:${SC[m.sz]};border:1px solid ${SC[m.sz]}25;font-family:'JetBrains Mono',monospace">${t}</span>`).join('')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${m.tg.map(t=>`<span style="font-size:8px;padding:2px 6px;border-radius:3px;background:${c}15;color:${c};border:1px solid ${c}30;font-family:'JetBrains Mono',monospace">${t}</span>`).join('')}</div>
     <div class="meas"><div><div class="mv">${m.h}</div><div class="ml">Height</div></div><div><div class="mv">${(WT[m.id]||{w:'?'}).w}kg</div><div class="ml">Weight</div></div><div><div class="mv">${m.bu}</div><div class="ml">Bust</div></div><div><div class="mv">${m.wa}</div><div class="ml">Waist</div></div><div><div class="mv">${m.hp}</div><div class="ml">Hips</div></div></div>
     <div class="card-assign" onclick="event.stopPropagation()">
       <div class="fg" style="flex-direction:row;align-items:center;gap:4px"><label>אחראי:</label><select onchange="updateAssign(${m.id},this.value)"><option value="">—</option><option value="שלומית" ${st.assigned_to==='שלומית'?'selected':''}>שלומית</option><option value="שקד" ${st.assigned_to==='שקד'?'selected':''}>שקד</option></select></div>
@@ -875,7 +1063,11 @@ function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-right:auto">${checks}</div>
     </div>
     <div class="img-area" onclick="event.stopPropagation()">${slots}</div>
-  </div>`}).join('')}
+  </div>`;
+    });
+  });
+  document.getElementById('galleryGrid').innerHTML = html;
+}
 
 function handleUpload(e,mid,pose){const file=e.target.files[0];if(file)uploadImage(mid,pose,file)}
 function tSel(id){if(sel.includes(id))sel=sel.filter(s=>s!==id);else if(sel.length<2)sel.push(id);else{sel.shift();sel.push(id)}document.getElementById('ccnt').textContent=sel.length+'/2';document.getElementById('cbtn').disabled=sel.length!==2}
@@ -923,7 +1115,8 @@ const skc={};MD.forEach(m=>skc[m.sk]=(skc[m.sk]||0)+1);const skCols={'olive':'#b
 const srt=[...MD].sort((a,b)=>b.cnt-a.cnt).slice(0,15);new Chart(document.getElementById('c6'),{type:'bar',data:{labels:srt.map(m=>m.nm),datasets:[{data:srt.map(m=>m.cnt),backgroundColor:srt.map(m=>m.cl+'88'),borderColor:srt.map(m=>m.cl),borderWidth:1,borderRadius:3,borderSkipped:false}]},options:{...co,plugins:{legend:{display:false}},indexAxis:'y'}})}();
 
 // ── PROFILES ──
-document.getElementById('traitsGrid').innerHTML=MD.map(m=>`<div class="tc"><div class="ta" style="background:${m.cl}">${m.nm[0]}</div><div class="ti"><h4>${m.nm}</h4><div class="tid">#${m.id} · ${m.sz} · ${m.bd} · ${m.h}cm · ${m.cnt.toLocaleString()}</div><div class="td">${m.tr}</div><div class="tt">${m.tg.map(t=>`<span class="ttg" style="background:${m.cl}18;color:${m.cl};border:1px solid ${m.cl}30">${t}</span>`).join('')}</div></div></div>`).join('');
+// Profiles tab removed — traits now shown in gallery cards
+// document.getElementById('traitsGrid') rendering removed
 
 // ── QC — TECHNICAL ILLUSTRATIONS (Premium) ──
 function drawBodySVG(bust,waist,hips,height,color,label,weight){
@@ -997,11 +1190,13 @@ function renderTechIllustrations(){
       </div>
     </div>
   </div>`;
-  document.getElementById('techIllustrations').innerHTML=html;
+  const tiEl=document.getElementById('techIllustrations');
+  if(tiEl) tiEl.innerHTML=html;
 
   // Size comparison chart
   const szLabels=SO.filter(s=>avgs[s]);
-  new Chart(document.getElementById('cSizeCompare'),{
+  const cSzEl=document.getElementById('cSizeCompare');
+  if(cSzEl) new Chart(cSzEl,{
     type:'bar',
     data:{labels:szLabels,datasets:[
       {label:'Bust (cm)',data:szLabels.map(s=>avgs[s].bu),backgroundColor:'#8b5cf650',borderColor:'#8b5cf6',borderWidth:2,borderRadius:4},
@@ -1020,7 +1215,8 @@ function renderTechIllustrations(){
     const ws=ms.map(m=>(WT[m.id]||{w:0}).w);
     sizeRanges[s]={count:ms.length,hMin:Math.min(...ms.map(m=>m.h)),hMax:Math.max(...ms.map(m=>m.h)),buMin:Math.min(...ms.map(m=>m.bu)),buMax:Math.max(...ms.map(m=>m.bu)),waMin:Math.min(...ms.map(m=>m.wa)),waMax:Math.max(...ms.map(m=>m.wa)),hpMin:Math.min(...ms.map(m=>m.hp)),hpMax:Math.max(...ms.map(m=>m.hp)),wMin:Math.min(...ws),wMax:Math.max(...ws)}});
 
-  document.getElementById('sizeRef').innerHTML=`<div class="size-ref"><h4>📐 Size Range Reference</h4><div class="sr-grid">${SO.filter(s=>sizeRanges[s]).map(s=>{const r=sizeRanges[s];return`<div class="sr-card" style="border-top:3px solid ${SC[s]}"><div class="sr-sz" style="color:${SC[s]}">${s}</div><div class="sr-range"><strong style="color:var(--tx)">${r.count}</strong> models<br>Height: ${r.hMin}–${r.hMax} cm<br>Bust: ${r.buMin}–${r.buMax}<br>Waist: ${r.waMin}–${r.waMax}<br>Hips: ${r.hpMin}–${r.hpMax}</div><div class="sr-weight">⚖️ ${r.wMin}–${r.wMax} kg</div></div>`}).join('')}</div></div>`;
+  const srEl=document.getElementById('sizeRef');
+  if(srEl) srEl.innerHTML=`<div class="size-ref"><h4>📐 Size Range Reference</h4><div class="sr-grid">${SO.filter(s=>sizeRanges[s]).map(s=>{const r=sizeRanges[s];return`<div class="sr-card" style="border-top:3px solid ${SC[s]}"><div class="sr-sz" style="color:${SC[s]}">${s}</div><div class="sr-range"><strong style="color:var(--tx)">${r.count}</strong> models<br>Height: ${r.hMin}–${r.hMax} cm<br>Bust: ${r.buMin}–${r.buMax}<br>Waist: ${r.waMin}–${r.waMax}<br>Hips: ${r.hpMin}–${r.hpMax}</div><div class="sr-weight">⚖️ ${r.wMin}–${r.wMax} kg</div></div>`}).join('')}</div></div>`;
 
   renderTechIllustrations();
 
@@ -1071,7 +1267,8 @@ function renderTechIllustrations(){
     </tr>`;
   });
   h+=`</tbody></table></div>`;
-  document.getElementById('qcTableSection').innerHTML=h;
+  const qcTblEl=document.getElementById('qcTableSection');
+  if(qcTblEl) qcTblEl.innerHTML=h;
 }();
 
 // ── LIVE GALLERY (Overview synced with uploaded images) ──
@@ -1830,6 +2027,285 @@ function copyEnhancedPrompt() {
 }
 
 // ── Initialize new features ──
+// ═══════════════════════════════════════════════════
+// ═══ AI STUDIO — Gemini Image Generation ═══
+// ═══════════════════════════════════════════════════
+
+let aiGeminiKey = null;
+let aiHistory = [];
+
+function connectGemini() {
+  const key = document.getElementById('aiApiKey').value.trim();
+  if (!key || key.length < 20) { toast('מפתח API לא תקין'); return; }
+  aiGeminiKey = key;
+  document.getElementById('aiConnStatus').innerHTML = '<span style="color:var(--gn)">🟢 מחובר ל-Gemini</span>';
+  document.getElementById('aiStudioMain').style.display = 'block';
+  document.getElementById('aiKeyBar').style.background = 'var(--sf2)';
+  // Populate model selector
+  const sel = document.getElementById('aiModelSelect');
+  sel.innerHTML = '<option value="">בחרי מודל...</option>';
+  MD.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = `${m.nm} #${m.id} — ${m.sz} ${m.bd}`;
+    sel.appendChild(opt);
+  });
+  toast('מחובר ל-Gemini! 🟢');
+  aiAssemblePrompt();
+  aiDrawWires();
+}
+
+function aiUpdatePreview() {
+  const mid = parseInt(document.getElementById('aiModelSelect').value);
+  const m = MD.find(x => x.id === mid);
+  if (!m) {
+    document.getElementById('aiModelPreview').innerHTML = '';
+    document.getElementById('aiSpecsBody').innerHTML = '<div style="color:var(--tx3);font-size:9px">← בחרי מודל</div>';
+    return;
+  }
+  const wt = WT[m.id] || { w: '?', d: '?' };
+  const szC = SC[m.sz];
+  document.getElementById('aiModelPreview').innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <span style="color:${szC};font-weight:800;font-size:14px">${m.nm}</span>
+      <span style="background:${szC}20;color:${szC};padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700">${m.sz}</span>
+    </div>
+    <div style="font-size:9px;color:var(--tx2)">${m.h}cm · ~${wt.w}kg · ${m.bd} · ${m.sk} · ${m.eth}</div>
+    <div style="font-size:9px;color:${szC};margin-top:2px">${m.tr}</div>`;
+
+  document.getElementById('aiSpecsBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;font-family:'JetBrains Mono',monospace">
+      <div>H: <span style="color:var(--tx)">${m.h}cm</span></div>
+      <div>W: <span style="color:var(--tx)">~${wt.w}kg</span></div>
+      <div>Bust: <span style="color:var(--tx)">${m.bu}</span></div>
+      <div>Waist: <span style="color:var(--tx)">${m.wa}</span></div>
+      <div>Hips: <span style="color:var(--tx)">${m.hp}</span></div>
+      <div>W/H: <span style="color:var(--tx)">${m.hp?(m.wa/m.hp).toFixed(2):'—'}</span></div>
+      <div>Eyes: <span style="color:var(--tx)">${m.ey}</span></div>
+      <div>Hair: <span style="color:var(--tx)">${m.hr}</span></div>
+    </div>`;
+  aiAssemblePrompt();
+}
+
+function aiAssemblePrompt() {
+  const mid = parseInt(document.getElementById('aiModelSelect')?.value);
+  const m = MD.find(x => x.id === mid);
+  const pose = document.getElementById('aiPoseSelect')?.value || 'Front';
+  const custom = document.getElementById('aiCustomPrompt')?.value || '';
+  const is4K = document.getElementById('ai4K')?.checked;
+
+  if (!m) {
+    document.getElementById('aiPromptPreview').textContent = 'בחרי מודל כדי לבנות פרומפט...';
+    return;
+  }
+
+  const wt = WT[m.id] || { w: '?', d: '?' };
+  const isCU = pose === 'Close-Up';
+  const pDesc = poseDesc[pose] || '';
+  const res = is4K ? '4K ultra high resolution (3840×5120), ' : '';
+
+  // Fixed studio conditions — identical for ALL models
+  const studioBody = 'Seamless pure white background. Soft even lighting, minimal shadows. Subtle grounding shadow under feet only. Full body head-to-toe, centered. Neutral perspective. High sharpness, realistic casting photography.';
+  const studioCUFixed = 'Seamless pure white background. Soft even beauty lighting with subtle fill. Head and shoulders framing. High sharpness, realistic casting close-up.';
+  const wardrobeBody = 'Black ribbed tank top with wide straps. Black fitted biker shorts. White minimal low-top sneakers, no branding. No logos, prints, accessories, jewelry, or props.';
+  const wardrobeCUFixed = 'Black ribbed tank top with wide straps visible at shoulders. No accessories, jewelry, or props.';
+  const consistencyFixed = '6-image set (Front, 45L, 45R, Profile 90, Back, Close-Up). Model identical across all. Uniform across all models. Natural casting look, NOT editorial.';
+
+  let prompt = `${res}GOAL: Generate an AI fashion model inspired by this type. Do NOT copy a real person. Maintain matching general attributes.\n\n`;
+
+  // EXACT measurements from model data
+  prompt += `MODEL: "${m.nm}" — ${cap(m.st)} stature, ${m.bd} build, size ${m.sz}.\n`;
+  prompt += `EXACT MEASUREMENTS:\n`;
+  prompt += `  Height: ${m.h}cm\n`;
+  prompt += `  Weight: ${wt.w}kg (${wt.d} build)\n`;
+  prompt += `  Bust: ${m.bu}cm\n`;
+  prompt += `  Waist: ${m.wa}cm\n`;
+  prompt += `  Hips: ${m.hp}cm\n`;
+  prompt += `  Waist-to-Hip Ratio: ${m.hp ? (m.wa/m.hp).toFixed(2) : '—'}\n`;
+  if (m.ins) prompt += `  Inseam: ${m.ins}cm\n`;
+  prompt += `APPEARANCE: ${cap(m.sk)} skin, ${m.eth} ethnicity, ${m.hr} hair, ${m.ey.toLowerCase()} eyes.\n`;
+  prompt += `BODY NOTE: Body weight must visually match a ${wt.d} ${m.h}cm woman weighing exactly ${wt.w}kg. Proportions must reflect B${m.bu}/W${m.wa}/H${m.hp}cm precisely.\n`;
+  prompt += `TRAIT: ${m.tr}\n\n`;
+
+  prompt += `POSE [${pose}]: ${pDesc}\n\n`;
+  prompt += `STUDIO: ${isCU ? studioCUFixed : studioBody}\n\n`;
+  prompt += `WARDROBE: ${isCU ? wardrobeCUFixed : wardrobeBody}\n\n`;
+  prompt += `CONSISTENCY: ${consistencyFixed}\n`;
+  if (custom) prompt += `\nADDITIONAL INSTRUCTIONS: ${custom}\n`;
+
+  document.getElementById('aiPromptPreview').textContent = prompt;
+}
+
+function aiCopyPrompt() {
+  const t = document.getElementById('aiPromptPreview').textContent;
+  navigator.clipboard.writeText(t).then(() => toast('פרומפט הועתק! 📋'));
+}
+
+async function aiRunPipeline() {
+  if (!aiGeminiKey) { toast('חברי API key קודם'); return; }
+  const mid = parseInt(document.getElementById('aiModelSelect')?.value);
+  if (!mid) { toast('בחרי מודל קודם'); return; }
+
+  const prompt = document.getElementById('aiPromptPreview').textContent;
+  if (!prompt || prompt.includes('בחרי מודל')) { toast('הפרומפט ריק'); return; }
+
+  const outBody = document.getElementById('aiOutputBody');
+  const runBtn = document.getElementById('aiRunBtn');
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Generating...';
+  outBody.innerHTML = '<div class="ai-generating"><div class="spinner"></div>Gemini מייצר תמונה...</div>';
+
+  try {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${aiGeminiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"],
+          temperature: 1,
+          topP: 0.95
+        }
+      })
+    });
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    
+    // Extract image from response
+    let imageData = null;
+    let textResp = '';
+    
+    if (data.candidates && data.candidates[0]?.content?.parts) {
+      for (const part of data.candidates[0].content.parts) {
+        if (part.inlineData) {
+          imageData = part.inlineData;
+        } else if (part.text) {
+          textResp = part.text;
+        }
+      }
+    }
+
+    if (imageData) {
+      const imgSrc = `data:${imageData.mimeType};base64,${imageData.data}`;
+      const m = MD.find(x => x.id === mid);
+      const pose = document.getElementById('aiPoseSelect').value;
+      
+      outBody.innerHTML = `
+        <img class="ai-output-img" src="${imgSrc}" alt="Generated"/>
+        ${textResp ? `<div style="margin-top:8px;font-size:9px;color:var(--tx3);direction:ltr;text-align:left">${textResp.substring(0,200)}</div>` : ''}
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <a href="${imgSrc}" download="${m?m.nm:'model'}_${pose}.png" class="btn btn-ghost" style="font-size:9px;text-decoration:none">💾 שמירה</a>
+          <button class="btn btn-ghost" style="font-size:9px" onclick="aiUploadToModel(${mid},'${pose}','${imgSrc.replace(/'/g,"\\'")}')">📤 העלאה לדשבורד</button>
+        </div>`;
+
+      // Add to history
+      aiHistory.unshift({ img: imgSrc, model: m?.nm || '?', pose, time: new Date().toLocaleTimeString('he-IL') });
+      aiRenderHistory();
+    } else {
+      outBody.innerHTML = `<div class="ai-error">Gemini לא החזיר תמונה. תגובה: ${textResp || 'ריקה'}</div>`;
+    }
+  } catch (err) {
+    outBody.innerHTML = `<div class="ai-error">❌ שגיאה: ${err.message}</div>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶️ Generate';
+  }
+}
+
+function aiUploadToModel(mid, pose, imgSrc) {
+  // Convert base64 to blob and upload
+  fetch(imgSrc).then(r => r.blob()).then(blob => {
+    const file = new File([blob], `${mid}_${pose}.png`, { type: 'image/png' });
+    uploadImage(mid, pose, file);
+    toast(`תמונה הועלתה ל-${pose}! 📤`);
+  });
+}
+
+function aiRenderHistory() {
+  const el = document.getElementById('aiHistory');
+  if (!aiHistory.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--tx3);font-size:10px">עדיין לא נוצרו תמונות</div>'; return; }
+  el.innerHTML = aiHistory.map((h, i) => `
+    <div class="ai-hist-item" onclick="document.getElementById('aiOutputBody').innerHTML='<img class=\\'ai-output-img\\' src=\\'${h.img.substring(0,50)}...\\'/>'">
+      <img src="${h.img}" alt="${h.model}"/>
+      <div class="ai-hist-label">${h.model} · ${h.pose} · ${h.time}</div>
+    </div>`).join('');
+}
+
+function aiResetCanvas() {
+  document.getElementById('aiModelSelect').value = '';
+  document.getElementById('aiPoseSelect').value = 'Front';
+  document.getElementById('aiCustomPrompt').value = '';
+  document.getElementById('aiModelPreview').innerHTML = '';
+  document.getElementById('aiSpecsBody').innerHTML = '<div style="color:var(--tx3);font-size:9px">← בחרי מודל</div>';
+  document.getElementById('aiOutputBody').innerHTML = '<div class="ai-output-placeholder"><div style="font-size:32px;margin-bottom:8px">🎨</div><div>לחצי Generate כדי ליצור תמונה</div></div>';
+  aiAssemblePrompt();
+}
+
+function aiDrawWires() {
+  // Draw decorative connection wires between nodes
+  const svg = document.getElementById('aiWires');
+  if (!svg) return;
+  const wires = [
+    ['aiNode-model', 'aiNode-specs', 'var(--cy)'],
+    ['aiNode-model', 'aiNode-prompt', 'var(--ac)'],
+    ['aiNode-pose', 'aiNode-prompt', 'var(--gn)'],
+    ['aiNode-style', 'aiNode-prompt', 'var(--am)'],
+    ['aiNode-custom', 'aiNode-prompt', 'var(--pk)'],
+    ['aiNode-prompt', 'aiNode-output', 'var(--or)']
+  ];
+  let paths = '';
+  wires.forEach(([fromId, toId, color]) => {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    if (!from || !to) return;
+    const x1 = from.offsetLeft + from.offsetWidth;
+    const y1 = from.offsetTop + from.offsetHeight / 2;
+    const x2 = to.offsetLeft;
+    const y2 = to.offsetTop + to.offsetHeight / 2;
+    const midX = (x1 + x2) / 2;
+    paths += `<path d="M${x1},${y1} C${midX},${y1} ${midX},${y2} ${x2},${y2}" fill="none" stroke="${color}" stroke-width="2" stroke-opacity=".3" stroke-dasharray="6,4"/>`;
+  });
+  svg.innerHTML = paths;
+}
+
+// Auto-assemble prompt when inputs change
+document.addEventListener('change', (e) => {
+  if (e.target.closest('#p-aiStudio')) aiAssemblePrompt();
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'aiCustomPrompt' || e.target.id === 'aiWardrobeCustom') aiAssemblePrompt();
+});
+
+// Make nodes draggable
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.ai-node-header').forEach(header => {
+    let isDragging = false, startX, startY, startLeft, startTop;
+    header.addEventListener('mousedown', (e) => {
+      const node = header.parentElement;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = node.offsetLeft;
+      startTop = node.offsetTop;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    function onMove(e) {
+      if (!isDragging) return;
+      const node = header.parentElement;
+      node.style.left = (startLeft + e.clientX - startX) + 'px';
+      node.style.top = (startTop + e.clientY - startY) + 'px';
+      aiDrawWires();
+    }
+    function onUp() { isDragging = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+  });
+});
+
 populateQCAModelSelector();
 
 async function boot(){
