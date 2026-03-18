@@ -465,7 +465,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       <div class="qca-overlay-bar">
         <span style="font-size:11px;color:var(--tx3);font-weight:600">OVERLAY CONTROLS:</span>
         <button class="qca-ovl-btn" id="btnOvlSilhouette" onclick="toggleGlobalOverlay('silhouette')">
-          <span class="qca-ovl-icon">👁</span> Silhouette
+          <span class="qca-ovl-icon">📐</span> Size Rulers
         </button>
         <button class="qca-ovl-btn" id="btnOvlMeasure" onclick="toggleGlobalOverlay('measure')">
           <span class="qca-ovl-icon">📏</span> Measurement Lines
@@ -608,23 +608,30 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
           <!-- Node: Studio Conditions (FIXED — identical for all models) -->
           <div class="ai-node" id="aiNode-style" style="left:320px;top:170px" data-type="style">
             <div class="ai-node-header" style="background:var(--am)">
-              <span>🔒 Studio Conditions (קבוע)</span>
+              <span>🔒 Studio & Output Settings</span>
               <span class="ai-node-port out" data-port="style-out"></span>
             </div>
             <div class="ai-node-body">
               <div style="font-size:9px;color:var(--tx2);line-height:1.7;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;direction:ltr;text-align:left">
                 <div><span style="color:var(--am);font-weight:700">BG:</span> Seamless pure white background</div>
-                <div><span style="color:var(--am);font-weight:700">LIGHT:</span> Soft even lighting, minimal shadows. Subtle grounding shadow under feet only.</div>
-                <div><span style="color:var(--am);font-weight:700">FRAME:</span> Full body head-to-toe, centered. Neutral perspective.</div>
-                <div><span style="color:var(--am);font-weight:700">WARDROBE:</span> Black ribbed tank top, black fitted biker shorts, white sneakers. No logos/accessories.</div>
-                <div><span style="color:var(--am);font-weight:700">QUALITY:</span> High sharpness, realistic casting photography.</div>
+                <div><span style="color:var(--am);font-weight:700">LIGHT:</span> Soft even lighting, minimal shadows.</div>
+                <div><span style="color:var(--am);font-weight:700">WARDROBE:</span> Black ribbed tank top, biker shorts, white sneakers.</div>
               </div>
-              <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
-                <label style="font-size:10px;color:var(--tx);font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer">
-                  <input type="checkbox" id="ai4K" checked style="accent-color:var(--ac);width:15px;height:15px"/> 4K Resolution
-                </label>
-                <span style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">3840×5120</span>
-              </div>
+              <label class="ai-field-label" style="margin-top:8px">📐 Aspect Ratio</label>
+              <select id="aiAspectRatio" style="width:100%" onchange="aiAssemblePrompt()">
+                <option value="3:4" selected>3:4 — Portrait (standard)</option>
+                <option value="4:3">4:3 — Landscape</option>
+                <option value="1:1">1:1 — Square</option>
+                <option value="9:16">9:16 — Tall Portrait</option>
+                <option value="16:9">16:9 — Wide Landscape</option>
+              </select>
+              <label class="ai-field-label" style="margin-top:6px">🖼️ Resolution</label>
+              <select id="aiImageSize" style="width:100%" onchange="aiAssemblePrompt()">
+                <option value="">Auto (default)</option>
+                <option value="1K">1K (1024px)</option>
+                <option value="2K" selected>2K (2048px)</option>
+                <option value="4K">4K (4096px)</option>
+              </select>
             </div>
           </div>
 
@@ -1881,92 +1888,50 @@ async function loadQCAModel() {
 // ── SVG OVERLAY BUILDERS ──
 
 function buildSilhouetteSVG(model, pose) {
+  // Measurement ruler bars — clear pass/fail indicators on right side of image
   const color = SC[model.sz] || '#C44569';
-  const cx = 150; // center of 300-wide viewBox
+  const isCU = pose === 'Close-Up';
+  if (isCU) return buildFaceSilhouetteSVG(model);
 
-  // Scale: map cm → SVG half-width. In 300px viewBox, body should be ~35% width
-  // Bust 88cm (S) → should be ~50px radius, so 88 * sc / 2 = 50 → sc ≈ 1.14
-  // But capped so 4XL (150cm bust) doesn't overflow: 150 * 0.7 / 2 = 52
-  const sc = 0.70;
-  const bR = Math.min(model.bu * sc / 2, 58);   // bust half-width
-  const wR = Math.min(model.wa * sc / 2, 52);   // waist
-  const hR = Math.min(model.hp * sc / 2, 62);   // hips
-  const shR = Math.max(bR, 22) + 5; // shoulders always wider
+  const sm = MD.filter(m => m.sz === model.sz);
+  const wt = WT[model.id] || {w:'?'};
 
-  // Pose width multiplier
-  let pf = 1;
-  if (pose === 'Profile 90') pf = 0.40;
-  else if (pose === '45L' || pose === '45R') pf = 0.70;
-  else if (pose === 'Back') pf = 0.97;
+  const barX = 195, barW = 95, barH = 16, rowH = 32;
+  const startY = 30;
 
-  const B = bR*pf, W = wR*pf, H = hR*pf, S = shR*pf;
-  const thR = H*0.52, kR = H*0.30, aR = H*0.16;
-  const nW = 5*pf; // neck half-width
+  function ruler(y, label, val, unit, min, max) {
+    const inRange = val >= min && val <= max;
+    const bg = inRange ? 'rgba(16,185,129,.3)' : 'rgba(244,63,94,.3)';
+    const border = inRange ? '#10b981' : '#f43f5e';
+    const mark = inRange ? '✓' : '!';
+    return `
+      <rect x="${barX}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="${bg}" stroke="${border}" stroke-width="1"/>
+      <text x="${barX+6}" y="${y+11}" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono">${label} ${val}${unit}</text>
+      <text x="${barX+barW-6}" y="${y+11}" fill="${border}" font-size="9" font-weight="900" font-family="JetBrains Mono" text-anchor="end">${mark}</text>
+      <text x="${barX+6}" y="${y+barH+8}" fill="rgba(255,255,255,.4)" font-size="6.5" font-family="JetBrains Mono">range: ${min}–${max}${unit}</text>`;
+  }
 
-  // Vertical landmarks — fill 400px viewBox
-  const headTop=12, headR=16, headCY=headTop+headR;
-  const chinY=headCY+headR+2, neckY=chinY+8;
-  const shoulderY=neckY+12;
-  const bustY=shoulderY+30;
-  const waistY=bustY+32;
-  const hipY=waistY+28;
-  const crotchY=hipY+20;
-  const kneeY=crotchY+52;
-  const ankleY=kneeY+52;
-  const footY=ankleY+8;
+  let svg = '';
+  // Dark panel background
+  svg += `<rect x="${barX-6}" y="${startY-16}" width="${barW+12}" height="${rowH*6+30}" rx="8" fill="rgba(6,6,9,.75)" stroke="${color}" stroke-width="1" opacity=".9"/>`;
+  svg += `<text x="${barX+barW/2}" y="${startY-2}" text-anchor="middle" fill="${color}" font-size="10" font-weight="900" font-family="JetBrains Mono">${model.sz} CHECK</text>`;
 
-  return `
-    <!-- Head -->
-    <ellipse cx="${cx}" cy="${headCY}" rx="${13*pf}" ry="${headR}" fill="none" stroke="${color}" stroke-width="2" opacity=".55"/>
+  let y = startY + 8;
+  svg += ruler(y, 'Ht', model.h, 'cm', Math.min(...sm.map(m=>m.h)), Math.max(...sm.map(m=>m.h)));
+  y += rowH;
+  svg += ruler(y, 'Wt', wt.w, 'kg', Math.min(...sm.map(m=>(WT[m.id]||{w:0}).w)), Math.max(...sm.map(m=>(WT[m.id]||{w:0}).w)));
+  y += rowH;
+  svg += ruler(y, 'Bu', model.bu, 'cm', Math.min(...sm.map(m=>m.bu)), Math.max(...sm.map(m=>m.bu)));
+  y += rowH;
+  svg += ruler(y, 'Wa', model.wa, 'cm', Math.min(...sm.map(m=>m.wa)), Math.max(...sm.map(m=>m.wa)));
+  y += rowH;
+  svg += ruler(y, 'Hi', model.hp, 'cm', Math.min(...sm.map(m=>m.hp)), Math.max(...sm.map(m=>m.hp)));
+  y += rowH;
+  const whr = model.hp ? (model.wa/model.hp).toFixed(2) : '—';
+  svg += `<rect x="${barX}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="rgba(139,92,246,.25)" stroke="#a78bfa" stroke-width="0.8"/>`;
+  svg += `<text x="${barX+6}" y="${y+11}" fill="#c4b5fd" font-size="9" font-weight="700" font-family="JetBrains Mono">W/H ${whr}</text>`;
 
-    <!-- Neck -->
-    <line x1="${cx-nW}" y1="${chinY}" x2="${cx-nW-1}" y2="${neckY}" stroke="${color}" stroke-width="1.5" opacity=".4"/>
-    <line x1="${cx+nW}" y1="${chinY}" x2="${cx+nW+1}" y2="${neckY}" stroke="${color}" stroke-width="1.5" opacity=".4"/>
-
-    <!-- LEFT body contour -->
-    <path d="
-      M${cx-nW-1},${neckY}
-      C${cx-S*0.4},${neckY+2} ${cx-S},${shoulderY-4} ${cx-S},${shoulderY}
-      C${cx-S+1},${shoulderY+10} ${cx-B-2},${bustY-10} ${cx-B},${bustY}
-      C${cx-B+2},${bustY+12} ${cx-W-1},${waistY-8} ${cx-W},${waistY}
-      C${cx-W-1},${waistY+10} ${cx-H+1},${hipY-8} ${cx-H},${hipY}
-      C${cx-H+1},${hipY+8} ${cx-thR-1},${crotchY-6} ${cx-thR},${crotchY}
-      C${cx-thR+1},${crotchY+8} ${cx-kR-1},${kneeY-6} ${cx-kR},${kneeY}
-      C${cx-kR+1},${kneeY+8} ${cx-aR-1},${ankleY-6} ${cx-aR},${ankleY}
-      L${cx-aR-3},${footY}
-    " fill="none" stroke="${color}" stroke-width="2" opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>
-
-    <!-- RIGHT body contour -->
-    <path d="
-      M${cx+nW+1},${neckY}
-      C${cx+S*0.4},${neckY+2} ${cx+S},${shoulderY-4} ${cx+S},${shoulderY}
-      C${cx+S-1},${shoulderY+10} ${cx+B+2},${bustY-10} ${cx+B},${bustY}
-      C${cx+B-2},${bustY+12} ${cx+W+1},${waistY-8} ${cx+W},${waistY}
-      C${cx+W+1},${waistY+10} ${cx+H-1},${hipY-8} ${cx+H},${hipY}
-      C${cx+H-1},${hipY+8} ${cx+thR+1},${crotchY-6} ${cx+thR},${crotchY}
-      C${cx+thR-1},${crotchY+8} ${cx+kR+1},${kneeY-6} ${cx+kR},${kneeY}
-      C${cx+kR-1},${kneeY+8} ${cx+aR+1},${ankleY-6} ${cx+aR},${ankleY}
-      L${cx+aR+3},${footY}
-    " fill="none" stroke="${color}" stroke-width="2" opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>
-
-    <!-- Bust measurement line -->
-    <line x1="${cx-B}" y1="${bustY}" x2="${cx+B}" y2="${bustY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
-    <circle cx="${cx-B}" cy="${bustY}" r="2.5" fill="${color}" opacity=".5"/>
-    <circle cx="${cx+B}" cy="${bustY}" r="2.5" fill="${color}" opacity=".5"/>
-
-    <!-- Waist measurement line -->
-    <line x1="${cx-W}" y1="${waistY}" x2="${cx+W}" y2="${waistY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
-    <circle cx="${cx-W}" cy="${waistY}" r="2.5" fill="${color}" opacity=".5"/>
-    <circle cx="${cx+W}" cy="${waistY}" r="2.5" fill="${color}" opacity=".5"/>
-
-    <!-- Hip measurement line -->
-    <line x1="${cx-H}" y1="${hipY}" x2="${cx+H}" y2="${hipY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
-    <circle cx="${cx-H}" cy="${hipY}" r="2.5" fill="${color}" opacity=".5"/>
-    <circle cx="${cx+H}" cy="${hipY}" r="2.5" fill="${color}" opacity=".5"/>
-
-    <!-- Leg separation line -->
-    <line x1="${cx}" y1="${crotchY}" x2="${cx}" y2="${footY}" stroke="${color}" stroke-width="0.6" opacity=".15" stroke-dasharray="4,4"/>
-  `;
+  return svg;
 }
 
 function buildFaceSilhouetteSVG(model) {
@@ -2322,7 +2287,8 @@ function aiAssemblePrompt() {
   const m = MD.find(x => x.id === mid);
   const pose = document.getElementById('aiPoseSelect')?.value || 'Front';
   const custom = document.getElementById('aiCustomPrompt')?.value || '';
-  const is4K = document.getElementById('ai4K')?.checked;
+  const imgSize = document.getElementById('aiImageSize')?.value || '';
+  const aspectRatio = document.getElementById('aiAspectRatio')?.value || '3:4';
 
   if (!m) {
     document.getElementById('aiPromptPreview').textContent = 'בחרי מודל כדי לבנות פרומפט...';
@@ -2332,7 +2298,7 @@ function aiAssemblePrompt() {
   const wt = WT[m.id] || { w: '?', d: '?' };
   const isCU = pose === 'Close-Up';
   const pDesc = poseDesc[pose] || '';
-  const res = is4K ? '4K ultra high resolution (3840×5120), ' : '';
+  const resLabel = imgSize ? `${imgSize} resolution, ` : '';
 
   // Fixed studio conditions — identical for ALL models
   const studioBody = 'Seamless pure white background. Soft even lighting, minimal shadows. Subtle grounding shadow under feet only. Full body head-to-toe, centered. Neutral perspective. High sharpness, realistic casting photography.';
@@ -2341,7 +2307,7 @@ function aiAssemblePrompt() {
   const wardrobeCUFixed = 'Black ribbed tank top with wide straps visible at shoulders. No accessories, jewelry, or props.';
   const consistencyFixed = '6-image set (Front, 45L, 45R, Profile 90, Back, Close-Up). Model identical across all. Uniform across all models. Natural casting look, NOT editorial.';
 
-  let prompt = `${res}GOAL: Generate an AI fashion model inspired by this type. Do NOT copy a real person. Maintain matching general attributes.\n\n`;
+  let prompt = `${resLabel}GOAL: Generate an AI fashion model inspired by this type. Do NOT copy a real person. Maintain matching general attributes.\n\n`;
 
   // EXACT measurements from model data
   prompt += `MODEL: "${m.nm}" — ${cap(m.st)} stature, ${m.bd} build, size ${m.sz}.\n`;
@@ -2386,6 +2352,10 @@ async function aiRunPipeline() {
   outBody.innerHTML = '<div class="ai-generating"><div class="spinner"></div>Gemini מייצר תמונה...</div>';
 
   try {
+    // Get image settings
+    const aspectRatio = document.getElementById('aiAspectRatio')?.value || '3:4';
+    const imageSize = document.getElementById('aiImageSize')?.value || '';
+
     // Try multiple model names (Google changes them frequently)
     const modelNames = [
       'gemini-2.5-flash-image',
@@ -2398,16 +2368,24 @@ async function aiRunPipeline() {
     
     for (const modelName of modelNames) {
       try {
+        // Build generation config with image_config
+        const genConfig = {
+          responseModalities: ["TEXT", "IMAGE"]
+        };
+        // Add image_config for aspect ratio and size
+        const imageConfig = {};
+        if (aspectRatio) imageConfig.aspect_ratio = aspectRatio;
+        if (imageSize) imageConfig.image_size = imageSize;
+        if (Object.keys(imageConfig).length > 0) {
+          genConfig.image_config = imageConfig;
+        }
+
         const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${aiGeminiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseModalities: ["TEXT", "IMAGE"],
-              temperature: 1,
-              topP: 0.95
-            }
+            generationConfig: genConfig
           })
         });
 
