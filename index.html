@@ -1882,87 +1882,90 @@ async function loadQCAModel() {
 
 function buildSilhouetteSVG(model, pose) {
   const color = SC[model.sz] || '#C44569';
-  const cx = 150;
+  const cx = 150; // center of 300-wide viewBox
 
-  // Use same proportional scaling as Size Reference tech drawings
-  const bR = model.bu * 0.16;
-  const wR = model.wa * 0.16;
-  const hR = model.hp * 0.16;
-  const shR = bR + 2;
+  // Scale: map cm → SVG half-width. In 300px viewBox, body should be ~35% width
+  // Bust 88cm (S) → should be ~50px radius, so 88 * sc / 2 = 50 → sc ≈ 1.14
+  // But capped so 4XL (150cm bust) doesn't overflow: 150 * 0.7 / 2 = 52
+  const sc = 0.70;
+  const bR = Math.min(model.bu * sc / 2, 58);   // bust half-width
+  const wR = Math.min(model.wa * sc / 2, 52);   // waist
+  const hR = Math.min(model.hp * sc / 2, 62);   // hips
+  const shR = Math.max(bR, 22) + 5; // shoulders always wider
 
-  // Pose width factor
+  // Pose width multiplier
   let pf = 1;
-  if (pose === 'Profile 90') pf = 0.42;
-  else if (pose === '45L' || pose === '45R') pf = 0.72;
+  if (pose === 'Profile 90') pf = 0.40;
+  else if (pose === '45L' || pose === '45R') pf = 0.70;
   else if (pose === 'Back') pf = 0.97;
 
-  // Apply pose scaling
-  const B = bR * pf, W = wR * pf, H = hR * pf, S = shR * pf;
-  const thR = H * 0.48, kR = H * 0.27, aR = H * 0.15;
+  const B = bR*pf, W = wR*pf, H = hR*pf, S = shR*pf;
+  const thR = H*0.52, kR = H*0.30, aR = H*0.16;
+  const nW = 5*pf; // neck half-width
 
-  // Vertical positions — fit full body in 400 viewBox (head at ~20, feet at ~385)
-  const headY = 20, headH = 20;
-  const chinY = headY + headH * 2;
-  const neckY = chinY + 6;
-  const shoulderY = neckY + 10;
-  const bustY = shoulderY + 28;
-  const waistY = bustY + 30;
-  const hipY = waistY + 28;
-  const crotchY = hipY + 18;
-  const kneeY = crotchY + 56;
-  const ankleY = kneeY + 56;
-  const footY = ankleY + 8;
+  // Vertical landmarks — fill 400px viewBox
+  const headTop=12, headR=16, headCY=headTop+headR;
+  const chinY=headCY+headR+2, neckY=chinY+8;
+  const shoulderY=neckY+12;
+  const bustY=shoulderY+30;
+  const waistY=bustY+32;
+  const hipY=waistY+28;
+  const crotchY=hipY+20;
+  const kneeY=crotchY+52;
+  const ankleY=kneeY+52;
+  const footY=ankleY+8;
 
   return `
     <!-- Head -->
-    <ellipse cx="${cx}" cy="${headY+headH}" rx="${12*pf}" ry="${headH}" fill="none" stroke="${color}" stroke-width="1.5" opacity=".6"/>
+    <ellipse cx="${cx}" cy="${headCY}" rx="${13*pf}" ry="${headR}" fill="none" stroke="${color}" stroke-width="2" opacity=".55"/>
+
     <!-- Neck -->
-    <line x1="${cx-4*pf}" y1="${chinY}" x2="${cx-5*pf}" y2="${neckY}" stroke="${color}" stroke-width="1" opacity=".4"/>
-    <line x1="${cx+4*pf}" y1="${chinY}" x2="${cx+5*pf}" y2="${neckY}" stroke="${color}" stroke-width="1" opacity=".4"/>
+    <line x1="${cx-nW}" y1="${chinY}" x2="${cx-nW-1}" y2="${neckY}" stroke="${color}" stroke-width="1.5" opacity=".4"/>
+    <line x1="${cx+nW}" y1="${chinY}" x2="${cx+nW+1}" y2="${neckY}" stroke="${color}" stroke-width="1.5" opacity=".4"/>
 
-    <!-- Body — Left contour -->
+    <!-- LEFT body contour -->
     <path d="
-      M${cx-5*pf},${neckY}
-      C${cx-S*0.5},${neckY} ${cx-S},${shoulderY-3} ${cx-S},${shoulderY}
-      C${cx-S},${shoulderY+8} ${cx-B-1},${bustY-8} ${cx-B},${bustY}
-      C${cx-B+1},${bustY+10} ${cx-W-1},${waistY-6} ${cx-W},${waistY}
-      C${cx-W-1},${waistY+8} ${cx-H},${hipY-6} ${cx-H},${hipY}
-      C${cx-H},${hipY+6} ${cx-thR-1},${crotchY-4} ${cx-thR},${crotchY}
-      L${cx-kR},${kneeY}
-      L${cx-aR},${ankleY}
+      M${cx-nW-1},${neckY}
+      C${cx-S*0.4},${neckY+2} ${cx-S},${shoulderY-4} ${cx-S},${shoulderY}
+      C${cx-S+1},${shoulderY+10} ${cx-B-2},${bustY-10} ${cx-B},${bustY}
+      C${cx-B+2},${bustY+12} ${cx-W-1},${waistY-8} ${cx-W},${waistY}
+      C${cx-W-1},${waistY+10} ${cx-H+1},${hipY-8} ${cx-H},${hipY}
+      C${cx-H+1},${hipY+8} ${cx-thR-1},${crotchY-6} ${cx-thR},${crotchY}
+      C${cx-thR+1},${crotchY+8} ${cx-kR-1},${kneeY-6} ${cx-kR},${kneeY}
+      C${cx-kR+1},${kneeY+8} ${cx-aR-1},${ankleY-6} ${cx-aR},${ankleY}
       L${cx-aR-3},${footY}
-    " fill="none" stroke="${color}" stroke-width="1.5" opacity=".55" stroke-linecap="round"/>
+    " fill="none" stroke="${color}" stroke-width="2" opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <!-- Body — Right contour -->
+    <!-- RIGHT body contour -->
     <path d="
-      M${cx+5*pf},${neckY}
-      C${cx+S*0.5},${neckY} ${cx+S},${shoulderY-3} ${cx+S},${shoulderY}
-      C${cx+S},${shoulderY+8} ${cx+B+1},${bustY-8} ${cx+B},${bustY}
-      C${cx+B-1},${bustY+10} ${cx+W+1},${waistY-6} ${cx+W},${waistY}
-      C${cx+W+1},${waistY+8} ${cx+H},${hipY-6} ${cx+H},${hipY}
-      C${cx+H},${hipY+6} ${cx+thR+1},${crotchY-4} ${cx+thR},${crotchY}
-      L${cx+kR},${kneeY}
-      L${cx+aR},${ankleY}
+      M${cx+nW+1},${neckY}
+      C${cx+S*0.4},${neckY+2} ${cx+S},${shoulderY-4} ${cx+S},${shoulderY}
+      C${cx+S-1},${shoulderY+10} ${cx+B+2},${bustY-10} ${cx+B},${bustY}
+      C${cx+B-2},${bustY+12} ${cx+W+1},${waistY-8} ${cx+W},${waistY}
+      C${cx+W+1},${waistY+10} ${cx+H-1},${hipY-8} ${cx+H},${hipY}
+      C${cx+H-1},${hipY+8} ${cx+thR+1},${crotchY-6} ${cx+thR},${crotchY}
+      C${cx+thR-1},${crotchY+8} ${cx+kR+1},${kneeY-6} ${cx+kR},${kneeY}
+      C${cx+kR-1},${kneeY+8} ${cx+aR+1},${ankleY-6} ${cx+aR},${ankleY}
       L${cx+aR+3},${footY}
-    " fill="none" stroke="${color}" stroke-width="1.5" opacity=".55" stroke-linecap="round"/>
+    " fill="none" stroke="${color}" stroke-width="2" opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <!-- Bust line -->
-    <line x1="${cx-B}" y1="${bustY}" x2="${cx+B}" y2="${bustY}" stroke="${color}" stroke-width="0.8" stroke-dasharray="4,3" opacity=".35"/>
-    <circle cx="${cx-B}" cy="${bustY}" r="2" fill="${color}" opacity=".4"/>
-    <circle cx="${cx+B}" cy="${bustY}" r="2" fill="${color}" opacity=".4"/>
+    <!-- Bust measurement line -->
+    <line x1="${cx-B}" y1="${bustY}" x2="${cx+B}" y2="${bustY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
+    <circle cx="${cx-B}" cy="${bustY}" r="2.5" fill="${color}" opacity=".5"/>
+    <circle cx="${cx+B}" cy="${bustY}" r="2.5" fill="${color}" opacity=".5"/>
 
-    <!-- Waist line -->
-    <line x1="${cx-W}" y1="${waistY}" x2="${cx+W}" y2="${waistY}" stroke="${color}" stroke-width="0.8" stroke-dasharray="4,3" opacity=".35"/>
-    <circle cx="${cx-W}" cy="${waistY}" r="2" fill="${color}" opacity=".4"/>
-    <circle cx="${cx+W}" cy="${waistY}" r="2" fill="${color}" opacity=".4"/>
+    <!-- Waist measurement line -->
+    <line x1="${cx-W}" y1="${waistY}" x2="${cx+W}" y2="${waistY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
+    <circle cx="${cx-W}" cy="${waistY}" r="2.5" fill="${color}" opacity=".5"/>
+    <circle cx="${cx+W}" cy="${waistY}" r="2.5" fill="${color}" opacity=".5"/>
 
-    <!-- Hip line -->
-    <line x1="${cx-H}" y1="${hipY}" x2="${cx+H}" y2="${hipY}" stroke="${color}" stroke-width="0.8" stroke-dasharray="4,3" opacity=".35"/>
-    <circle cx="${cx-H}" cy="${hipY}" r="2" fill="${color}" opacity=".4"/>
-    <circle cx="${cx+H}" cy="${hipY}" r="2" fill="${color}" opacity=".4"/>
+    <!-- Hip measurement line -->
+    <line x1="${cx-H}" y1="${hipY}" x2="${cx+H}" y2="${hipY}" stroke="${color}" stroke-width="1" stroke-dasharray="5,3" opacity=".4"/>
+    <circle cx="${cx-H}" cy="${hipY}" r="2.5" fill="${color}" opacity=".5"/>
+    <circle cx="${cx+H}" cy="${hipY}" r="2.5" fill="${color}" opacity=".5"/>
 
-    <!-- Leg separation -->
-    <line x1="${cx}" y1="${crotchY}" x2="${cx}" y2="${footY}" stroke="${color}" stroke-width="0.5" opacity=".15" stroke-dasharray="3,4"/>
+    <!-- Leg separation line -->
+    <line x1="${cx}" y1="${crotchY}" x2="${cx}" y2="${footY}" stroke="${color}" stroke-width="0.6" opacity=".15" stroke-dasharray="4,4"/>
   `;
 }
 
@@ -2026,7 +2029,7 @@ function buildFaceSilhouetteSVG(model) {
 function buildMeasurementSVG(model, sizeGuide) {
   const cx = 150;
   // Match the new anatomical positions from buildSilhouetteSVG
-  const bustY = 128, waistY = 158, hipY = 186;
+  const bustY = 114, waistY = 146, hipY = 174;
   const bust = model.bu, waist = model.wa, hips = model.hp;
   const color = '#06b6d4';
 
