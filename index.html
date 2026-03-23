@@ -191,6 +191,36 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .fb-modal textarea:focus{outline:none;border-color:var(--ac)}
 .fb-modal .fb-m-actions{display:flex;gap:8px;justify-content:flex-end}
 
+/* Overlay QC Tool */
+.overlay-tool{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:24px;margin-bottom:16px}
+.overlay-tool h4{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--tx);display:flex;align-items:center;gap:8px}
+.overlay-tool .ot-sub{font-size:10px;color:var(--tx3);margin-bottom:16px}
+.overlay-ctrl{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;align-items:flex-end}
+.overlay-ctrl .fg select,.overlay-ctrl .fg input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:6px;font-size:12px;font-family:'Outfit',sans-serif}
+.overlay-ctrl .fg label{font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace;margin-bottom:2px;display:block}
+.overlay-canvas-wrap{position:relative;display:flex;justify-content:center;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;min-height:500px;overflow:hidden}
+.overlay-canvas-wrap .oc-placeholder{text-align:center;padding:40px;color:var(--tx3);font-size:12px}
+.overlay-canvas-wrap canvas{display:block;max-width:100%;cursor:grab}
+.overlay-canvas-wrap canvas:active{cursor:grabbing}
+.ot-range{display:flex;align-items:center;gap:8px}
+.ot-range input[type=range]{accent-color:var(--ac);width:120px;cursor:pointer}
+.ot-range span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tx2);min-width:36px}
+.ot-upload-area{border:2px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--sf2)}
+.ot-upload-area:hover{border-color:var(--ac);background:var(--acd)}
+.ot-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ot-upload-area .icon{font-size:28px;margin-bottom:6px}
+.ot-upload-area .txt{font-size:11px;color:var(--tx2)}
+.ot-thumb{width:60px;height:80px;border-radius:6px;object-fit:cover;border:2px solid var(--gn);cursor:pointer;transition:all .15s}
+.ot-thumb:hover{border-color:var(--ac);transform:scale(1.05)}
+.ot-btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Screenshot floating button */
+.screenshot-fab{position:fixed;bottom:70px;right:24px;z-index:998;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.screenshot-fab .fab-btn{background:var(--sf);border:1px solid var(--bd);color:var(--tx2);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(0,0,0,.4);backdrop-filter:blur(8px)}
+.screenshot-fab .fab-btn:hover{background:var(--ac);color:#fff;border-color:var(--ac);transform:scale(1.08)}
+.screenshot-fab .fab-label{font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace;text-align:center;opacity:0;transition:opacity .15s;pointer-events:none}
+.screenshot-fab:hover .fab-label{opacity:1}
+
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ac);color:#fff;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
@@ -247,6 +277,61 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">QC Measurement Reference</h3><p style="color:var(--tx2);font-size:11px">Visual guide + measurement table for quality control verification</p></div>
       <div class="badge" style="font-size:11px">34 Models · 8 Sizes</div>
     </div>
+
+    <!-- ═══ OVERLAY COMPARISON TOOL ═══ -->
+    <div class="overlay-tool" id="overlayTool">
+      <h4><span style="font-size:20px">🔬</span> Silhouette Overlay — בדיקת התאמת מידות</h4>
+      <div class="ot-sub">העלי תמונה שנוצרה → תראי אותה בשכבות מעל הסילואט הטכני של המידה · שנו שקיפות וגודל הסילואט לבדיקה מדויקת</div>
+
+      <div class="overlay-ctrl" id="overlayCtrl">
+        <div class="fg"><label>בחרי מודל</label>
+          <select id="otModel" onchange="otSelectModel()"><option value="">— בחרי —</option></select>
+        </div>
+        <div class="fg"><label>מידה (אוטומטי)</label>
+          <select id="otSize" onchange="otRedraw()" disabled><option value="">—</option></select>
+        </div>
+        <div class="fg"><label>פוזה</label>
+          <select id="otPose" onchange="otLoadPoseImage()">
+            <option value="Front">Front</option><option value="45L">45L</option><option value="45R">45R</option>
+            <option value="Profile 90">Profile 90</option><option value="Back">Back</option>
+          </select>
+        </div>
+        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות תמונה</label><input type="range" id="otOpacity" min="10" max="100" value="50" oninput="otRedraw();document.getElementById('otOpVal').textContent=this.value+'%'"><span id="otOpVal">50%</span></div>
+        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="otScale" min="50" max="200" value="100" oninput="otRedraw();document.getElementById('otScVal').textContent=this.value+'%'"><span id="otScVal">100%</span></div>
+        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">מיקום Y סילואט</label><input type="range" id="otOffsetY" min="-200" max="200" value="0" oninput="otRedraw();document.getElementById('otOyVal').textContent=this.value+'px'"><span id="otOyVal">0px</span></div>
+        <div class="ot-btn-row">
+          <button class="btn btn-ac" onclick="otDownloadCanvas()">⬇️ הורד תמונה משולבת</button>
+          <button class="btn btn-ghost" onclick="otReset()">🔄 אפס</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <!-- Upload / select from poses -->
+        <div style="min-width:200px;flex:0 0 200px">
+          <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px">תמונה להשוואה</div>
+          <div class="ot-upload-area" id="otUploadArea">
+            <input type="file" accept="image/*" onchange="otHandleUpload(event)"/>
+            <div class="icon">📷</div>
+            <div class="txt">גררי תמונה או לחצי להעלאה</div>
+          </div>
+          <div id="otPoseImages" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+        </div>
+
+        <!-- Canvas overlay area -->
+        <div style="flex:1;min-width:400px">
+          <div class="overlay-canvas-wrap" id="otCanvasWrap">
+            <div class="oc-placeholder" id="otPlaceholder">
+              <div style="font-size:32px;margin-bottom:8px;opacity:.3">🔬</div>
+              <div>בחרי מודל והעלי תמונה כדי להתחיל</div>
+              <div style="font-size:10px;color:var(--tx3);margin-top:4px">התמונה שהועלתה תוצג בשקיפות מעל הסילואט הטכני</div>
+            </div>
+            <canvas id="otCanvas" width="600" height="800" style="display:none"></canvas>
+          </div>
+          <div id="otInfo" style="margin-top:8px;font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace;text-align:center"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="techIllustrations"></div>
     <div id="sizeRef"></div>
     <div id="sizeCompareChart" class="cb" style="margin-bottom:16px;padding:18px"><h4 style="margin-bottom:12px">Average Measurements by Size</h4><canvas id="cSizeCompare"></canvas></div>
@@ -257,7 +342,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <div id="fbModal"></div>
 <div class="toast" id="toast"></div>
 
+<!-- Screenshot Floating Button -->
+<div class="screenshot-fab" id="screenshotFab">
+  <div class="fab-label">הורד מסך</div>
+  <div class="fab-btn" onclick="captureScreen()" title="הורד תמונה מהמסך הנוכחי">📸</div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ╔══════════════════════════════════════════════════╗
 // ║  🔧 SUPABASE CONFIG — FILL IN YOUR CREDENTIALS  ║
@@ -961,6 +1053,391 @@ function renderDataTable(){
   document.getElementById('dataTable').innerHTML=h;
 }
 renderDataTable();
+
+// ══════════════════════════════════════════
+// ═══ SILHOUETTE OVERLAY COMPARISON TOOL ═══
+// ══════════════════════════════════════════
+let otUploadedImg=null; // Image object of uploaded photo
+let otSelectedModel=null;
+
+// Technical silhouette measurements from the spec image
+const SILHOUETTE_SPEC={
+  XS:{bust:82,waist:64,hips:90,height:160,wMin:48.6,wMax:56.3},
+  S:{bust:86,waist:68,hips:90,height:162,wMin:47.2,wMax:57.7},
+  M:{bust:88,waist:70,hips:96,height:164,wMin:51.1,wMax:61.9},
+  L:{bust:92,waist:74,hips:100,height:176,wMin:58.9,wMax:71.2},
+  XL:{bust:96,waist:76,hips:106,height:178,wMin:63.4,wMax:76.0},
+  '2XL':{bust:100,waist:80,hips:116,height:180,wMin:71.3,wMax:87.5},
+  '3XL':{bust:104,waist:94,hips:120,height:188,wMin:81.3,wMax:106.0},
+  '4XL':{bust:106,waist:103,hips:126,height:190,wMin:83.0,wMax:108.3}
+};
+
+// Initialize model dropdown
+!function(){
+  const sel=document.getElementById('otModel');
+  MD.forEach(m=>{
+    const o=document.createElement('option');
+    o.value=m.id;
+    o.textContent=`${m.nm} #${m.id} — ${m.sz} (${m.bd})`;
+    sel.appendChild(o);
+  });
+  const szSel=document.getElementById('otSize');
+  SO.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;szSel.appendChild(o)});
+}();
+
+function otSelectModel(){
+  const mid=parseInt(document.getElementById('otModel').value);
+  if(!mid){otSelectedModel=null;otRedraw();return}
+  otSelectedModel=MD.find(m=>m.id===mid);
+  if(otSelectedModel){
+    document.getElementById('otSize').value=otSelectedModel.sz;
+    otLoadPoseImages();
+    otLoadPoseImage();
+    otRedraw();
+  }
+}
+
+function otLoadPoseImages(){
+  if(!otSelectedModel)return;
+  const m=otSelectedModel;
+  let html='<div style="font-size:9px;color:var(--tx3);margin-bottom:4px;font-family:\'JetBrains Mono\',monospace">תמונות קיימות:</div>';
+  let hasAny=false;
+  allPoses.forEach(p=>{
+    const url=dbImages[m.id+'_'+p];
+    if(url){
+      hasAny=true;
+      html+=`<img src="${url}" class="ot-thumb" onclick="otUseExistingImage('${url}','${p}')" title="${p}"/>`;
+    }
+  });
+  if(!hasAny)html+='<div style="font-size:9px;color:var(--tx3)">אין תמונות עדיין</div>';
+  document.getElementById('otPoseImages').innerHTML=html;
+}
+
+function otLoadPoseImage(){
+  if(!otSelectedModel)return;
+  const pose=document.getElementById('otPose').value;
+  const url=dbImages[otSelectedModel.id+'_'+pose];
+  if(url){
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{otUploadedImg=img;otRedraw()};
+    img.onerror=()=>{};
+    img.src=url;
+  }
+}
+
+function otUseExistingImage(url,pose){
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=()=>{otUploadedImg=img;otRedraw();toast('תמונה נטענה — '+pose)};
+  img.onerror=()=>toast('שגיאה בטעינת תמונה');
+  img.src=url;
+  // Update pose selector
+  if(pose&&document.getElementById('otPose').querySelector(`option[value="${pose}"]`)){
+    document.getElementById('otPose').value=pose;
+  }
+}
+
+function otHandleUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{otUploadedImg=img;otRedraw();toast('תמונה הועלתה להשוואה')};
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function otDrawSilhouette(ctx,spec,model,cx,cy,scale){
+  // Draw a detailed technical silhouette based on spec measurements
+  const sc=scale*0.008; // scaling factor
+  const bR=spec.bust*sc;
+  const wR=spec.waist*sc;
+  const hR=spec.hips*sc;
+  const bodyH=spec.height*scale*0.0045;
+
+  const headR=10*scale/100;
+  const neckY=cy-bodyH*0.44;
+  const shoulderY=neckY+headR*1.5;
+  const bustY=neckY+bodyH*0.15;
+  const waistY=neckY+bodyH*0.32;
+  const hipY=neckY+bodyH*0.45;
+  const kneeY=neckY+bodyH*0.72;
+  const footY=neckY+bodyH;
+
+  // Semi-transparent body silhouette
+  ctx.save();
+
+  // Head
+  ctx.beginPath();
+  ctx.ellipse(cx,neckY-headR*0.4,headR*0.85,headR*1.05,0,0,Math.PI*2);
+  ctx.fillStyle='rgba(139,92,246,0.15)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(139,92,246,0.5)';
+  ctx.lineWidth=1.2;
+  ctx.stroke();
+
+  // Neck
+  ctx.beginPath();
+  ctx.moveTo(cx-headR*0.35,neckY+headR*0.5);
+  ctx.lineTo(cx+headR*0.35,neckY+headR*0.5);
+  ctx.strokeStyle='rgba(139,92,246,0.3)';
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  // Body outline using bezier curves
+  ctx.beginPath();
+  // Right side down
+  ctx.moveTo(cx,neckY+headR*0.6);
+  ctx.bezierCurveTo(cx+bR*0.3,shoulderY,cx+bR*0.9,bustY-bodyH*0.04,cx+bR,bustY);
+  ctx.bezierCurveTo(cx+bR*0.95,bustY+bodyH*0.04,cx+wR*0.6,waistY-bodyH*0.03,cx+wR,waistY);
+  ctx.bezierCurveTo(cx+wR*1.1,waistY+bodyH*0.04,cx+hR*0.85,hipY-bodyH*0.04,cx+hR,hipY);
+  // Right leg
+  ctx.bezierCurveTo(cx+hR*0.85,hipY+bodyH*0.08,cx+hR*0.5,kneeY-bodyH*0.05,cx+hR*0.35,kneeY);
+  ctx.bezierCurveTo(cx+hR*0.32,kneeY+bodyH*0.05,cx+hR*0.28,footY-bodyH*0.1,cx+hR*0.25,footY);
+  // Right foot
+  ctx.lineTo(cx+hR*0.05,footY);
+  // Inner right leg up to crotch
+  ctx.bezierCurveTo(cx+hR*0.05,footY-bodyH*0.02,cx+hR*0.08,kneeY+bodyH*0.05,cx+hR*0.08,kneeY);
+  ctx.bezierCurveTo(cx+hR*0.08,kneeY-bodyH*0.06,cx+wR*0.05,hipY+bodyH*0.12,cx,hipY+bodyH*0.15);
+  // Inner left leg down
+  ctx.bezierCurveTo(cx-wR*0.05,hipY+bodyH*0.12,cx-hR*0.08,kneeY-bodyH*0.06,cx-hR*0.08,kneeY);
+  ctx.bezierCurveTo(cx-hR*0.08,kneeY+bodyH*0.05,cx-hR*0.05,footY-bodyH*0.02,cx-hR*0.05,footY);
+  // Left foot
+  ctx.lineTo(cx-hR*0.25,footY);
+  // Left leg up
+  ctx.bezierCurveTo(cx-hR*0.28,footY-bodyH*0.1,cx-hR*0.32,kneeY+bodyH*0.05,cx-hR*0.35,kneeY);
+  ctx.bezierCurveTo(cx-hR*0.5,kneeY-bodyH*0.05,cx-hR*0.85,hipY+bodyH*0.08,cx-hR,hipY);
+  // Left side up
+  ctx.bezierCurveTo(cx-hR*0.85,hipY-bodyH*0.04,cx-wR*1.1,waistY+bodyH*0.04,cx-wR,waistY);
+  ctx.bezierCurveTo(cx-wR*0.6,waistY-bodyH*0.03,cx-bR*0.95,bustY+bodyH*0.04,cx-bR,bustY);
+  ctx.bezierCurveTo(cx-bR*0.9,bustY-bodyH*0.04,cx-bR*0.3,shoulderY,cx,neckY+headR*0.6);
+  ctx.closePath();
+
+  // Fill body
+  const grad=ctx.createLinearGradient(cx,neckY,cx,footY);
+  grad.addColorStop(0,'rgba(139,92,246,0.12)');
+  grad.addColorStop(1,'rgba(139,92,246,0.04)');
+  ctx.fillStyle=grad;
+  ctx.fill();
+  ctx.strokeStyle='rgba(139,92,246,0.55)';
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+
+  // Measurement lines (dashed)
+  ctx.setLineDash([4,3]);
+  ctx.lineWidth=1;
+
+  // Bust line
+  ctx.strokeStyle='rgba(139,92,246,0.7)';
+  ctx.beginPath();ctx.moveTo(cx-bR-15,bustY);ctx.lineTo(cx+bR+15,bustY);ctx.stroke();
+  // Waist line
+  ctx.strokeStyle='rgba(245,158,11,0.7)';
+  ctx.beginPath();ctx.moveTo(cx-wR-15,waistY);ctx.lineTo(cx+wR+15,waistY);ctx.stroke();
+  // Hips line
+  ctx.strokeStyle='rgba(244,63,94,0.7)';
+  ctx.beginPath();ctx.moveTo(cx-hR-15,hipY);ctx.lineTo(cx+hR+15,hipY);ctx.stroke();
+
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.font='bold 10px JetBrains Mono';
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(139,92,246,0.85)';ctx.fillText(`B: ${spec.bust}cm`,cx+bR+18,bustY+4);
+  ctx.fillStyle='rgba(245,158,11,0.85)';ctx.fillText(`W: ${spec.waist}cm`,cx+wR+18,waistY+4);
+  ctx.fillStyle='rgba(244,63,94,0.85)';ctx.fillText(`H: ${spec.hips}cm`,cx+hR+18,hipY+4);
+
+  // Height marker
+  ctx.strokeStyle='rgba(255,255,255,0.2)';
+  ctx.lineWidth=0.8;
+  ctx.setLineDash([2,4]);
+  ctx.beginPath();ctx.moveTo(cx+bR+50,neckY-headR*1.5);ctx.lineTo(cx+bR+50,footY);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.font='bold 11px JetBrains Mono';
+  ctx.fillText(`${spec.height}cm`,cx+bR+54,(neckY+footY)/2+4);
+
+  // Size badge
+  const szStr=document.getElementById('otSize').value||'';
+  ctx.fillStyle='rgba(139,92,246,0.9)';
+  ctx.font='bold 18px JetBrains Mono';
+  ctx.textAlign='center';
+  ctx.fillText(szStr,cx,footY+24);
+
+  // Model info if available
+  if(model){
+    ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.font='11px Outfit';
+    ctx.fillText(`${model.nm} · ${model.h}cm · B${model.bu}/W${model.wa}/H${model.hp}`,cx,footY+42);
+
+    // Draw model-specific lines in a different color for comparison
+    const mBR=model.bu*sc;const mWR=model.wa*sc;const mHR=model.hp*sc;
+    ctx.setLineDash([2,2]);
+    ctx.lineWidth=1.2;
+    ctx.strokeStyle='rgba(16,185,129,0.7)';
+    ctx.beginPath();ctx.moveTo(cx-mBR-8,bustY);ctx.lineTo(cx+mBR+8,bustY);ctx.stroke();
+    ctx.strokeStyle='rgba(16,185,129,0.6)';
+    ctx.beginPath();ctx.moveTo(cx-mWR-8,waistY);ctx.lineTo(cx+mWR+8,waistY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-mHR-8,hipY);ctx.lineTo(cx+mHR+8,hipY);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Model measurement labels (green)
+    ctx.textAlign='right';
+    ctx.fillStyle='rgba(16,185,129,0.85)';
+    ctx.font='bold 10px JetBrains Mono';
+    ctx.fillText(`B: ${model.bu}cm`,cx-bR-20,bustY+4);
+    ctx.fillText(`W: ${model.wa}cm`,cx-wR-20,waistY+4);
+    ctx.fillText(`H: ${model.hp}cm`,cx-hR-20,hipY+4);
+  }
+
+  ctx.restore();
+}
+
+function otRedraw(){
+  const canvas=document.getElementById('otCanvas');
+  const ctx=canvas.getContext('2d');
+  const sz=document.getElementById('otSize').value;
+  const spec=SILHOUETTE_SPEC[sz];
+  const opacity=parseInt(document.getElementById('otOpacity').value)/100;
+  const scale=parseInt(document.getElementById('otScale').value);
+  const offsetY=parseInt(document.getElementById('otOffsetY').value);
+
+  if(!spec&&!otUploadedImg){
+    canvas.style.display='none';
+    document.getElementById('otPlaceholder').style.display='block';
+    document.getElementById('otInfo').textContent='';
+    return;
+  }
+
+  canvas.style.display='block';
+  document.getElementById('otPlaceholder').style.display='none';
+
+  // Set canvas size
+  const cW=600,cH=800;
+  canvas.width=cW;canvas.height=cH;
+
+  // Clear
+  ctx.fillStyle='#0a0a12';
+  ctx.fillRect(0,0,cW,cH);
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.03)';
+  ctx.lineWidth=0.5;
+  for(let x=0;x<cW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cH);ctx.stroke()}
+  for(let y=0;y<cH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cW,y);ctx.stroke()}
+
+  // Center cross
+  ctx.strokeStyle='rgba(139,92,246,0.1)';
+  ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(cW/2,0);ctx.lineTo(cW/2,cH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,cH/2);ctx.lineTo(cW,cH/2);ctx.stroke();
+
+  const cx=cW/2;
+  const cy=cH*0.42+offsetY;
+
+  // Draw silhouette FIRST (under the image)
+  if(spec){
+    otDrawSilhouette(ctx,spec,otSelectedModel,cx,cy,scale);
+  }
+
+  // Draw uploaded image on top with opacity
+  if(otUploadedImg){
+    ctx.save();
+    ctx.globalAlpha=opacity;
+    // Fit image proportionally in canvas
+    const imgAR=otUploadedImg.width/otUploadedImg.height;
+    let drawW,drawH;
+    if(imgAR>cW/cH){drawW=cW*0.85;drawH=drawW/imgAR}
+    else{drawH=cH*0.9;drawW=drawH*imgAR}
+    const drawX=(cW-drawW)/2;
+    const drawY=(cH-drawH)/2;
+    ctx.drawImage(otUploadedImg,drawX,drawY,drawW,drawH);
+    ctx.restore();
+  }
+
+  // Legend
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.font='10px JetBrains Mono';
+  ctx.textAlign='left';
+  ctx.fillText('🟣 Spec (target)   🟢 Model (actual)',12,cH-12);
+
+  // Info text
+  let info='';
+  if(spec&&otSelectedModel){
+    const dB=(otSelectedModel.bu-spec.bust).toFixed(1);
+    const dW=(otSelectedModel.wa-spec.waist).toFixed(1);
+    const dH=(otSelectedModel.hp-spec.hips).toFixed(1);
+    info=`Δ Bust: ${dB>0?'+':''}${dB}cm | Δ Waist: ${dW>0?'+':''}${dW}cm | Δ Hips: ${dH>0?'+':''}${dH}cm | Scale: ${scale}% | Opacity: ${Math.round(opacity*100)}%`;
+  }
+  document.getElementById('otInfo').textContent=info;
+}
+
+function otDownloadCanvas(){
+  const canvas=document.getElementById('otCanvas');
+  if(!canvas||canvas.style.display==='none'){toast('אין תמונה להורדה');return}
+  const model=otSelectedModel;
+  const sz=document.getElementById('otSize').value;
+  const name=model?`QC_Overlay_${model.nm}_${model.id}_${sz}`:`QC_Overlay_${sz}`;
+  const a=document.createElement('a');
+  a.download=name+'.png';
+  a.href=canvas.toDataURL('image/png');
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast(`⬇️ ${name}.png`);
+}
+
+function otReset(){
+  otUploadedImg=null;
+  otSelectedModel=null;
+  document.getElementById('otModel').value='';
+  document.getElementById('otSize').value='';
+  document.getElementById('otOpacity').value=50;document.getElementById('otOpVal').textContent='50%';
+  document.getElementById('otScale').value=100;document.getElementById('otScVal').textContent='100%';
+  document.getElementById('otOffsetY').value=0;document.getElementById('otOyVal').textContent='0px';
+  document.getElementById('otPoseImages').innerHTML='';
+  document.getElementById('otCanvas').style.display='none';
+  document.getElementById('otPlaceholder').style.display='block';
+  document.getElementById('otInfo').textContent='';
+}
+
+// ══════════════════════════════
+// ═══ SCREENSHOT / DOWNLOAD ═══
+// ══════════════════════════════
+async function captureScreen(){
+  toast('📸 מכין צילום מסך...');
+  try{
+    // Find active panel
+    const activeTab=document.querySelector('.tab.active');
+    const tabName=activeTab?activeTab.dataset.tab:'dashboard';
+    const activePanel=document.querySelector('.panel.active');
+    const target=activePanel||document.querySelector('.ctr');
+
+    const canvas=await html2canvas(target,{
+      backgroundColor:'#060609',
+      scale:2,
+      useCORS:true,
+      allowTaint:true,
+      logging:false,
+      scrollX:0,
+      scrollY:-window.scrollY,
+      windowWidth:document.documentElement.scrollWidth,
+      windowHeight:document.documentElement.scrollHeight
+    });
+
+    const timestamp=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    const filename=`DataPlus_${tabName}_${timestamp}.png`;
+    const a=document.createElement('a');
+    a.download=filename;
+    a.href=canvas.toDataURL('image/png');
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    toast(`⬇️ ${filename}`);
+  }catch(e){
+    console.error('Screenshot error:',e);
+    toast('שגיאה בצילום מסך');
+  }
+}
 
 // ── BOOT ──
 async function boot(){
