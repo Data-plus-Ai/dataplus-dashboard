@@ -596,15 +596,9 @@ if (!isConnected) document.getElementById('connBanner').classList.add('show');
 let dbStatus = {};   // model_id → {assigned_to, pose_front, pose_45l, ...}
 let dbImages = {};   // "model_id_pose" → image_url
 
-// Image optimization helper — resized thumbnails via Supabase transforms
-function imgThumb(url,w){
-  if(!url)return '';
-  if(url.includes('supabase.co/storage')){
-    const sep=url.includes('?')?'&':'?';
-    return url+sep+'width='+w+'&quality=75';
-  }
-  return url;
-}let currentUser = localStorage.getItem('dpUser') || '';
+// Image helper — passthrough (Supabase free tier has no image transforms)
+function imgThumb(url,w){return url||''}
+let currentUser = localStorage.getItem('dpUser') || '';
 document.getElementById('currentUser').value = currentUser;
 
 function setUser(v) { currentUser = v; localStorage.setItem('dpUser', v); }
