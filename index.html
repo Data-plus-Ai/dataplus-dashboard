@@ -299,6 +299,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות תמונה</label><input type="range" id="otOpacity" min="10" max="100" value="50" oninput="otRedraw();document.getElementById('otOpVal').textContent=this.value+'%'"><span id="otOpVal">50%</span></div>
         <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="otScale" min="50" max="200" value="100" oninput="otRedraw();document.getElementById('otScVal').textContent=this.value+'%'"><span id="otScVal">100%</span></div>
         <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">מיקום Y סילואט</label><input type="range" id="otOffsetY" min="-200" max="200" value="0" oninput="otRedraw();document.getElementById('otOyVal').textContent=this.value+'px'"><span id="otOyVal">0px</span></div>
+        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">מיקום X סילואט</label><input type="range" id="otOffsetX" min="-200" max="200" value="0" oninput="otRedraw();document.getElementById('otOxVal').textContent=this.value+'px'"><span id="otOxVal">0px</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שכבת Body Composition</label><input type="checkbox" id="otShowBodyComp" onchange="otRedraw()" style="accent-color:var(--ac);width:16px;height:16px;cursor:pointer"></div>
+        <div class="ot-range" id="otBodyCompOpacityWrap" style="display:none"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות Body Comp</label><input type="range" id="otBodyCompOpacity" min="10" max="100" value="40" oninput="otRedraw();document.getElementById('otBcOpVal').textContent=this.value+'%'"><span id="otBcOpVal">40%</span></div>
         <div class="ot-btn-row">
           <button class="btn btn-ac" onclick="otDownloadCanvas()">⬇️ הורד תמונה משולבת</button>
           <button class="btn btn-ghost" onclick="otReset()">🔄 אפס</button>
@@ -1085,8 +1088,21 @@ const SILHOUETTE_IMAGE_URLS={
   '4XL': SIL_BASE_URL+'sil_4xl.jpg'
 };
 
+// Body Composition Guide images (second overlay layer)
+const BODY_COMP_URLS={
+  XS: SIL_BASE_URL+'body_XS.jpg',
+  S:  SIL_BASE_URL+'body_S.jpg',
+  M:  SIL_BASE_URL+'body_M.jpg',
+  L:  SIL_BASE_URL+'body_L.jpg',
+  XL: SIL_BASE_URL+'body_xl.jpg',
+  '2XL': SIL_BASE_URL+'body_2xl.jpg',
+  '3XL': SIL_BASE_URL+'body_3xl.jpg',
+  '4XL': SIL_BASE_URL+'body_4xl.jpg'
+};
+
 // Preload silhouette images
 let silImages={};
+let bodyCompImages={};
 let silImagesLoaded=0;
 !function(){
   Object.keys(SILHOUETTE_IMAGE_URLS).forEach(sz=>{
@@ -1096,6 +1112,13 @@ let silImagesLoaded=0;
     img.onerror=()=>{console.warn('Failed to load silhouette:',sz)};
     img.src=SILHOUETTE_IMAGE_URLS[sz];
     silImages[sz]=img;
+  });
+  Object.keys(BODY_COMP_URLS).forEach(sz=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{otRedraw()};
+    img.src=BODY_COMP_URLS[sz];
+    bodyCompImages[sz]=img;
   });
 }();
 
@@ -1177,7 +1200,7 @@ function otHandleUpload(e){
   reader.readAsDataURL(file);
 }
 
-function otDrawSilhouette(ctx,spec,model,sz,cW,cH,scale,offsetY){
+function otDrawSilhouette(ctx,spec,model,sz,cW,cH,scale,offsetY,offsetX){
   const silImg=silImages[sz];
   if(!silImg||!silImg.complete||!silImg.naturalWidth)return;
 
@@ -1185,7 +1208,7 @@ function otDrawSilhouette(ctx,spec,model,sz,cW,cH,scale,offsetY){
   const baseScale=scale/100;
   const imgW=silImg.naturalWidth*baseScale*1.4;
   const imgH=silImg.naturalHeight*baseScale*1.4;
-  const drawX=(cW-imgW)/2;
+  const drawX=(cW-imgW)/2+(offsetX||0);
   const drawY=(cH-imgH)/2+offsetY;
 
   // Draw the actual spec image
@@ -1242,6 +1265,12 @@ function otRedraw(){
   const opacity=parseInt(document.getElementById('otOpacity').value)/100;
   const scale=parseInt(document.getElementById('otScale').value);
   const offsetY=parseInt(document.getElementById('otOffsetY').value);
+  const offsetX=parseInt(document.getElementById('otOffsetX').value);
+  const showBodyComp=document.getElementById('otShowBodyComp').checked;
+  const bodyCompOpacity=parseInt(document.getElementById('otBodyCompOpacity').value)/100;
+
+  // Show/hide body comp opacity slider
+  document.getElementById('otBodyCompOpacityWrap').style.display=showBodyComp?'flex':'none';
 
   if(!spec&&!otUploadedImg){
     canvas.style.display='none';
@@ -1269,13 +1298,28 @@ function otRedraw(){
   ctx.beginPath();ctx.moveTo(cW/2,0);ctx.lineTo(cW/2,cH);ctx.stroke();
   ctx.beginPath();ctx.moveTo(0,cH/2);ctx.lineTo(cW,cH/2);ctx.stroke();
 
-  // Draw the SPEC SILHOUETTE IMAGE first (background)
+  // Layer 1: Body Composition Guide (if enabled)
+  if(showBodyComp&&sz&&bodyCompImages[sz]){
+    const bcImg=bodyCompImages[sz];
+    if(bcImg.complete&&bcImg.naturalWidth){
+      const baseScale=scale/100;
+      const imgW=bcImg.naturalWidth*baseScale*1.4;
+      const imgH=bcImg.naturalHeight*baseScale*1.4;
+      const drawX=(cW-imgW)/2+offsetX;
+      const drawY=(cH-imgH)/2+offsetY;
+      ctx.save();
+      ctx.globalAlpha=bodyCompOpacity;
+      ctx.drawImage(bcImg,drawX,drawY,imgW,imgH);
+      ctx.restore();
+    }
+  }
+
+  // Layer 2: Technical Spec Silhouette
   if(spec&&sz){
     const silImg=silImages[sz];
     if(silImg&&silImg.complete&&silImg.naturalWidth){
-      otDrawSilhouette(ctx,spec,otSelectedModel,sz,cW,cH,scale,offsetY);
+      otDrawSilhouette(ctx,spec,otSelectedModel,sz,cW,cH,scale,offsetY,offsetX);
     } else {
-      // Show loading text while image loads
       ctx.fillStyle='rgba(139,92,246,0.5)';
       ctx.font='14px Outfit';
       ctx.textAlign='center';
@@ -1283,7 +1327,7 @@ function otRedraw(){
     }
   }
 
-  // Draw uploaded/generated image on top with adjustable opacity
+  // Layer 3: Uploaded/generated image on top with adjustable opacity
   if(otUploadedImg){
     ctx.save();
     ctx.globalAlpha=opacity;
@@ -1300,7 +1344,7 @@ function otRedraw(){
   ctx.fillStyle='rgba(255,255,255,0.5)';
   ctx.font='10px JetBrains Mono';
   ctx.textAlign='left';
-  ctx.fillText('📐 Spec silhouette (background)   🟢 Model measurements (overlay)',12,cH-12);
+  ctx.fillText('📐 Spec silhouette'+(showBodyComp?' + Body Comp':'')+' (background)   🟢 Model measurements',12,cH-12);
 
   let info='';
   if(spec&&otSelectedModel){
@@ -1333,6 +1377,10 @@ function otReset(){
   document.getElementById('otOpacity').value=50;document.getElementById('otOpVal').textContent='50%';
   document.getElementById('otScale').value=100;document.getElementById('otScVal').textContent='100%';
   document.getElementById('otOffsetY').value=0;document.getElementById('otOyVal').textContent='0px';
+  document.getElementById('otOffsetX').value=0;document.getElementById('otOxVal').textContent='0px';
+  document.getElementById('otShowBodyComp').checked=false;
+  document.getElementById('otBodyCompOpacity').value=40;document.getElementById('otBcOpVal').textContent='40%';
+  document.getElementById('otBodyCompOpacityWrap').style.display='none';
   document.getElementById('otPoseImages').innerHTML='';
   document.getElementById('otCanvas').style.display='none';
   document.getElementById('otPlaceholder').style.display='block';
