@@ -1704,21 +1704,19 @@ function renderCanvas(){
     const frontImg=dbImages[m.id+'_Front']||'';
     // Figure height proportional to actual height
     const figH=Math.round((m.h/tallest)*figBaseH);
-    // Bottom offset to align feet at ground level
-    const bottomOffset=0;
+    // Keep a natural portrait ratio for the image frame so it does not look squeezed
+    const figW=Math.max(150, Math.round(figH*0.62));
+    const colW=figW+24;
     const heightDiff=m.h-spec.height;
     const diffColor=heightDiff>0?'var(--gn)':heightDiff<0?'var(--rs)':'var(--tx2)';
     const diffSign=heightDiff>0?'+':'';
 
-    return `<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:140px">
-      <!-- Figure with background removed effect -->
-      <div style="height:${figH}px;width:120px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:8px 8px 0 0;padding:0 6px;box-sizing:border-box">
-        ${frontImg?`<img src="${frontImg}" style="height:100%;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;display:block;mix-blend-mode:normal;filter:contrast(1.02)"/>`
-        :`<div style="height:100%;width:100%;background:linear-gradient(180deg,var(--sf2),var(--sf3));display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.2">👤</div>`}
+    return `<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:${colW}px">
+      <div style="height:${figH}px;width:${figW}px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:visible;border-radius:8px 8px 0 0;box-sizing:border-box;background:transparent">
+        ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;display:block"/>`
+        :`<div style="height:100%;width:100%;background:linear-gradient(180deg,var(--sf2),var(--sf3));display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.2;border-radius:8px 8px 0 0">👤</div>`}
       </div>
-      <!-- Ground line -->
-      <div style="width:120px;height:2px;background:${spec.color}60;border-radius:1px"></div>
-      <!-- Info: name, ID, size, height only -->
+      <div style="width:${figW}px;height:2px;background:${spec.color}60;border-radius:1px"></div>
       <div style="text-align:center;padding:6px 0;width:100%">
         <div style="font-size:11px;font-weight:800;color:${m.cl}">${m.nm}</div>
         <div style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">#${m.id} · ${m.sz}</div>
