@@ -455,15 +455,34 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 
   <!-- ═══ CASTING SHEET TAB ═══ -->
   <div id="p-casting" class="panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">📋 Casting Sheet</h3><p style="color:var(--tx2);font-size:11px">כרטיסיות דוגמניות להורדה — שם, מספר, מידות, תמונות</p></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="fg"><label>מידה</label><select id="castingSize" onchange="renderCasting()"><option value="">הכל</option></select></div>
-        <div class="fg"><label>סטטוס</label><select id="castingStatus" onchange="renderCasting()"><option value="">הכל</option><option value="has">עם תמונות</option><option value="front">יש Front</option><option value="closeup">יש Close-Up</option><option value="done">הושלם (6/6)</option></select></div>
-        <button class="btn btn-ac" onclick="downloadCasting('png')">⬇️ הורד PNG</button>
-        <button class="btn btn-ghost" onclick="downloadCasting('pdf')">📄 הורד PDF</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">📋 Casting Sheet</h3><p style="color:var(--tx2);font-size:11px">כרטיסיות דוגמניות להורדה — בחרי מה להציג ותורידי PNG או PDF</p></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ac" onclick="downloadCasting('png')">⬇️ PNG</button>
+        <button class="btn btn-ghost" onclick="downloadCasting('pdf')">📄 PDF</button>
       </div>
     </div>
+
+    <!-- Filters row -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:flex-end">
+      <div class="fg"><label>מידה</label><select id="castingSize" onchange="renderCasting()"><option value="">הכל</option></select></div>
+      <div class="fg"><label>סטטוס</label><select id="castingStatus" onchange="renderCasting()"><option value="">הכל</option><option value="has">עם תמונות</option><option value="front">יש Front</option><option value="closeup">יש Close-Up</option><option value="done">הושלם (6/6)</option></select></div>
+      <div class="fg"><label>סוג גוף</label><select id="castingBody" onchange="renderCasting()"><option value="">הכל</option><option value="regular">Regular</option><option value="curvy">Curvy</option></select></div>
+      <div class="fg"><label>אתניות</label><select id="castingEth" onchange="renderCasting()"><option value="">הכל</option><option value="caucasian">Caucasian</option><option value="black">Black</option><option value="latino">Latino</option><option value="asian">Asian</option><option value="african">African</option><option value="Mixed">Mixed</option></select></div>
+    </div>
+
+    <!-- Field toggles — what to show/hide -->
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;padding:10px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;align-items:center">
+      <span style="font-size:10px;font-weight:700;color:var(--tx2)">🔧 שדות לתצוגה:</span>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csHeight" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Height</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csWeight" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Weight</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csMeasure" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Measurements</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" id="csInseam" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Inseam</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csAttrs" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Attributes</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csPoses" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Pose thumbs</label>
+      <label style="font-size:10px;color:var(--tx);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csLogo" onchange="renderCasting()" style="accent-color:var(--ac);width:13px;height:13px"> Logo footer</label>
+    </div>
+
     <div id="castingSheet" style="background:#fff;border-radius:12px;padding:24px;color:#111"></div>
   </div>
 
@@ -1740,103 +1759,112 @@ function renderCanvas(){
 function renderCasting(){
   const sz=document.getElementById('castingSize').value;
   const status=document.getElementById('castingStatus').value;
+  const bd=document.getElementById('castingBody')?.value||'';
+  const eth=document.getElementById('castingEth')?.value||'';
+  const showHeight=document.getElementById('csHeight')?.checked!==false;
+  const showWeight=document.getElementById('csWeight')?.checked!==false;
+  const showMeasure=document.getElementById('csMeasure')?.checked!==false;
+  const showInseam=document.getElementById('csInseam')?.checked===true;
+  const showAttrs=document.getElementById('csAttrs')?.checked!==false;
+  const showPoses=document.getElementById('csPoses')?.checked!==false;
+  const showLogo=document.getElementById('csLogo')?.checked!==false;
+
   let models=[...MD];
   if(sz)models=models.filter(m=>m.sz===sz);
+  if(bd)models=models.filter(m=>m.bd===bd);
+  if(eth)models=models.filter(m=>m.eth.toLowerCase()===eth.toLowerCase());
   if(status==='has')models=models.filter(m=>allPoses.some(p=>dbImages[m.id+'_'+p]));
-  if(status==='done')models=models.filter(m=>getDoneCount(m.id)===6);
   if(status==='front')models=models.filter(m=>dbImages[m.id+'_Front']);
   if(status==='closeup')models=models.filter(m=>dbImages[m.id+'_Close-Up']);
-  models.sort((a,b)=>{const ai=SO.indexOf(a.sz),bi=SO.indexOf(b.sz);return ai!==bi?ai-bi:a.h-b.h});
+  if(status==='done')models=models.filter(m=>getDoneCount(m.id)===6);
+  models.sort((a,b)=>{const ai=SO.indexOf(a.sz),bi=SO.indexOf(b.sz);if(ai!==bi)return ai-bi;return a.h-b.h});
 
   const sheet=document.getElementById('castingSheet');
   let html=`<div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #ddd">
-    <h1 style="font-size:28px;font-weight:900;margin:0;color:#111">FY26 Casting Models - Batch 1 (${models.length} Models)</h1>
-    <p style="font-size:13px;color:#666;margin:4px 0 0">Black tank + black biker shorts | White studio | 5 poses per model</p>
+    <h1 style="font-size:26px;font-weight:900;margin:0;color:#111">FY26 Casting Models - Batch 1 (${models.length} Models)</h1>
+    <p style="font-size:12px;color:#666;margin:4px 0 0">Black tank + black biker shorts | White studio | 5 poses per model</p>
   </div>`;
 
-  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px">`;
-  models.forEach(m=>{
+  let currentSz='';
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">`;
+  models.forEach((m,idx)=>{
+    if(m.sz!==currentSz){
+      currentSz=m.sz;
+      const spec=SILHOUETTE_SPEC[m.sz]||{color:'#888',desc:''};
+      if(idx>0)html+=`<div style="grid-column:1/-1;height:1px"></div>`;
+      html+=`<div style="grid-column:1/-1;padding:6px 12px;background:${spec.color}15;border-right:3px solid ${spec.color};border-radius:4px;font-size:12px;font-weight:800;color:${spec.color}">${m.sz} — ${spec.desc||''}</div>`;
+    }
     const wt=WT[m.id]||{w:'?',d:'?'};
     const frontImg=dbImages[m.id+'_Front']||'';
     const closeupImg=dbImages[m.id+'_Close-Up']||'';
-
-    // Collect ONLY existing pose images
+    const mainImg=frontImg||closeupImg;
     const existingPoses=allPoses.filter(p=>dbImages[m.id+'_'+p]);
-    const poseImgs=existingPoses.map(p=>{
-      const url=dbImages[m.id+'_'+p];
-      return `<img src="${url}" style="width:48px;height:64px;object-fit:cover;border-radius:3px;border:1px solid #ddd" title="${p}"/>`;
-    }).join('');
-
+    const poseImgs=existingPoses.map(p=>`<img src="${dbImages[m.id+'_'+p]}" style="width:44px;height:58px;object-fit:cover;border-radius:3px;border:1px solid #ddd" title="${p}"/>`).join('');
+    let info='';
+    if(showHeight)info+=`Height: ${m.h}cm<br>`;
+    if(showWeight)info+=`Weight: ~${wt.w}kg (${wt.d})<br>`;
+    if(showMeasure)info+=`B${m.bu} / W${m.wa} / H${m.hp}cm<br>`;
+    if(showInseam&&m.ins)info+=`Inseam: ${m.ins}cm<br>`;
     html+=`<div style="background:#fafafa;border:1px solid #ddd;border-radius:8px;overflow:hidden;page-break-inside:avoid">
       <div style="display:flex;gap:10px;padding:10px">
-        <div style="width:90px;height:120px;background:#eee;border-radius:6px;overflow:hidden;flex-shrink:0">
-          ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:cover"/>`
-           :closeupImg?`<img src="${closeupImg}" style="width:100%;height:100%;object-fit:cover"/>`
-           :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc">👤</div>`}
+        <div style="width:85px;height:115px;background:#eee;border-radius:6px;overflow:hidden;flex-shrink:0">
+          ${mainImg?`<img src="${mainImg}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc">👤</div>`}
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:10px;color:#999;font-family:monospace">#${m.id} · ${m.sz}</div>
-          <div style="font-size:15px;font-weight:800;color:#222;margin:2px 0">${m.nm}</div>
-          <div style="font-size:10px;color:#555;line-height:1.5">
-            Height: ${m.h}cm<br>
-            Weight: ~${wt.w}kg (${wt.d})<br>
-            Measurements: B${m.bu} / W${m.wa} / H${m.hp}cm
-            ${m.ins?'<br>Inseam: '+m.ins+'cm':''}
-          </div>
-          <div style="font-size:9px;color:#888;margin-top:3px">${cap(m.bd)} · ${cap(m.sk)} · ${m.eth} · ${m.hr} · ${m.ey}</div>
-          <div style="font-size:8px;color:#aaa;margin-top:2px">${existingPoses.length}/${allPoses.length} poses</div>
+          <div style="font-size:9px;color:#999;font-family:monospace">#${m.id} \u00b7 ${m.sz}</div>
+          <div style="font-size:14px;font-weight:800;color:#222;margin:2px 0">${m.nm}</div>
+          ${info?`<div style="font-size:10px;color:#555;line-height:1.5">${info}</div>`:''}
+          ${showAttrs?`<div style="font-size:8px;color:#888;margin-top:2px">${cap(m.bd)} \u00b7 ${cap(m.sk)} \u00b7 ${m.eth} \u00b7 ${m.hr} \u00b7 ${m.ey}</div>`:''}
+          <div style="font-size:7px;color:#bbb;margin-top:2px">${existingPoses.length}/${allPoses.length} poses</div>
         </div>
       </div>
-      ${poseImgs?`<div style="padding:6px 10px 10px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;border-top:1px solid #eee">${poseImgs}</div>`:''}
+      ${showPoses&&poseImgs?`<div style="padding:5px 10px 8px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;border-top:1px solid #eee">${poseImgs}</div>`:''}
     </div>`;
   });
   html+=`</div>`;
-
-  html+=`<div style="text-align:right;margin-top:20px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:10px;color:#aaa">Generated ${new Date().toLocaleDateString()}</span>
-    <span style="font-size:14px;font-weight:800;color:#333">Data<span style="color:#8b5cf6">Plus</span> × Walmart</span>
-  </div>`;
-
+  if(showLogo){
+    html+=`<div style="margin-top:20px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:10px;color:#aaa">Generated ${new Date().toLocaleDateString()}</span>
+      <span style="font-size:14px;font-weight:800;color:#333">Data<span style="color:#8b5cf6">Plus</span> \u00d7 Walmart</span>
+    </div>`;
+  }
   sheet.innerHTML=html;
 }
 
 async function downloadCasting(format){
-  toast('⏳ מייצר '+format.toUpperCase()+'...');
+  toast('\u23f3 \u05de\u05d9\u05d9\u05e6\u05e8 '+format.toUpperCase()+'...');
   const el=document.getElementById('castingSheet');
-  if(!el.innerHTML){renderCasting()}
-
+  if(!el.innerHTML)renderCasting();
   try{
-    const canvas=await html2canvas(el,{
-      backgroundColor:'#ffffff',
-      scale:2,
-      useCORS:true,
-      allowTaint:true,
-      logging:false
-    });
-
+    await new Promise(r=>setTimeout(r,500));
+    const canvas=await html2canvas(el,{backgroundColor:'#ffffff',scale:2,useCORS:true,allowTaint:true,logging:false,width:el.scrollWidth,height:el.scrollHeight,windowWidth:el.scrollWidth,windowHeight:el.scrollHeight});
     const timestamp=new Date().toISOString().slice(0,10);
     const sz=document.getElementById('castingSize').value;
     const filename=`DataPlus_CastingSheet${sz?'_'+sz:''}_${timestamp}`;
-
     if(format==='png'){
-      const a=document.createElement('a');
-      a.download=filename+'.png';
-      a.href=canvas.toDataURL('image/png');
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
-      toast(`⬇️ ${filename}.png`);
-    } else if(format==='pdf'){
-      const {jsPDF}=window.jspdf;
-      const imgData=canvas.toDataURL('image/jpeg',0.95);
-      const imgW=canvas.width;const imgH=canvas.height;
-      const pdfW=imgW*0.264583;const pdfH=imgH*0.264583; // px to mm at 96dpi
-      const pdf=new jsPDF({orientation:pdfW>pdfH?'l':'p',unit:'mm',format:[pdfW,pdfH]});
-      pdf.addImage(imgData,'JPEG',0,0,pdfW,pdfH);
-      pdf.save(filename+'.pdf');
-      toast(`⬇️ ${filename}.pdf`);
+      const a=document.createElement('a');a.download=filename+'.png';a.href=canvas.toDataURL('image/png');
+      document.body.appendChild(a);a.click();document.body.removeChild(a);toast(`\u2b07\ufe0f ${filename}.png`);
+    }else if(format==='pdf'){
+      const{jsPDF}=window.jspdf;
+      const imgData=canvas.toDataURL('image/jpeg',0.92);
+      const pxToMm=0.264583;const pdfW=canvas.width*pxToMm/2;const pdfH=canvas.height*pxToMm/2;
+      const maxPageH=297;const pageW=Math.min(pdfW,210);const scaleRatio=pageW/pdfW;const scaledH=pdfH*scaleRatio;
+      if(scaledH<=maxPageH){
+        const pdf=new jsPDF({orientation:pageW>scaledH?'l':'p',unit:'mm',format:[pageW,scaledH]});
+        pdf.addImage(imgData,'JPEG',0,0,pageW,scaledH);pdf.save(filename+'.pdf');
+      }else{
+        const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+        const a4W=210;const a4H=297;const imgScaleW=a4W;const imgScaleH=(canvas.height/canvas.width)*a4W;
+        let yOff=0;let pg=0;
+        while(yOff<imgScaleH){if(pg>0)pdf.addPage();pdf.addImage(imgData,'JPEG',0,-yOff,imgScaleW,imgScaleH);yOff+=a4H;pg++}
+        pdf.save(filename+'.pdf');
+      }
+      toast(`\u2b07\ufe0f ${filename}.pdf`);
     }
-  }catch(e){
-    console.error('Export error:',e);
-    toast('שגיאה בייצוא');
+  }catch(e){console.error('Export error:',e);toast('\u05e9\u05d2\u05d9\u05d0\u05d4 \u05d1\u05d9\u05d9\u05e6\u05d5\u05d0 \u2014 '+e.message)}
+}
+
+toast('שגיאה בייצוא');
   }
 }
 
