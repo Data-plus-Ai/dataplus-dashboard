@@ -595,7 +595,16 @@ if (!isConnected) document.getElementById('connBanner').classList.add('show');
 // ── LOCAL FALLBACK STATE ──
 let dbStatus = {};   // model_id → {assigned_to, pose_front, pose_45l, ...}
 let dbImages = {};   // "model_id_pose" → image_url
-let currentUser = localStorage.getItem('dpUser') || '';
+
+// Image optimization helper — resized thumbnails via Supabase transforms
+function imgThumb(url,w){
+  if(!url)return '';
+  if(url.includes('supabase.co/storage')){
+    const sep=url.includes('?')?'&':'?';
+    return url+sep+'width='+w+'&quality=75';
+  }
+  return url;
+}let currentUser = localStorage.getItem('dpUser') || '';
 document.getElementById('currentUser').value = currentUser;
 
 function setUser(v) { currentUser = v; localStorage.setItem('dpUser', v); }
@@ -735,10 +744,10 @@ async function uploadImage(mid,pose,file){
       const path=`${mid}/${pose.replace(/ /g,'_')}.${ext}`;
       // Remove old file first (upsert can be flaky)
       await sb.storage.from(STORAGE_BUCKET).remove([path]);
-      const{data,error}=await sb.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',contentType:file.type});
+      const{data,error}=await sb.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type});
       if(error){console.error('Upload error:',error);toast('שגיאה בהעלאה: '+error.message);return}
       const{data:urlData}=sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-      const url=urlData.publicUrl+'?t='+Date.now();
+      const url=urlData.publicUrl;
       dbImages[mid+'_'+pose]=url;
       const{error:dbErr}=await sb.from('model_images').upsert({model_id:mid,pose:pose,image_url:url,uploaded_by:currentUser},{onConflict:'model_id,pose'});
       if(dbErr)console.error('DB error:',dbErr);
@@ -813,7 +822,7 @@ function openFBModal(mid,pose){
     <div class="fb-modal-overlay" onclick="if(event.target===this)closeFBModal()">
       <div class="fb-modal">
         <h4>${m.nm} — ${pose}</h4>
-        ${img?`<img class="fb-m-img" src="${img}"/>`:`<div class="fb-m-img" style="display:flex;align-items:center;justify-content:center;color:var(--tx3)">אין תמונה</div>`}
+        ${img?`<img class="fb-m-img" src="${imgThumb(img,300)}"/>`:`<div class="fb-m-img" style="display:flex;align-items:center;justify-content:center;color:var(--tx3)">אין תמונה</div>`}
         <div class="fb-m-btns">
           <div class="fb-m-btn ${curStatus==='approved'?'sel-approved':''}" id="fbBtnOk" onclick="toggleFBBtn('approved')">✅ מאושר</div>
           <div class="fb-m-btn ${curStatus==='rejected'?'sel-rejected':''}" id="fbBtnNo" onclick="toggleFBBtn('rejected')">❌ צריך תיקון</div>
@@ -853,7 +862,7 @@ function openModelPage(mid){
     const checked=st[poseDB[p]];
     return `<div style="text-align:center">
       <div class="img-slot ${img?'has-img':''} ${fbCls}" style="aspect-ratio:3/4;width:100%;border-radius:10px;font-size:10px">
-        ${img?`<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:9px"/>
+        ${img?`<img src="${imgThumb(img,400)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:9px"/>
           <div class="img-overlay" style="opacity:1;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 60%)">
             <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="saveFeedback(${m.id},'${p}','approved','');openModelPage(${m.id})" title="מאושר">✅</span>
             <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
@@ -980,7 +989,7 @@ function rGal(l){l=l||MD;document.getElementById('galleryGrid').innerHTML=l.map(
   const slots=allPoses.map(p=>{const imgKey=m.id+'_'+p;const img=dbImages[imgKey]||'';const fb=getFB(m.id,p);
     const fbCls=fb?(fb.status==='approved'?'fb-slot-ok':fb.status==='rejected'?'fb-slot-no':''):'';
     return `<div class="img-slot ${img?'has-img':''} ${fbCls}" id="slot-${imgKey}">
-      ${img?`<img src="${img}"/>
+      ${img?`<img src="${imgThumb(img,120)}" loading="lazy" decoding="async"/>
         <div class="img-overlay">
           <span class="io-btn ${fb&&fb.status==='approved'?'io-active-ok':''}" onclick="event.stopPropagation();saveFeedback(${m.id},'${p}','approved','')" title="מאושר">✅</span>
           <span class="io-btn ${fb&&fb.status==='rejected'?'io-active-no':''}" onclick="event.stopPropagation();openFBModal(${m.id},'${p}')" title="צריך תיקון">❌</span>
@@ -1233,7 +1242,7 @@ function renderLiveGallery(){
 
     html+=`<div style="background:var(--sf2);border:1px solid ${dc===6?'var(--gn)':hasAny?'var(--ac)':'var(--bd)'};border-radius:10px;overflow:hidden;transition:all .2s">
       <div style="aspect-ratio:3/4;background:var(--sf3);display:flex;align-items:center;justify-content:center;overflow:hidden">
-        ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="font-size:24px;opacity:.15">👤</div>`}
+        ${frontImg?`<img src="${imgThumb(frontImg,300)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="font-size:24px;opacity:.15">👤</div>`}
       </div>
       <div style="padding:8px;text-align:center">
         <div style="font-size:11px;font-weight:700">${m.nm}</div>
@@ -1816,15 +1825,15 @@ function renderCanvas(){
   container.innerHTML=models.map(m=>{
     const frontImg=dbImages[m.id+'_Front']||'';
     const figH=Math.max(60, Math.round((Math.min(m.h,rulerMax)/rulerMax)*usableH));
-    const figW=Math.max(118, Math.round(figH*0.62));
-    const colW=figW+26;
+    const figW=120;
+    const colW=figW+20;
     const heightDiff=m.h-spec.height;
     const diffColor=heightDiff>0?'var(--gn)':heightDiff<0?'var(--rs)':'var(--tx2)';
     const diffSign=heightDiff>0?'+':'';
 
     return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex-shrink:0;width:${colW}px;height:100%;cursor:pointer" onclick="gotoModelCard(${m.id})" title="פתחי כרטיס דוגמנית">
-      <div style="height:${figH}px;width:${figW}px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:8px 8px 0 0;box-sizing:border-box;background:transparent">
-        ${frontImg?`<img src="${frontImg}" class="canvas-model-figure" style="width:100%;height:100%"/>`
+      <div style="height:${figH}px;width:${figW}px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:8px 8px 0 0;background:transparent">
+        ${frontImg?`<img src="${imgThumb(frontImg,200)}" loading="lazy" decoding="async" style="width:auto;height:100%;max-width:${figW}px;object-fit:contain;object-position:bottom center"/>`
         :`<div style="height:100%;width:100%;background:linear-gradient(180deg,var(--sf2),var(--sf3));display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.2;border-radius:8px 8px 0 0">👤</div>`}
       </div>
       <div style="width:${figW}px;height:2px;background:${spec.color}80;border-radius:1px"></div>
