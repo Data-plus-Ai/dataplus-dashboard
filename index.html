@@ -233,7 +233,64 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 @media(max-width:600px){.ss{grid-template-columns:repeat(2,1fr)}}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card,.tc{animation:fu .3s ease both}
+/* ═══ AI STUDIO ═══ */
+.ai-key-bar{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
+.ai-canvas-wrap{border:1px solid var(--bd);border-radius:14px;background:var(--bg);overflow:auto;position:relative;height:620px}
+.ai-canvas{position:relative;width:920px;height:600px;background-image:radial-gradient(circle,var(--bd) 1px,transparent 1px);background-size:20px 20px}
+.ai-node{position:absolute;min-width:250px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:box-shadow .15s}
+.ai-node:hover{box-shadow:0 6px 24px rgba(139,92,246,.15)}
+.ai-node-wide{min-width:280px}
+.ai-node-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px 9px 0 0;font-size:11px;font-weight:700;color:#fff;cursor:grab;user-select:none}
+.ai-node-header:active{cursor:grabbing}
+.ai-node-body{padding:10px 12px}
+.ai-node-body select,.ai-node-body textarea,.ai-node-body input[type="text"],.ai-node-body input[type="password"]{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;width:100%;box-sizing:border-box}
+.ai-node-body textarea{resize:vertical;font-family:'JetBrains Mono',monospace;line-height:1.5}
+.ai-node-port{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.2);display:inline-block;cursor:crosshair;transition:all .15s}
+.ai-node-port:hover{background:rgba(255,255,255,.6);transform:scale(1.3)}
+.ai-node-port.in{margin-left:-18px}
+.ai-node-port.out{margin-right:-18px}
+.ai-prompt-preview{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-word}
+.ai-output-placeholder{text-align:center;padding:30px;color:var(--tx3);font-size:11px}
+.ai-output-img{width:100%;border-radius:8px;border:1px solid var(--bd)}
+.ai-generating{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--ac2);font-size:12px}
+.ai-generating .spinner{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-history{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:200px;overflow-y:auto}
+.ai-hist-item{background:var(--sf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.ai-hist-item:hover{border-color:var(--ac)}
+.ai-hist-item img{width:100%;aspect-ratio:3/4;object-fit:cover}
+.ai-hist-item .ai-hist-label{padding:4px 6px;font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-error{background:var(--rsd);border:1px solid var(--rs);border-radius:8px;padding:12px;color:var(--rs);font-size:11px;margin-top:8px}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+/* ═══ AI STUDIO ═══ */
+.ai-key-bar{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
+.ai-canvas-wrap{border:1px solid var(--bd);border-radius:14px;background:var(--bg);overflow:auto;position:relative;height:620px}
+.ai-canvas{position:relative;width:920px;height:600px;background-image:radial-gradient(circle,var(--bd) 1px,transparent 1px);background-size:20px 20px}
+.ai-node{position:absolute;min-width:250px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:box-shadow .15s}
+.ai-node:hover{box-shadow:0 6px 24px rgba(139,92,246,.15)}
+.ai-node-wide{min-width:280px}
+.ai-node-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px 9px 0 0;font-size:11px;font-weight:700;color:#fff;cursor:grab;user-select:none}
+.ai-node-header:active{cursor:grabbing}
+.ai-node-body{padding:10px 12px}
+.ai-node-body select,.ai-node-body textarea,.ai-node-body input[type="text"],.ai-node-body input[type="password"]{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;width:100%;box-sizing:border-box}
+.ai-node-body textarea{resize:vertical;font-family:'JetBrains Mono',monospace;line-height:1.5}
+.ai-node-port{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.2);display:inline-block;cursor:crosshair;transition:all .15s}
+.ai-node-port:hover{background:rgba(255,255,255,.6);transform:scale(1.3)}
+.ai-node-port.in{margin-left:-18px}
+.ai-node-port.out{margin-right:-18px}
+.ai-prompt-preview{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-word}
+.ai-output-placeholder{text-align:center;padding:30px;color:var(--tx3);font-size:11px}
+.ai-output-img{width:100%;border-radius:8px;border:1px solid var(--bd)}
+.ai-generating{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--ac2);font-size:12px}
+.ai-generating .spinner{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-history{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:200px;overflow-y:auto}
+.ai-hist-item{background:var(--sf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.ai-hist-item:hover{border-color:var(--ac)}
+.ai-hist-item img{width:100%;aspect-ratio:3/4;object-fit:cover}
+.ai-hist-item .ai-hist-label{padding:4px 6px;font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-error{background:var(--rsd);border:1px solid var(--rs);border-radius:8px;padding:12px;color:var(--rs);font-size:11px;margin-top:8px}
+
 </style>
 </head>
 <body>
@@ -264,6 +321,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     <button class="tab" data-tab="compare">השוואה</button>
     <button class="tab" data-tab="prompts">פרומפטים</button>
     <button class="tab" data-tab="qc">QC מידות</button>
+    <button class="tab" data-tab="canvas">📊 Canvas</button>
+    <button class="tab" data-tab="casting">📋 Casting Sheet</button>
+    <button class="tab" data-tab="aiStudio">🎨 AI Studio</button>
     <button class="tab" data-tab="table">טבלה</button>
   </div>
 
@@ -372,6 +432,111 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       <div id="qcTableSection"></div>
     </div>
   </div>
+  <!-- ═══ CANVAS TAB ═══ -->
+  <div id="p-canvas" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">📊 Canvas — Height Comparison</h3><p style="color:var(--tx2);font-size:11px">כל המודלים של מידה מסוימת עם סקאלת גובה יחסית</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="fg"><label>מידה</label><select id="canvasSize" onchange="renderCanvas()"></select></div>
+        <div class="fg"><label>סוג גוף</label><select id="canvasBody" onchange="renderCanvas()"><option value="">הכל</option><option value="regular">Regular</option><option value="curvy">Curvy</option></select></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0;background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden;min-height:500px">
+      <!-- Height scale sidebar -->
+      <div id="canvasScale" style="width:60px;background:var(--sf2);border-left:1px solid var(--bd);position:relative;flex-shrink:0"></div>
+      <!-- Models area -->
+      <div style="flex:1;overflow-x:auto;padding:16px">
+        <div id="canvasModels" style="display:flex;gap:16px;align-items:flex-end;min-height:450px"></div>
+      </div>
+    </div>
+    <!-- Profiles table below canvas -->
+    <div id="canvasTable" style="margin-top:16px"></div>
+  </div>
+
+  <!-- ═══ CASTING SHEET TAB ═══ -->
+  <div id="p-casting" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">📋 Casting Sheet</h3><p style="color:var(--tx2);font-size:11px">כרטיסיות דוגמניות להורדה — שם, מספר, מידות, תמונות</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="fg"><label>מידה</label><select id="castingSize" onchange="renderCasting()"><option value="">הכל</option></select></div>
+        <div class="fg"><label>סטטוס</label><select id="castingStatus" onchange="renderCasting()"><option value="">הכל</option><option value="has">עם תמונות</option><option value="done">הושלם (6/6)</option></select></div>
+        <button class="btn btn-ac" onclick="downloadCasting('png')">⬇️ הורד PNG</button>
+        <button class="btn btn-ghost" onclick="downloadCasting('pdf')">📄 הורד PDF</button>
+      </div>
+    </div>
+    <div id="castingSheet" style="background:#fff;border-radius:12px;padding:24px;color:#111"></div>
+  </div>
+
+  <!-- ═══ AI STUDIO TAB ═══ -->
+  <div id="p-aiStudio" class="panel">
+    <div class="ai-key-bar" id="aiKeyBar">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        <span style="font-size:18px">🔑</span>
+        <input type="password" id="aiApiKey" placeholder="Gemini API Key (לא נשמר בקובץ)" style="flex:1;min-width:200px;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px"/>
+        <button class="btn btn-ac" onclick="connectGemini()">חיבור</button>
+      </div>
+      <div id="aiConnStatus" style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">⚪ לא מחובר</div>
+    </div>
+    <div id="aiStudioMain" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">🎨 AI Fashion Model Studio</h3>
+        <p style="color:var(--tx2);font-size:11px">Node-based workflow · Gemini imagen · prompt → image</p></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" onclick="aiResetCanvas()">🗑️ נקה</button>
+          <button class="btn btn-ac" onclick="aiRunPipeline()" id="aiRunBtn">▶️ Generate</button>
+        </div>
+      </div>
+      <div class="ai-canvas-wrap">
+        <div class="ai-canvas" id="aiCanvas">
+          <div class="ai-node" id="aiNode-model" style="left:30px;top:30px" data-type="model">
+            <div class="ai-node-header" style="background:var(--ac)"><span>👤 Model Selection</span><span class="ai-node-port out" data-port="model-out"></span></div>
+            <div class="ai-node-body"><select id="aiModelSelect" onchange="aiUpdatePreview()" style="width:100%"><option value="">בחרי מודל...</option></select><div id="aiModelPreview" style="margin-top:8px;font-size:9px;color:var(--tx3)"></div></div>
+          </div>
+          <div class="ai-node" id="aiNode-specs" style="left:30px;top:230px" data-type="specs">
+            <div class="ai-node-header" style="background:var(--cy)"><span class="ai-node-port in" data-port="specs-in"></span><span>📏 Body Specs</span><span class="ai-node-port out" data-port="specs-out"></span></div>
+            <div class="ai-node-body" id="aiSpecsBody"><div style="color:var(--tx3);font-size:9px">← חברי מודל כדי לטעון</div></div>
+          </div>
+          <div class="ai-node" id="aiNode-pose" style="left:320px;top:30px" data-type="pose">
+            <div class="ai-node-header" style="background:var(--gn)"><span>🧍 Pose</span><span class="ai-node-port out" data-port="pose-out"></span></div>
+            <div class="ai-node-body"><select id="aiPoseSelect" style="width:100%"><option value="Front">Front</option><option value="45L">45° Left</option><option value="45R">45° Right</option><option value="Profile 90">Profile 90°</option><option value="Back">Back</option><option value="Close-Up">Close-Up</option></select></div>
+          </div>
+          <div class="ai-node" id="aiNode-style" style="left:320px;top:170px" data-type="style">
+            <div class="ai-node-header" style="background:var(--am)"><span>🔒 Studio Conditions (קבוע)</span><span class="ai-node-port out" data-port="style-out"></span></div>
+            <div class="ai-node-body">
+              <div style="font-size:9px;color:var(--tx2);line-height:1.7;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;direction:ltr;text-align:left">
+                <div><span style="color:var(--am);font-weight:700">BG:</span> Seamless pure white</div>
+                <div><span style="color:var(--am);font-weight:700">LIGHT:</span> Soft even, minimal shadows</div>
+                <div><span style="color:var(--am);font-weight:700">WARDROBE:</span> Black tank, biker shorts, white sneakers</div>
+                <div><span style="color:var(--am);font-weight:700">QUALITY:</span> High sharpness, realistic casting</div>
+              </div>
+              <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+                <label style="font-size:10px;color:var(--tx);font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="ai4K" checked style="accent-color:var(--ac);width:15px;height:15px"/> 4K Resolution</label>
+                <span style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">3840×5120</span>
+              </div>
+            </div>
+          </div>
+          <div class="ai-node" id="aiNode-custom" style="left:320px;top:420px" data-type="custom">
+            <div class="ai-node-header" style="background:var(--pk)"><span>✏️ Custom Prompt</span><span class="ai-node-port out" data-port="custom-out"></span></div>
+            <div class="ai-node-body"><textarea id="aiCustomPrompt" placeholder="תוספת חופשית לפרומפט (אופציונלי)..." style="width:100%;min-height:50px"></textarea></div>
+          </div>
+          <div class="ai-node" id="aiNode-prompt" style="left:620px;top:60px" data-type="prompt">
+            <div class="ai-node-header" style="background:var(--or)"><span class="ai-node-port in" data-port="prompt-in"></span><span>📝 Assembled Prompt</span><span class="ai-node-port out" data-port="prompt-out"></span></div>
+            <div class="ai-node-body"><div id="aiPromptPreview" class="ai-prompt-preview" style="max-height:220px;overflow-y:auto;font-size:9px;line-height:1.5;color:var(--tx2)">הפרומפט ייבנה אוטומטית מהנודים...</div><button class="btn btn-ghost" style="margin-top:6px;width:100%;font-size:9px" onclick="aiCopyPrompt()">📋 העתק</button></div>
+          </div>
+          <div class="ai-node ai-node-wide" id="aiNode-output" style="left:620px;top:360px" data-type="output">
+            <div class="ai-node-header" style="background:linear-gradient(135deg,var(--ac),var(--pk))"><span class="ai-node-port in" data-port="output-in"></span><span>🖼️ Generated Image</span></div>
+            <div class="ai-node-body" id="aiOutputBody"><div class="ai-output-placeholder"><div style="font-size:32px;margin-bottom:8px">🎨</div><div>לחצי Generate כדי ליצור תמונה</div></div></div>
+          </div>
+          <svg class="ai-wires" id="aiWires" style="position:absolute;inset:0;pointer-events:none;z-index:0"></svg>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">📜 היסטוריית יצירות</div>
+        <div class="ai-history" id="aiHistory"><div style="text-align:center;padding:20px;color:var(--tx3);font-size:10px">עדיין לא נוצרו תמונות</div></div>
+      </div>
+    </div>
+  </div>
+
   <div id="p-table" class="panel"><div class="tw"><table id="dataTable"></table></div></div>
 </div>
 <div id="fbModal"></div>
@@ -385,6 +550,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ╔══════════════════════════════════════════════════╗
 // ║  🔧 SUPABASE CONFIG — FILL IN YOUR CREDENTIALS  ║
@@ -1459,6 +1625,319 @@ async function captureScreen(){
   }
 }
 
+// ══════════════════════════════════════
+// ═══ CANVAS TAB — HEIGHT COMPARISON ═══
+// ══════════════════════════════════════
+!function(){
+  const sel=document.getElementById('canvasSize');
+  const cSel=document.getElementById('castingSize');
+  SO.forEach(s=>{
+    sel.appendChild(Object.assign(document.createElement('option'),{value:s,textContent:s}));
+    cSel.appendChild(Object.assign(document.createElement('option'),{value:s,textContent:s}));
+  });
+}();
+
+function renderCanvas(){
+  const sz=document.getElementById('canvasSize').value;
+  const bd=document.getElementById('canvasBody').value;
+  const spec=SILHOUETTE_SPEC[sz];
+  if(!spec)return;
+
+  let models=MD.filter(m=>m.sz===sz);
+  if(bd)models=models.filter(m=>m.bd===bd);
+  models.sort((a,b)=>a.h-b.h);
+
+  // Height scale
+  const minH=Math.max(145,Math.min(...models.map(m=>m.h))-5);
+  const maxH=Math.min(200,Math.max(...models.map(m=>m.h))+5);
+  const scaleEl=document.getElementById('canvasScale');
+  let scaleHtml='';
+  for(let h=maxH;h>=minH;h-=5){
+    const pct=((maxH-h)/(maxH-minH))*100;
+    scaleHtml+=`<div style="position:absolute;top:${pct}%;left:0;right:0;border-top:1px solid var(--bd)"><span style="position:absolute;left:4px;top:-8px;font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${h}</span></div>`;
+  }
+  scaleEl.style.background=`linear-gradient(180deg,${spec.color}15,${spec.color}05)`;
+  scaleEl.innerHTML=scaleHtml;
+
+  // Model cards positioned by height
+  const container=document.getElementById('canvasModels');
+  container.innerHTML=models.map(m=>{
+    const wt=WT[m.id]||{w:'?',d:'?'};
+    const pct=((maxH-m.h)/(maxH-minH))*100;
+    const frontImg=dbImages[m.id+'_Front']||dbImages[m.id+'_Close-Up']||'';
+    const dc=getDoneCount(m.id);
+    return `<div style="min-width:130px;max-width:150px;display:flex;flex-direction:column;align-items:center;margin-top:${pct}%" onclick="openModelPage(${m.id})">
+      <div style="background:var(--sf2);border:2px solid ${spec.color};border-radius:10px;overflow:hidden;width:130px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='${spec.color}'">
+        <div style="aspect-ratio:3/4;background:var(--sf3);display:flex;align-items:center;justify-content:center;overflow:hidden">
+          ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="font-size:28px;opacity:.15">👤</div>`}
+        </div>
+        <div style="padding:8px;text-align:center">
+          <div style="font-size:12px;font-weight:700;color:${m.cl}">${m.nm}</div>
+          <div style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">#${m.id} · ${m.h}cm · ${wt.w}kg</div>
+          <div style="font-size:8px;color:var(--tx2);margin-top:2px">B${m.bu}/W${m.wa}/H${m.hp}</div>
+          <div style="font-size:8px;color:var(--tx3);margin-top:2px">${dc}/6 poses</div>
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:${spec.color};margin-top:4px;font-family:'JetBrains Mono',monospace">${m.h}cm</div>
+    </div>`;
+  }).join('');
+
+  // Profiles table
+  const whr=m=>m.hp?(m.wa/m.hp).toFixed(2):'—';
+  document.getElementById('canvasTable').innerHTML=`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:${spec.color}">${sz} — ${models.length} Models</span>
+        <span style="font-size:10px;color:var(--tx3)">${spec.desc}</span>
+      </div>
+      <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:10px;direction:ltr;text-align:left">
+        <thead><tr style="background:var(--sf2)">
+          <th style="padding:8px;font-weight:600;color:var(--tx2);font-size:8px;text-transform:uppercase">Name</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">ID</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Body</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Height</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Weight</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Bust</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Waist</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Hips</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">W/H</th>
+          <th style="padding:8px;color:var(--tx2);font-size:8px">Trait</th>
+        </tr></thead>
+        <tbody>${models.map(m=>{const w=WT[m.id]||{w:'?'};return `<tr style="border-top:1px solid var(--bd);cursor:pointer" onclick="openModelPage(${m.id})" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
+          <td style="padding:6px 8px;font-weight:700;color:${m.cl}">${m.nm}</td>
+          <td style="padding:6px 8px;color:var(--tx3)">#${m.id}</td>
+          <td style="padding:6px 8px;color:var(--tx2)">${m.bd}</td>
+          <td style="padding:6px 8px;font-weight:600">${m.h}cm</td>
+          <td style="padding:6px 8px">${w.w}kg</td>
+          <td style="padding:6px 8px">${m.bu}</td>
+          <td style="padding:6px 8px">${m.wa}</td>
+          <td style="padding:6px 8px">${m.hp}</td>
+          <td style="padding:6px 8px">${m.hp?(m.wa/m.hp).toFixed(2):'—'}</td>
+          <td style="padding:6px 8px;font-size:9px;color:var(--tx3)">${m.tr.split(';')[0].split('—')[0].trim()}</td>
+        </tr>`}).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// ═══ CASTING SHEET — EXPORT ═══
+// ══════════════════════════════════════
+function renderCasting(){
+  const sz=document.getElementById('castingSize').value;
+  const status=document.getElementById('castingStatus').value;
+  let models=[...MD];
+  if(sz)models=models.filter(m=>m.sz===sz);
+  if(status==='has')models=models.filter(m=>allPoses.some(p=>dbImages[m.id+'_'+p]));
+  if(status==='done')models=models.filter(m=>getDoneCount(m.id)===6);
+  models.sort((a,b)=>{const ai=SO.indexOf(a.sz),bi=SO.indexOf(b.sz);return ai!==bi?ai-bi:a.h-b.h});
+
+  const sheet=document.getElementById('castingSheet');
+  let html=`<div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #ddd">
+    <h1 style="font-size:28px;font-weight:900;margin:0;color:#111">FY26 Casting Models${sz?' — Size '+sz:''}</h1>
+    <p style="font-size:13px;color:#666;margin:4px 0 0">Black tank + black biker shorts | White studio | ${models.length} Models · ${allPoses.length} poses per model</p>
+  </div>`;
+
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px">`;
+  models.forEach(m=>{
+    const wt=WT[m.id]||{w:'?',d:'?'};
+    const dc=getDoneCount(m.id);
+    const frontImg=dbImages[m.id+'_Front']||'';
+    const poseImgs=allPoses.filter(p=>p!=='Close-Up').map(p=>{
+      const url=dbImages[m.id+'_'+p];
+      return url?`<img src="${url}" style="width:48px;height:64px;object-fit:cover;border-radius:3px;border:1px solid #ddd"/>`:`<div style="width:48px;height:64px;background:#f0f0f0;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#aaa;border:1px solid #ddd">${p}</div>`;
+    }).join('');
+
+    html+=`<div style="background:#fafafa;border:1px solid #ddd;border-radius:8px;overflow:hidden;page-break-inside:avoid">
+      <div style="display:flex;gap:10px;padding:10px">
+        <div style="width:90px;height:120px;background:#eee;border-radius:6px;overflow:hidden;flex-shrink:0">
+          ${frontImg?`<img src="${frontImg}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc">👤</div>`}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;color:#999;font-family:monospace">#${m.id} · ${m.sz}</div>
+          <div style="font-size:15px;font-weight:800;color:#222;margin:2px 0">${m.nm}</div>
+          <div style="font-size:10px;color:#555;line-height:1.5">
+            Height: ${m.h}cm<br>
+            Weight: ~${wt.w}kg (${wt.d})<br>
+            Measurements: B${m.bu} / W${m.wa} / H${m.hp}cm
+            ${m.ins?'<br>Inseam: '+m.ins+'cm':''}
+          </div>
+          <div style="font-size:9px;color:#888;margin-top:3px">${cap(m.bd)} · ${cap(m.sk)} · ${m.eth} · ${m.hr} · ${m.ey}</div>
+        </div>
+      </div>
+      <div style="padding:6px 10px 10px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;border-top:1px solid #eee">${poseImgs}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // Footer
+  html+=`<div style="text-align:right;margin-top:20px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:10px;color:#aaa">Generated ${new Date().toLocaleDateString()}</span>
+    <span style="font-size:14px;font-weight:800;color:#333">Data<span style="color:#8b5cf6">Plus</span> × Walmart</span>
+  </div>`;
+
+  sheet.innerHTML=html;
+}
+
+async function downloadCasting(format){
+  toast('⏳ מייצר '+format.toUpperCase()+'...');
+  const el=document.getElementById('castingSheet');
+  if(!el.innerHTML){renderCasting()}
+
+  try{
+    const canvas=await html2canvas(el,{
+      backgroundColor:'#ffffff',
+      scale:2,
+      useCORS:true,
+      allowTaint:true,
+      logging:false
+    });
+
+    const timestamp=new Date().toISOString().slice(0,10);
+    const sz=document.getElementById('castingSize').value;
+    const filename=`DataPlus_CastingSheet${sz?'_'+sz:''}_${timestamp}`;
+
+    if(format==='png'){
+      const a=document.createElement('a');
+      a.download=filename+'.png';
+      a.href=canvas.toDataURL('image/png');
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      toast(`⬇️ ${filename}.png`);
+    } else if(format==='pdf'){
+      const {jsPDF}=window.jspdf;
+      const imgData=canvas.toDataURL('image/jpeg',0.95);
+      const imgW=canvas.width;const imgH=canvas.height;
+      const pdfW=imgW*0.264583;const pdfH=imgH*0.264583; // px to mm at 96dpi
+      const pdf=new jsPDF({orientation:pdfW>pdfH?'l':'p',unit:'mm',format:[pdfW,pdfH]});
+      pdf.addImage(imgData,'JPEG',0,0,pdfW,pdfH);
+      pdf.save(filename+'.pdf');
+      toast(`⬇️ ${filename}.pdf`);
+    }
+  }catch(e){
+    console.error('Export error:',e);
+    toast('שגיאה בייצוא');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// ═══ AI STUDIO — Gemini Image Generation ═══
+// ═══════════════════════════════════════════════════
+let aiGeminiKey=null;
+let aiHistory=[];
+
+function connectGemini(){
+  const key=document.getElementById('aiApiKey').value.trim();
+  if(!key||key.length<20){toast('מפתח API לא תקין');return}
+  aiGeminiKey=key;
+  document.getElementById('aiConnStatus').innerHTML='<span style="color:var(--gn)">🟢 מחובר ל-Gemini</span>';
+  document.getElementById('aiStudioMain').style.display='block';
+  document.getElementById('aiKeyBar').style.background='var(--sf2)';
+  const sel=document.getElementById('aiModelSelect');
+  sel.innerHTML='<option value="">בחרי מודל...</option>';
+  MD.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=`${m.nm} #${m.id} — ${m.sz} ${m.bd}`;sel.appendChild(opt)});
+  toast('מחובר ל-Gemini! 🟢');
+  aiAssemblePrompt();
+  aiDrawWires();
+}
+
+function aiUpdatePreview(){
+  const mid=parseInt(document.getElementById('aiModelSelect').value);
+  const m=MD.find(x=>x.id===mid);
+  if(!m){document.getElementById('aiModelPreview').innerHTML='';document.getElementById('aiSpecsBody').innerHTML='<div style="color:var(--tx3);font-size:9px">← בחרי מודל</div>';return}
+  const wt=WT[m.id]||{w:'?',d:'?'};const szC=SC[m.sz];
+  document.getElementById('aiModelPreview').innerHTML=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:${szC};font-weight:800;font-size:14px">${m.nm}</span><span style="background:${szC}20;color:${szC};padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700">${m.sz}</span></div><div style="font-size:9px;color:var(--tx2)">${m.h}cm · ~${wt.w}kg · ${m.bd} · ${m.sk} · ${m.eth}</div><div style="font-size:9px;color:${szC};margin-top:2px">${m.tr}</div>`;
+  document.getElementById('aiSpecsBody').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;font-family:'JetBrains Mono',monospace"><div>H: <span style="color:var(--tx)">${m.h}cm</span></div><div>W: <span style="color:var(--tx)">~${wt.w}kg</span></div><div>Bust: <span style="color:var(--tx)">${m.bu}</span></div><div>Waist: <span style="color:var(--tx)">${m.wa}</span></div><div>Hips: <span style="color:var(--tx)">${m.hp}</span></div><div>W/H: <span style="color:var(--tx)">${m.hp?(m.wa/m.hp).toFixed(2):'—'}</span></div><div>Eyes: <span style="color:var(--tx)">${m.ey}</span></div><div>Hair: <span style="color:var(--tx)">${m.hr}</span></div></div>`;
+  aiAssemblePrompt();
+}
+
+function aiAssemblePrompt(){
+  const mid=parseInt(document.getElementById('aiModelSelect')?.value);
+  const m=MD.find(x=>x.id===mid);
+  const pose=document.getElementById('aiPoseSelect')?.value||'Front';
+  const custom=document.getElementById('aiCustomPrompt')?.value||'';
+  const is4K=document.getElementById('ai4K')?.checked;
+  if(!m){document.getElementById('aiPromptPreview').textContent='בחרי מודל כדי לבנות פרומפט...';return}
+  const wt=WT[m.id]||{w:'?',d:'?'};const isCU=pose==='Close-Up';const pDesc=poseDesc[pose]||'';const res=is4K?'4K ultra high resolution (3840×5120), ':'';
+  const studioBody='Seamless pure white background. Soft even lighting, minimal shadows. Subtle grounding shadow under feet only. Full body head-to-toe, centered. Neutral perspective. High sharpness, realistic casting photography.';
+  const studioCUFixed='Seamless pure white background. Soft even beauty lighting with subtle fill. Head and shoulders framing. High sharpness, realistic casting close-up.';
+  const wardrobeBody='Black ribbed tank top with wide straps. Black fitted biker shorts. White minimal low-top sneakers, no branding. No logos, prints, accessories, jewelry, or props.';
+  const wardrobeCUFixed='Black ribbed tank top with wide straps visible at shoulders. No accessories, jewelry, or props.';
+  const consistencyFixed='6-image set (Front, 45L, 45R, Profile 90, Back, Close-Up). Model identical across all. Uniform across all models. Natural casting look, NOT editorial.';
+  let prompt=`${res}GOAL: Generate an AI fashion model inspired by this type. Do NOT copy a real person. Maintain matching general attributes.\n\nMODEL: "${m.nm}" — ${cap(m.st)} stature, ${m.bd} build, size ${m.sz}.\nEXACT MEASUREMENTS:\n  Height: ${m.h}cm\n  Weight: ${wt.w}kg (${wt.d} build)\n  Bust: ${m.bu}cm\n  Waist: ${m.wa}cm\n  Hips: ${m.hp}cm\n  Waist-to-Hip Ratio: ${m.hp?(m.wa/m.hp).toFixed(2):'—'}\n`;
+  if(m.ins)prompt+=`  Inseam: ${m.ins}cm\n`;
+  prompt+=`APPEARANCE: ${cap(m.sk)} skin, ${m.eth} ethnicity, ${m.hr} hair, ${m.ey.toLowerCase()} eyes.\nBODY NOTE: Body weight must visually match a ${wt.d} ${m.h}cm woman weighing exactly ${wt.w}kg. Proportions must reflect B${m.bu}/W${m.wa}/H${m.hp}cm precisely.\nTRAIT: ${m.tr}\n\nPOSE [${pose}]: ${pDesc}\n\nSTUDIO: ${isCU?studioCUFixed:studioBody}\n\nWARDROBE: ${isCU?wardrobeCUFixed:wardrobeBody}\n\nCONSISTENCY: ${consistencyFixed}\n`;
+  if(custom)prompt+=`\nADDITIONAL INSTRUCTIONS: ${custom}\n`;
+  document.getElementById('aiPromptPreview').textContent=prompt;
+}
+
+function aiCopyPrompt(){const t=document.getElementById('aiPromptPreview').textContent;navigator.clipboard.writeText(t).then(()=>toast('פרומפט הועתק! 📋'))}
+
+async function aiRunPipeline(){
+  if(!aiGeminiKey){toast('חברי API key קודם');return}
+  const mid=parseInt(document.getElementById('aiModelSelect')?.value);
+  if(!mid){toast('בחרי מודל קודם');return}
+  const prompt=document.getElementById('aiPromptPreview').textContent;
+  if(!prompt||prompt.includes('בחרי מודל')){toast('הפרומפט ריק');return}
+  const outBody=document.getElementById('aiOutputBody');const runBtn=document.getElementById('aiRunBtn');
+  runBtn.disabled=true;runBtn.textContent='⏳ Generating...';
+  outBody.innerHTML='<div class="ai-generating"><div class="spinner"></div>Gemini מייצר תמונה...</div>';
+  try{
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${aiGeminiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:["TEXT","IMAGE"],temperature:1,topP:0.95}})});
+    if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error?.message||`HTTP ${resp.status}`)}
+    const data=await resp.json();
+    let imageData=null;let textResp='';
+    if(data.candidates&&data.candidates[0]?.content?.parts){for(const part of data.candidates[0].content.parts){if(part.inlineData)imageData=part.inlineData;else if(part.text)textResp=part.text}}
+    if(imageData){
+      const imgSrc=`data:${imageData.mimeType};base64,${imageData.data}`;
+      const m=MD.find(x=>x.id===mid);const pose=document.getElementById('aiPoseSelect').value;
+      outBody.innerHTML=`<img class="ai-output-img" src="${imgSrc}" alt="Generated"/>${textResp?`<div style="margin-top:8px;font-size:9px;color:var(--tx3);direction:ltr;text-align:left">${textResp.substring(0,200)}</div>`:''}<div style="display:flex;gap:6px;margin-top:8px"><a href="${imgSrc}" download="${m?m.nm:'model'}_${pose}.png" class="btn btn-ghost" style="font-size:9px;text-decoration:none">💾 שמירה</a><button class="btn btn-ghost" style="font-size:9px" onclick="aiUploadToModel(${mid},'${pose}')">📤 העלאה לדשבורד</button></div>`;
+      aiHistory.unshift({img:imgSrc,model:m?.nm||'?',pose,time:new Date().toLocaleTimeString('he-IL')});
+      aiRenderHistory();
+    }else{outBody.innerHTML=`<div class="ai-error">Gemini לא החזיר תמונה. תגובה: ${textResp||'ריקה'}</div>`}
+  }catch(err){outBody.innerHTML=`<div class="ai-error">❌ שגיאה: ${err.message}</div>`}
+  finally{runBtn.disabled=false;runBtn.textContent='▶️ Generate'}
+}
+
+function aiUploadToModel(mid,pose){
+  const imgEl=document.querySelector('#aiOutputBody .ai-output-img');
+  if(!imgEl)return;
+  fetch(imgEl.src).then(r=>r.blob()).then(blob=>{const file=new File([blob],`${mid}_${pose}.png`,{type:'image/png'});uploadImage(mid,pose,file);toast(`תמונה הועלתה ל-${pose}! 📤`)});
+}
+
+function aiRenderHistory(){
+  const el=document.getElementById('aiHistory');
+  if(!aiHistory.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:10px">עדיין לא נוצרו תמונות</div>';return}
+  el.innerHTML=aiHistory.map(h=>`<div class="ai-hist-item"><img src="${h.img}" alt="${h.model}"/><div class="ai-hist-label">${h.model} · ${h.pose} · ${h.time}</div></div>`).join('');
+}
+
+function aiResetCanvas(){
+  document.getElementById('aiModelSelect').value='';document.getElementById('aiPoseSelect').value='Front';document.getElementById('aiCustomPrompt').value='';
+  document.getElementById('aiModelPreview').innerHTML='';document.getElementById('aiSpecsBody').innerHTML='<div style="color:var(--tx3);font-size:9px">← בחרי מודל</div>';
+  document.getElementById('aiOutputBody').innerHTML='<div class="ai-output-placeholder"><div style="font-size:32px;margin-bottom:8px">🎨</div><div>לחצי Generate כדי ליצור תמונה</div></div>';
+  aiAssemblePrompt();
+}
+
+function aiDrawWires(){
+  const svg=document.getElementById('aiWires');if(!svg)return;
+  const wires=[['aiNode-model','aiNode-specs','var(--cy)'],['aiNode-model','aiNode-prompt','var(--ac)'],['aiNode-pose','aiNode-prompt','var(--gn)'],['aiNode-style','aiNode-prompt','var(--am)'],['aiNode-custom','aiNode-prompt','var(--pk)'],['aiNode-prompt','aiNode-output','var(--or)']];
+  let paths='';
+  wires.forEach(([fromId,toId,color])=>{const from=document.getElementById(fromId);const to=document.getElementById(toId);if(!from||!to)return;const x1=from.offsetLeft+from.offsetWidth;const y1=from.offsetTop+from.offsetHeight/2;const x2=to.offsetLeft;const y2=to.offsetTop+to.offsetHeight/2;const midX=(x1+x2)/2;paths+=`<path d="M${x1},${y1} C${midX},${y1} ${midX},${y2} ${x2},${y2}" fill="none" stroke="${color}" stroke-width="2" stroke-opacity=".3" stroke-dasharray="6,4"/>`});
+  svg.innerHTML=paths;
+}
+
+// Auto-assemble prompt on input change
+document.addEventListener('change',e=>{if(e.target.closest('#p-aiStudio'))aiAssemblePrompt()});
+document.addEventListener('input',e=>{if(e.target.id==='aiCustomPrompt')aiAssemblePrompt()});
+
+// Draggable nodes
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.ai-node-header').forEach(header=>{
+    let isDragging=false,startX,startY,startLeft,startTop;
+    header.addEventListener('mousedown',e=>{const node=header.parentElement;isDragging=true;startX=e.clientX;startY=e.clientY;startLeft=node.offsetLeft;startTop=node.offsetTop;document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp)});
+    function onMove(e){if(!isDragging)return;const node=header.parentElement;node.style.left=(startLeft+e.clientX-startX)+'px';node.style.top=(startTop+e.clientY-startY)+'px';aiDrawWires()}
+    function onUp(){isDragging=false;document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp)}
+  });
+});
+
 // ── BOOT ──
 async function boot(){
   if(sb){
@@ -1476,6 +1955,8 @@ async function boot(){
   renderDataTable();
   subscribeRealtime();
   genPrompts();
+  renderCanvas();
+  renderCasting();
   document.getElementById('syncStatus').innerHTML=isConnected?'<span class="live-dot"></span> מחובר ב-Real-Time':'⚡ מצב מקומי';
 }
 boot();
