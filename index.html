@@ -229,7 +229,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .conn-banner.show{display:flex}
 .conn-banner .retry-btn{background:var(--rs);color:#fff;border:none;padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600}
 
-@media(max-width:900px){.cv,.cg{grid-template-columns:1fr}.ss{grid-template-columns:repeat(3,1fr)}.tg{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:900px){.cv,.cg{grid-template-columns:1fr}.ss{grid-template-columns:repeat(3,1fr)}.tg{grid-template-columns:1fr}.grid{grid-template-columns:1fr}#qcMainLayout{grid-template-columns:1fr!important}}
 @media(max-width:600px){.ss{grid-template-columns:repeat(2,1fr)}}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card,.tc{animation:fu .3s ease both}
@@ -273,72 +273,104 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   <div id="p-compare" class="panel"><div class="chdr"><span style="font-size:12px;color:var(--tx2)">בחרי 2 מגלריה ←</span><span class="ccnt" id="ccnt">0/2</span><button class="btn btn-ac" id="cbtn" disabled onclick="runCompare()">השווי</button><button class="btn btn-ghost" onclick="clearSel()">נקי</button></div><div id="cmpR"></div></div>
   <div id="p-prompts" class="panel"><p style="color:var(--tx2);margin-bottom:10px;font-size:11px">פרומפטים מלאים — 5 פוזות + Close-Up. כפתור העתקה על כל פרומפט.</p><div class="filters" style="margin-bottom:10px"><div class="fg"><label>אחראי/ת</label><select id="pmsAssign" onchange="genPrompts()"><option value="">הכל</option><option value="שלומית">שלומית</option><option value="שקד">שקד</option></select></div><div class="fg"><label>מודל</label><select id="pms" onchange="genPrompts()"><option value="all">כל המודלים</option></select></div><div class="fg"><label>סטטוס</label><select id="pmsStatus" onchange="genPrompts()"><option value="">הכל</option><option value="done">הושלם</option><option value="partial">הושלם חלקית</option><option value="none">לא התחיל</option></select></div></div><div id="pCon"></div></div>
   <div id="p-qc" class="panel">
+    <!-- QC PRO HEADER -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div><h3 style="font-size:18px;font-weight:800;margin-bottom:2px">QC Measurement Reference</h3><p style="color:var(--tx2);font-size:11px">Visual guide + measurement table for quality control verification</p></div>
-      <div class="badge" style="font-size:11px">34 Models · 8 Sizes</div>
-    </div>
-
-    <!-- ═══ OVERLAY COMPARISON TOOL ═══ -->
-    <div class="overlay-tool" id="overlayTool">
-      <h4><span style="font-size:20px">🔬</span> Silhouette Overlay — בדיקת התאמת מידות</h4>
-      <div class="ot-sub">העלי תמונה שנוצרה → תראי אותה בשכבות מעל הסילואט הטכני של המידה · שנו שקיפות וגודל הסילואט לבדיקה מדויקת</div>
-
-      <div class="overlay-ctrl" id="overlayCtrl">
-        <div class="fg"><label>בחרי מודל</label>
-          <select id="otModel" onchange="otSelectModel()"><option value="">— בחרי —</option></select>
-        </div>
-        <div class="fg"><label>מידה (אוטומטי)</label>
-          <select id="otSize" onchange="otRedraw()" disabled><option value="">—</option></select>
-        </div>
-        <div class="fg"><label>פוזה</label>
-          <select id="otPose" onchange="otLoadPoseImage()">
-            <option value="Front">Front</option><option value="45L">45L</option><option value="45R">45R</option>
-            <option value="Profile 90">Profile 90</option><option value="Back">Back</option>
-          </select>
-        </div>
-        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות תמונה</label><input type="range" id="otOpacity" min="10" max="100" value="50" oninput="otRedraw();document.getElementById('otOpVal').textContent=this.value+'%'"><span id="otOpVal">50%</span></div>
-        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="otScale" min="50" max="200" value="100" oninput="otRedraw();document.getElementById('otScVal').textContent=this.value+'%'"><span id="otScVal">100%</span></div>
-        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">מיקום Y סילואט</label><input type="range" id="otOffsetY" min="-200" max="200" value="0" oninput="otRedraw();document.getElementById('otOyVal').textContent=this.value+'px'"><span id="otOyVal">0px</span></div>
-        <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">מיקום X סילואט</label><input type="range" id="otOffsetX" min="-200" max="200" value="0" oninput="otRedraw();document.getElementById('otOxVal').textContent=this.value+'px'"><span id="otOxVal">0px</span></div>
-        <div style="display:flex;align-items:center;gap:6px"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שכבת Body Composition</label><input type="checkbox" id="otShowBodyComp" onchange="otRedraw()" style="accent-color:var(--ac);width:16px;height:16px;cursor:pointer"></div>
-        <div class="ot-range" id="otBodyCompOpacityWrap" style="display:none"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות Body Comp</label><input type="range" id="otBodyCompOpacity" min="10" max="100" value="40" oninput="otRedraw();document.getElementById('otBcOpVal').textContent=this.value+'%'"><span id="otBcOpVal">40%</span></div>
-        <div class="ot-btn-row">
-          <button class="btn btn-ac" onclick="otDownloadCanvas()">⬇️ הורד תמונה משולבת</button>
-          <button class="btn btn-ghost" onclick="otReset()">🔄 אפס</button>
-        </div>
+      <div>
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:22px">🔬</span> QC Pro — Quality Control
+        </h3>
+        <p style="color:var(--tx2);font-size:11px">Profile · Silhouette Overlay · Height Reference · Smart Measurement Check</p>
       </div>
-
-      <div style="display:flex;gap:16px;flex-wrap:wrap">
-        <!-- Upload / select from poses -->
-        <div style="min-width:200px;flex:0 0 200px">
-          <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px">תמונה להשוואה</div>
-          <div class="ot-upload-area" id="otUploadArea">
-            <input type="file" accept="image/*" onchange="otHandleUpload(event)"/>
-            <div class="icon">📷</div>
-            <div class="txt">גררי תמונה או לחצי להעלאה</div>
-          </div>
-          <div id="otPoseImages" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
-        </div>
-
-        <!-- Canvas overlay area -->
-        <div style="flex:1;min-width:400px">
-          <div class="overlay-canvas-wrap" id="otCanvasWrap">
-            <div class="oc-placeholder" id="otPlaceholder">
-              <div style="font-size:32px;margin-bottom:8px;opacity:.3">🔬</div>
-              <div>בחרי מודל — הסילואט הטכני יופיע אוטומטית</div>
-              <div style="font-size:10px;color:var(--tx3);margin-top:4px">העלי תמונה שנוצרה כדי להשוות אותה מעל הסילואט</div>
-            </div>
-            <canvas id="otCanvas" width="600" height="800" style="display:none"></canvas>
-          </div>
-          <div id="otInfo" style="margin-top:8px;font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace;text-align:center"></div>
-        </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="badge" style="font-size:11px">34 Models · 8 Sizes</div>
+        <button class="btn btn-ghost" onclick="qcToggleView()" id="qcViewBtn">📊 טבלת QC</button>
       </div>
     </div>
 
-    <div id="techIllustrations"></div>
-    <div id="sizeRef"></div>
-    <div id="sizeCompareChart" class="cb" style="margin-bottom:16px;padding:18px"><h4 style="margin-bottom:12px">Average Measurements by Size</h4><canvas id="cSizeCompare"></canvas></div>
-    <div id="qcTableSection"></div>
+    <!-- QC MODEL SELECTOR -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
+      <div class="fg"><label>בחרי מודל</label>
+        <select id="qcModel" onchange="qcSelectModel()" style="min-width:200px"><option value="">— בחרי מודל —</option></select>
+      </div>
+      <div class="fg"><label>פילטר מידה</label>
+        <select id="qcSizeFilter" onchange="qcFilterModels()"><option value="">הכל</option></select>
+      </div>
+      <div class="fg"><label>פוזה להשוואה</label>
+        <select id="qcPose" onchange="qcLoadPoseImage()">
+          <option value="Front">Front</option><option value="45L">45L</option><option value="45R">45R</option>
+          <option value="Profile 90">Profile 90</option><option value="Back">Back</option>
+        </select>
+      </div>
+      <button class="btn btn-ac" onclick="qcDownloadCanvas()" style="margin-bottom:2px">⬇️ הורד תמונה</button>
+      <button class="btn btn-ghost" onclick="qcReset()" style="margin-bottom:2px">🔄 אפס</button>
+    </div>
+
+    <!-- QC MAIN LAYOUT: 3 columns -->
+    <div id="qcMainLayout" style="display:grid;grid-template-columns:280px 1fr 300px;gap:16px;min-height:600px">
+
+      <!-- LEFT: Profile Panel -->
+      <div id="qcProfilePanel" style="background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px;overflow-y:auto;max-height:800px">
+        <div id="qcProfileContent" style="text-align:center;padding:40px 10px;color:var(--tx3)">
+          <div style="font-size:40px;opacity:.2;margin-bottom:8px">👤</div>
+          <div style="font-size:12px">בחרי מודל כדי לראות פרופיל</div>
+        </div>
+      </div>
+
+      <!-- CENTER: Overlay Canvas -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות תמונה</label><input type="range" id="qcOpacity" min="0" max="100" value="50" oninput="qcRedraw();document.getElementById('qcOpVal').textContent=this.value+'%'"><span id="qcOpVal">50%</span></div>
+          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="qcScale" min="50" max="200" value="100" oninput="qcRedraw();document.getElementById('qcScVal').textContent=this.value+'%'"><span id="qcScVal">100%</span></div>
+          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">X</label><input type="range" id="qcOffX" min="-200" max="200" value="0" oninput="qcRedraw()"></div>
+          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">Y</label><input type="range" id="qcOffY" min="-200" max="200" value="0" oninput="qcRedraw()"></div>
+          <div style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="qcShowBody" onchange="qcRedraw()" style="accent-color:var(--cy);width:14px;height:14px;cursor:pointer"><label style="font-size:9px;color:var(--tx3)">Body Comp</label></div>
+        </div>
+
+        <div class="overlay-canvas-wrap" id="qcCanvasWrap" style="flex:1">
+          <div class="oc-placeholder" id="qcPlaceholder">
+            <div style="font-size:40px;margin-bottom:8px;opacity:.2">🔬</div>
+            <div style="font-size:13px;font-weight:600">בחרי מודל — הסילואט יופיע אוטומטית</div>
+            <div style="font-size:10px;color:var(--tx3);margin-top:4px">העלי או בחרי תמונה כדי להשוות</div>
+          </div>
+          <canvas id="qcCanvas" width="600" height="800" style="display:none"></canvas>
+        </div>
+        <div id="qcCanvasInfo" style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace;text-align:center"></div>
+      </div>
+
+      <!-- RIGHT: QC Results + Height Bar + Upload -->
+      <div style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:800px">
+        <!-- Upload area -->
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px">📷 תמונה להשוואה</div>
+          <div class="ot-upload-area" id="qcUploadArea" style="padding:14px">
+            <input type="file" accept="image/*" onchange="qcHandleUpload(event)"/>
+            <div class="icon" style="font-size:20px">📷</div>
+            <div class="txt" style="font-size:10px">גררי או לחצי להעלאה</div>
+          </div>
+          <div id="qcPoseImages" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px"></div>
+        </div>
+
+        <!-- Height Reference -->
+        <div id="qcHeightRef" style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:8px">📏 Height Reference</div>
+          <div id="qcHeightBar" style="position:relative;height:200px;background:var(--sf2);border-radius:8px;border:1px solid var(--bd);overflow:hidden"></div>
+        </div>
+
+        <!-- QC Results -->
+        <div id="qcResultsPanel" style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:8px">✅ QC Check Results</div>
+          <div id="qcResultsContent" style="font-size:11px;color:var(--tx3);text-align:center;padding:20px 0">בחרי מודל</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QC TABLE VIEW (hidden by default) -->
+    <div id="qcTableView" style="display:none;margin-top:16px">
+      <div id="techIllustrations"></div>
+      <div id="sizeRef"></div>
+      <div id="sizeCompareChart" class="cb" style="margin-bottom:16px;padding:18px"><h4 style="margin-bottom:12px">Average Measurements by Size</h4><canvas id="cSizeCompare"></canvas></div>
+      <div id="qcTableSection"></div>
+    </div>
   </div>
   <div id="p-table" class="panel"><div class="tw"><table id="dataTable"></table></div></div>
 </div>
@@ -1058,333 +1090,335 @@ function renderDataTable(){
 renderDataTable();
 
 // ══════════════════════════════════════════
-// ═══ SILHOUETTE OVERLAY COMPARISON TOOL ═══
+// ═══ QC PRO — QUALITY CONTROL SYSTEM ═══
 // ══════════════════════════════════════════
-let otUploadedImg=null; // Image object of uploaded photo
-let otSelectedModel=null;
+let qcUploadedImg=null;
+let qcSelectedModel=null;
+let qcTableVisible=false;
 
-// Technical silhouette measurements from the spec image
+// Size data with CDN silhouettes + local fallback
 const SILHOUETTE_SPEC={
-  XS:{bust:82,waist:64,hips:90,height:160,wMin:48.6,wMax:56.3},
-  S:{bust:86,waist:68,hips:90,height:162,wMin:47.2,wMax:57.7},
-  M:{bust:88,waist:70,hips:96,height:164,wMin:51.1,wMax:61.9},
-  L:{bust:92,waist:74,hips:100,height:176,wMin:58.9,wMax:71.2},
-  XL:{bust:96,waist:76,hips:106,height:178,wMin:63.4,wMax:76.0},
-  '2XL':{bust:100,waist:80,hips:116,height:180,wMin:71.3,wMax:87.5},
-  '3XL':{bust:104,waist:94,hips:120,height:188,wMin:81.3,wMax:106.0},
-  '4XL':{bust:106,waist:103,hips:126,height:190,wMin:83.0,wMax:108.3}
+  XS:{bust:82,waist:64,hips:90,height:160,weight:{min:48.6,max:56.3,avg:52.5},color:'#FF6B9D',desc:'Lean, Athletic, Visible Muscle',muscle:70,fat:20},
+  S:{bust:86,waist:68,hips:90,height:162,weight:{min:47.2,max:57.7,avg:52.5},color:'#C44569',desc:'Slender, Toned, Subtle Definition',muscle:22,fat:18},
+  M:{bust:88,waist:70,hips:96,height:164,weight:{min:51.1,max:61.9,avg:56.5},color:'#A0522D',desc:'Regular, Balanced, Soft Definition',muscle:24,fat:20},
+  L:{bust:92,waist:74,hips:100,height:176,weight:{min:58.9,max:71.2,avg:65.0},color:'#D4A574',desc:'Curvy, Voluptuous, Soft Forms',muscle:22,fat:24},
+  XL:{bust:96,waist:76,hips:106,height:178,weight:{min:63.4,max:76.0,avg:69.7},color:'#E8B4A8',desc:'Plus-Size, Generous, Soft Curves',muscle:20,fat:28},
+  '2XL':{bust:100,waist:80,hips:116,height:180,weight:{min:71.3,max:87.5,avg:79.4},color:'#F0C8B8',desc:'Voluptuous, Confident, Soft Throughout',muscle:18,fat:32},
+  '3XL':{bust:104,waist:94,hips:120,height:188,weight:{min:81.3,max:106.0,avg:93.7},color:'#F5D5C8',desc:'Full-Figured, Presence, Generous Forms',muscle:16,fat:36},
+  '4XL':{bust:106,waist:103,hips:126,height:190,weight:{min:83.0,max:108.3,avg:95.7},color:'#FCDDC1',desc:'Plus-Size, Commanding, Voluptuous Curves',muscle:14,fat:40}
 };
 
-// Silhouette images loaded from repo (external files — much lighter than base64)
-const SIL_BASE_URL='./';
-const SILHOUETTE_IMAGE_URLS={
-  XS: SIL_BASE_URL+'sil_XS.jpg',
-  S:  SIL_BASE_URL+'sil_S.jpg',
-  M:  SIL_BASE_URL+'sil_M.jpg',
-  L:  SIL_BASE_URL+'sil_L.jpg',
-  XL: SIL_BASE_URL+'sil_xl.jpg',
-  '2XL': SIL_BASE_URL+'sil_2xl.jpg',
-  '3XL': SIL_BASE_URL+'sil_3xl.jpg',
-  '4XL': SIL_BASE_URL+'sil_4xl.jpg'
+// CDN silhouette URLs (primary) + local fallback
+const CDN_BASE='https://d2xsxph8kpxj0f.cloudfront.net/310519663378099405/crQZnhQhmELVKaguYtfGqx/';
+const SIL_CDN={
+  XS:CDN_BASE+'size_body_xs_clean-iZXNcAPsh8mqR8uUhxyH6R.webp',
+  S:CDN_BASE+'size_body_s_clean-9tkiBYiYW8Cvhbu6PBWpV3.webp',
+  M:CDN_BASE+'size_body_m_clean-iHWPrn4h5oXSe7oEQRWSNz.webp',
+  L:CDN_BASE+'size_body_l_clean-4GZqdKMsVwPWkbcCHgX9Xq.webp',
+  XL:CDN_BASE+'size_body_xl_clean-cb9SRuoGynwLSYMnBzyVjo.webp',
+  '2XL':CDN_BASE+'size_body_2xl_clean-KcHC6SnffPTBS5VD5ZGy5P.webp',
+  '3XL':CDN_BASE+'size_body_3xl_clean-No9EzdKfKMxaLZEjYKTWhh.webp',
+  '4XL':CDN_BASE+'size_body_4xl_clean-UyUqQ9vfoR4cLpS7hXuBNQ.webp'
 };
+const SIL_LOCAL={XS:'./sil_XS.jpg',S:'./sil_S.jpg',M:'./sil_M.jpg',L:'./sil_L.jpg',XL:'./sil_xl.jpg','2XL':'./sil_2xl.jpg','3XL':'./sil_3xl.jpg','4XL':'./sil_4xl.jpg'};
+const BODY_LOCAL={XS:'./body_XS.jpg',S:'./body_S.jpg',M:'./body_M.jpg',L:'./body_L.jpg',XL:'./body_xl.jpg','2XL':'./body_2xl.jpg','3XL':'./body_3xl.jpg','4XL':'./body_4xl.jpg'};
 
-// Body Composition Guide images (second overlay layer)
-const BODY_COMP_URLS={
-  XS: SIL_BASE_URL+'body_XS.jpg',
-  S:  SIL_BASE_URL+'body_S.jpg',
-  M:  SIL_BASE_URL+'body_M.jpg',
-  L:  SIL_BASE_URL+'body_L.jpg',
-  XL: SIL_BASE_URL+'body_xl.jpg',
-  '2XL': SIL_BASE_URL+'body_2xl.jpg',
-  '3XL': SIL_BASE_URL+'body_3xl.jpg',
-  '4XL': SIL_BASE_URL+'body_4xl.jpg'
-};
-
-// Preload silhouette images
-let silImages={};
-let bodyCompImages={};
-let silImagesLoaded=0;
+// Preload images with CDN primary, local fallback
+let silImages={},bodyCompImages={};
 !function(){
-  Object.keys(SILHOUETTE_IMAGE_URLS).forEach(sz=>{
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{silImagesLoaded++;otRedraw()};
-    img.onerror=()=>{console.warn('Failed to load silhouette:',sz)};
-    img.src=SILHOUETTE_IMAGE_URLS[sz];
+  SO.forEach(sz=>{
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>qcRedraw();
+    img.onerror=()=>{img.src=SIL_LOCAL[sz]||''};
+    img.src=SIL_CDN[sz]||SIL_LOCAL[sz]||'';
     silImages[sz]=img;
-  });
-  Object.keys(BODY_COMP_URLS).forEach(sz=>{
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{otRedraw()};
-    img.src=BODY_COMP_URLS[sz];
-    bodyCompImages[sz]=img;
+    const bc=new Image();bc.crossOrigin='anonymous';
+    bc.onload=()=>qcRedraw();
+    bc.src=BODY_LOCAL[sz]||'';
+    bodyCompImages[sz]=bc;
   });
 }();
 
-// Initialize model dropdown
+// Init QC model selector
 !function(){
-  const sel=document.getElementById('otModel');
-  MD.forEach(m=>{
-    const o=document.createElement('option');
-    o.value=m.id;
-    o.textContent=`${m.nm} #${m.id} — ${m.sz} (${m.bd})`;
-    sel.appendChild(o);
-  });
-  const szSel=document.getElementById('otSize');
-  SO.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;szSel.appendChild(o)});
+  const sel=document.getElementById('qcModel');
+  const filt=document.getElementById('qcSizeFilter');
+  SO.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;filt.appendChild(o)});
+  MD.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=`${m.nm} #${m.id} — ${m.sz} (${m.bd})`;sel.appendChild(o)});
 }();
 
-function otSelectModel(){
-  const mid=parseInt(document.getElementById('otModel').value);
-  if(!mid){otSelectedModel=null;otRedraw();return}
-  otSelectedModel=MD.find(m=>m.id===mid);
-  if(otSelectedModel){
-    document.getElementById('otSize').value=otSelectedModel.sz;
-    otLoadPoseImages();
-    otLoadPoseImage();
-    otRedraw();
+function qcFilterModels(){
+  const sz=document.getElementById('qcSizeFilter').value;
+  const sel=document.getElementById('qcModel');
+  sel.innerHTML='<option value="">— בחרי מודל —</option>';
+  const list=sz?MD.filter(m=>m.sz===sz):MD;
+  list.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=`${m.nm} #${m.id} — ${m.sz} (${m.bd})`;sel.appendChild(o)});
+}
+
+function qcToggleView(){
+  qcTableVisible=!qcTableVisible;
+  document.getElementById('qcMainLayout').style.display=qcTableVisible?'none':'grid';
+  document.getElementById('qcTableView').style.display=qcTableVisible?'block':'none';
+  document.getElementById('qcViewBtn').textContent=qcTableVisible?'🔬 תצוגת QC':'📊 טבלת QC';
+}
+
+function qcSelectModel(){
+  const mid=parseInt(document.getElementById('qcModel').value);
+  if(!mid){qcSelectedModel=null;qcRedraw();qcRenderProfile();qcRenderResults();return}
+  qcSelectedModel=MD.find(m=>m.id===mid);
+  if(qcSelectedModel){
+    qcRenderProfile();
+    qcLoadPoseImages();
+    qcLoadPoseImage();
+    qcRenderHeightBar();
+    qcRunCheck();
+    qcRedraw();
   }
 }
 
-function otLoadPoseImages(){
-  if(!otSelectedModel)return;
-  const m=otSelectedModel;
-  let html='<div style="font-size:9px;color:var(--tx3);margin-bottom:4px;font-family:\'JetBrains Mono\',monospace">תמונות קיימות:</div>';
-  let hasAny=false;
-  allPoses.forEach(p=>{
-    const url=dbImages[m.id+'_'+p];
-    if(url){
-      hasAny=true;
-      html+=`<img src="${url}" class="ot-thumb" onclick="otUseExistingImage('${url}','${p}')" title="${p}"/>`;
-    }
-  });
-  if(!hasAny)html+='<div style="font-size:9px;color:var(--tx3)">אין תמונות עדיין</div>';
-  document.getElementById('otPoseImages').innerHTML=html;
+// ── PROFILE PANEL ──
+function qcRenderProfile(){
+  const el=document.getElementById('qcProfileContent');
+  if(!qcSelectedModel){el.innerHTML='<div style="text-align:center;padding:40px 10px;color:var(--tx3)"><div style="font-size:40px;opacity:.2;margin-bottom:8px">👤</div><div style="font-size:12px">בחרי מודל</div></div>';return}
+  const m=qcSelectedModel;const wt=WT[m.id]||{w:'?',d:'?'};const spec=SILHOUETTE_SPEC[m.sz];const st=getStatus(m.id);const dc=getDoneCount(m.id);const fbc=getFBCounts(m.id);
+  const whr=m.hp?(m.wa/m.hp).toFixed(2):'—';
+  el.innerHTML=`
+    <div style="text-align:center;margin-bottom:14px">
+      <span style="display:inline-block;padding:4px 14px;border-radius:6px;font-size:13px;font-weight:800;color:#fff;background:${spec.color};font-family:'JetBrains Mono',monospace">${m.sz}</span>
+      <div style="font-size:20px;font-weight:800;margin-top:8px;color:${m.cl}">${m.nm}</div>
+      <div style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">#${m.id} · ${m.bd} · ${m.st}</div>
+      <div style="font-size:10px;color:${spec.color};margin-top:4px">${spec.desc}</div>
+      <div style="font-size:9px;color:var(--tx3);margin-top:4px">${m.tr}</div>
+    </div>
+    <div style="border-top:1px solid var(--bd);padding-top:10px;margin-bottom:10px">
+      <div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📐 Measurements</div>
+      ${qcRow('Height',m.h+'cm')}${qcRow('Weight',wt.w+'kg ('+wt.d+')')}${qcRow('Bust',m.bu+'cm')}${qcRow('Waist',m.wa+'cm')}${qcRow('Hips',m.hp+'cm')}${qcRow('Inseam',(m.ins||'—')+'cm')}${qcRow('W/H Ratio',whr)}
+    </div>
+    <div style="border-top:1px solid var(--bd);padding-top:10px;margin-bottom:10px">
+      <div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🏋️ Body Composition</div>
+      ${qcRow('Muscle',spec.muscle+'%')}${qcRow('Fat',spec.fat+'%')}
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <div style="flex:${spec.muscle};height:6px;background:var(--gn);border-radius:3px 0 0 3px"></div>
+        <div style="flex:${spec.fat};height:6px;background:var(--am);border-radius:0 3px 3px 0"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-top:2px"><span>💪 ${spec.muscle}%</span><span>${spec.fat}% 🔥</span></div>
+    </div>
+    <div style="border-top:1px solid var(--bd);padding-top:10px;margin-bottom:10px">
+      <div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">👤 Attributes</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${[m.sk,m.hr,m.eth,m.ey+' eyes',m.ag].map(a=>`<span style="background:var(--sf3);padding:2px 6px;border-radius:3px;font-size:8px;color:var(--tx2)">${a}</span>`).join('')}</div>
+    </div>
+    <div style="border-top:1px solid var(--bd);padding-top:10px">
+      <div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📊 Progress</div>
+      ${qcRow('Generated',dc+'/6')}${qcRow('Approved',fbc.approved+'')}${qcRow('Rejected',fbc.rejected+'')}${qcRow('Assigned',st.assigned_to||'—')}
+      <div style="height:4px;background:var(--sf3);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${(dc/6*100)}%;background:${dc===6?'var(--gn)':'var(--ac)'};border-radius:2px"></div></div>
+    </div>`;
 }
 
-function otLoadPoseImage(){
-  if(!otSelectedModel)return;
-  const pose=document.getElementById('otPose').value;
-  const url=dbImages[otSelectedModel.id+'_'+pose];
-  if(url){
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{otUploadedImg=img;otRedraw()};
-    img.onerror=()=>{};
-    img.src=url;
+function qcRow(label,val){return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px"><span style="color:var(--tx2)">${label}</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10px">${val}</span></div>`}
+
+// ── HEIGHT REFERENCE BAR ──
+function qcRenderHeightBar(){
+  const bar=document.getElementById('qcHeightBar');
+  if(!qcSelectedModel){bar.innerHTML='';return}
+  const m=qcSelectedModel;const spec=SILHOUETTE_SPEC[m.sz];
+  const minH=150,maxH=200,range=maxH-minH;
+  let html='';
+  // Scale markers
+  for(let h=150;h<=200;h+=10){
+    const pct=((h-minH)/range)*100;
+    html+=`<div style="position:absolute;bottom:${pct}%;left:0;right:0;height:1px;background:var(--bd)"><span style="position:absolute;right:4px;top:-7px;font-size:7px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${h}</span></div>`;
   }
+  // Spec height indicator
+  const specPct=((spec.height-minH)/range)*100;
+  html+=`<div style="position:absolute;bottom:${specPct}%;left:8px;right:8px;height:16px;border-radius:4px;background:${spec.color}40;border:1px solid ${spec.color};transform:translateY(50%)" title="Spec: ${spec.height}cm"><span style="position:absolute;left:4px;top:1px;font-size:8px;font-weight:700;color:${spec.color}">${m.sz} ${spec.height}cm</span></div>`;
+  // Model actual height
+  const modelPct=((m.h-minH)/range)*100;
+  html+=`<div style="position:absolute;bottom:${modelPct}%;left:8px;right:8px;height:16px;border-radius:4px;background:${m.cl}40;border:1px dashed ${m.cl};transform:translateY(50%)" title="Model: ${m.h}cm"><span style="position:absolute;left:4px;top:1px;font-size:8px;font-weight:700;color:${m.cl}">${m.nm} ${m.h}cm</span></div>`;
+  bar.innerHTML=html;
 }
 
-function otUseExistingImage(url,pose){
-  const img=new Image();
-  img.crossOrigin='anonymous';
-  img.onload=()=>{otUploadedImg=img;otRedraw();toast('תמונה נטענה — '+pose)};
-  img.onerror=()=>toast('שגיאה בטעינת תמונה');
+// ── SMART QC CHECK ──
+function qcRunCheck(){
+  if(!qcSelectedModel)return;
+  const m=qcSelectedModel;const spec=SILHOUETTE_SPEC[m.sz];const wt=WT[m.id]||{w:0};
+  const checks=[
+    qcCompare('Height',m.h,spec.height,'cm',5),
+    qcCompare('Bust',m.bu,spec.bust,'cm',8),
+    qcCompare('Waist',m.wa,spec.waist,'cm',8),
+    qcCompare('Hips',m.hp,spec.hips,'cm',8),
+    qcCompareRange('Weight',wt.w,spec.weight.min,spec.weight.max,'kg')
+  ];
+  qcRenderResults(checks);
+}
+
+function qcCompare(label,actual,expected,unit,tolerance){
+  const diff=actual-expected;const absDiff=Math.abs(diff);const pct=(absDiff/expected*100);
+  const status=pct<=tolerance?'match':pct<=tolerance*2?'close':'mismatch';
+  return{label,actual,expected,diff:diff.toFixed(1),pct:pct.toFixed(1),unit,status};
+}
+
+function qcCompareRange(label,actual,min,max,unit){
+  const status=actual>=min&&actual<=max?'match':(actual>=min-3&&actual<=max+3)?'close':'mismatch';
+  return{label,actual,expected:`${min}-${max}`,diff:'—',pct:'—',unit,status,isRange:true};
+}
+
+function qcRenderResults(checks){
+  const el=document.getElementById('qcResultsContent');
+  if(!checks){el.innerHTML='<div style="text-align:center;padding:20px 0;color:var(--tx3)">בחרי מודל</div>';return}
+  const icons={match:'✅',close:'⚠️',mismatch:'❌'};
+  const colors={match:'var(--gn)',close:'var(--am)',mismatch:'var(--rs)'};
+  const bgs={match:'var(--gnd)',close:'rgba(245,158,11,.1)',mismatch:'var(--rsd)'};
+  let html=checks.map(c=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;background:${bgs[c.status]};margin-bottom:4px">
+      <span style="font-size:12px">${icons[c.status]}</span>
+      <span style="font-size:10px;font-weight:600;color:${colors[c.status]};flex:1">${c.label}</span>
+      <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--tx2)">${c.actual}${c.unit}</span>
+      <span style="font-size:8px;color:var(--tx3)">vs ${c.expected}${c.unit}</span>
+    </div>`).join('');
+  // Overall status
+  const statuses=checks.map(c=>c.status);
+  const mismatches=statuses.filter(s=>s==='mismatch').length;
+  const closes=statuses.filter(s=>s==='close').length;
+  const overall=mismatches===0&&closes===0?'PERFECT ✅':mismatches===0?'CLOSE ⚠️':'NEEDS REVIEW ❌';
+  const overallColor=mismatches===0&&closes===0?'var(--gn)':mismatches===0?'var(--am)':'var(--rs)';
+  html+=`<div style="margin-top:8px;padding:8px;border-radius:6px;background:var(--sf2);text-align:center;font-size:12px;font-weight:800;color:${overallColor}">${overall}</div>`;
+  el.innerHTML=html;
+}
+
+// ── IMAGE HANDLING ──
+function qcLoadPoseImages(){
+  if(!qcSelectedModel)return;
+  const m=qcSelectedModel;
+  let html='';let hasAny=false;
+  allPoses.forEach(p=>{const url=dbImages[m.id+'_'+p];if(url){hasAny=true;html+=`<img src="${url}" class="ot-thumb" onclick="qcUseImage('${url}','${p}')" title="${p}" style="width:36px;height:48px"/>`}});
+  if(!hasAny)html='<div style="font-size:8px;color:var(--tx3)">אין תמונות</div>';
+  document.getElementById('qcPoseImages').innerHTML=html;
+}
+
+function qcLoadPoseImage(){
+  if(!qcSelectedModel)return;
+  const pose=document.getElementById('qcPose').value;
+  const url=dbImages[qcSelectedModel.id+'_'+pose];
+  if(url){const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{qcUploadedImg=img;qcRedraw()};img.src=url}
+}
+
+function qcUseImage(url,pose){
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>{qcUploadedImg=img;qcRedraw();toast('תמונה נטענה — '+pose)};
   img.src=url;
-  // Update pose selector
-  if(pose&&document.getElementById('otPose').querySelector(`option[value="${pose}"]`)){
-    document.getElementById('otPose').value=pose;
-  }
 }
 
-function otHandleUpload(e){
-  const file=e.target.files[0];
-  if(!file)return;
+function qcHandleUpload(e){
+  const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{otUploadedImg=img;otRedraw();toast('תמונה הועלתה להשוואה')};
-    img.src=ev.target.result;
-  };
+  reader.onload=ev=>{const img=new Image();img.onload=()=>{qcUploadedImg=img;qcRedraw();toast('תמונה הועלתה')};img.src=ev.target.result};
   reader.readAsDataURL(file);
 }
 
-function otDrawSilhouette(ctx,spec,model,sz,cW,cH,scale,offsetY,offsetX){
-  const silImg=silImages[sz];
-  if(!silImg||!silImg.complete||!silImg.naturalWidth)return;
-
-  // Calculate proportional size based on scale
-  const baseScale=scale/100;
-  const imgW=silImg.naturalWidth*baseScale*1.4;
-  const imgH=silImg.naturalHeight*baseScale*1.4;
-  const drawX=(cW-imgW)/2+(offsetX||0);
-  const drawY=(cH-imgH)/2+offsetY;
-
-  // Draw the actual spec image
-  ctx.save();
-  ctx.globalAlpha=0.85;
-  ctx.drawImage(silImg,drawX,drawY,imgW,imgH);
-  ctx.restore();
-
-  // If model selected, draw model-specific measurement comparison lines
-  if(model&&spec){
-    const sc=baseScale*0.008*1.4;
-    const cx=cW/2;
-    const bodyTop=drawY+imgH*0.22;
-    const bodyBot=drawY+imgH*0.88;
-    const bustY=bodyTop+(bodyBot-bodyTop)*0.22;
-    const waistY=bodyTop+(bodyBot-bodyTop)*0.36;
-    const hipY=bodyTop+(bodyBot-bodyTop)*0.50;
-
-    const mBR=model.bu*sc;const mWR=model.wa*sc;const mHR=model.hp*sc;
-
-    ctx.save();
-    ctx.setLineDash([4,3]);
-    ctx.lineWidth=2;
-
-    ctx.strokeStyle='rgba(16,185,129,0.8)';
-    ctx.beginPath();ctx.moveTo(cx-mBR,bustY);ctx.lineTo(cx+mBR,bustY);ctx.stroke();
-    ctx.strokeStyle='rgba(16,185,129,0.7)';
-    ctx.beginPath();ctx.moveTo(cx-mWR,waistY);ctx.lineTo(cx+mWR,waistY);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx-mHR,hipY);ctx.lineTo(cx+mHR,hipY);ctx.stroke();
-
-    ctx.setLineDash([]);
-
-    ctx.textAlign='left';
-    ctx.fillStyle='rgba(16,185,129,0.95)';
-    ctx.font='bold 11px JetBrains Mono';
-    ctx.fillText(`Model B: ${model.bu}cm`,cx+mBR+8,bustY+4);
-    ctx.fillText(`Model W: ${model.wa}cm`,cx+mWR+8,waistY+4);
-    ctx.fillText(`Model H: ${model.hp}cm`,cx+mHR+8,hipY+4);
-
-    ctx.fillStyle='rgba(16,185,129,0.8)';
-    ctx.font='bold 12px Outfit';
-    ctx.textAlign='center';
-    ctx.fillText(`${model.nm} #${model.id} · ${model.h}cm · ${(WT[model.id]||{w:'?'}).w}kg · B${model.bu}/W${model.wa}/H${model.hp}`,cW/2,cH-30);
-
-    ctx.restore();
-  }
-}
-
-function otRedraw(){
-  const canvas=document.getElementById('otCanvas');
+// ── CANVAS DRAWING ──
+function qcRedraw(){
+  const canvas=document.getElementById('qcCanvas');
   const ctx=canvas.getContext('2d');
-  const sz=document.getElementById('otSize').value;
+  const sz=qcSelectedModel?qcSelectedModel.sz:'';
   const spec=SILHOUETTE_SPEC[sz];
-  const opacity=parseInt(document.getElementById('otOpacity').value)/100;
-  const scale=parseInt(document.getElementById('otScale').value);
-  const offsetY=parseInt(document.getElementById('otOffsetY').value);
-  const offsetX=parseInt(document.getElementById('otOffsetX').value);
-  const showBodyComp=document.getElementById('otShowBodyComp').checked;
-  const bodyCompOpacity=parseInt(document.getElementById('otBodyCompOpacity').value)/100;
+  const opacity=parseInt(document.getElementById('qcOpacity').value)/100;
+  const scale=parseInt(document.getElementById('qcScale').value);
+  const offX=parseInt(document.getElementById('qcOffX').value);
+  const offY=parseInt(document.getElementById('qcOffY').value);
+  const showBody=document.getElementById('qcShowBody').checked;
 
-  // Show/hide body comp opacity slider
-  document.getElementById('otBodyCompOpacityWrap').style.display=showBodyComp?'flex':'none';
-
-  if(!spec&&!otUploadedImg){
+  if(!spec&&!qcUploadedImg){
     canvas.style.display='none';
-    document.getElementById('otPlaceholder').style.display='block';
-    document.getElementById('otInfo').textContent='';
+    document.getElementById('qcPlaceholder').style.display='block';
+    document.getElementById('qcCanvasInfo').textContent='';
     return;
   }
-
   canvas.style.display='block';
-  document.getElementById('otPlaceholder').style.display='none';
+  document.getElementById('qcPlaceholder').style.display='none';
 
-  const cW=600,cH=800;
-  canvas.width=cW;canvas.height=cH;
-
-  ctx.fillStyle='#0a0a12';
-  ctx.fillRect(0,0,cW,cH);
-
-  ctx.strokeStyle='rgba(255,255,255,0.03)';
-  ctx.lineWidth=0.5;
+  const cW=600,cH=800;canvas.width=cW;canvas.height=cH;
+  ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,cW,cH);
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=0.5;
   for(let x=0;x<cW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cH);ctx.stroke()}
   for(let y=0;y<cH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cW,y);ctx.stroke()}
+  // Center
+  ctx.strokeStyle='rgba(139,92,246,0.08)';ctx.beginPath();ctx.moveTo(cW/2,0);ctx.lineTo(cW/2,cH);ctx.stroke();
 
-  ctx.strokeStyle='rgba(139,92,246,0.1)';
-  ctx.lineWidth=0.5;
-  ctx.beginPath();ctx.moveTo(cW/2,0);ctx.lineTo(cW/2,cH);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,cH/2);ctx.lineTo(cW,cH/2);ctx.stroke();
+  const baseScale=scale/100;
 
-  // Layer 1: Body Composition Guide (if enabled)
-  if(showBodyComp&&sz&&bodyCompImages[sz]){
-    const bcImg=bodyCompImages[sz];
-    if(bcImg.complete&&bcImg.naturalWidth){
-      const baseScale=scale/100;
-      const imgW=bcImg.naturalWidth*baseScale*1.4;
-      const imgH=bcImg.naturalHeight*baseScale*1.4;
-      const drawX=(cW-imgW)/2+offsetX;
-      const drawY=(cH-imgH)/2+offsetY;
-      ctx.save();
-      ctx.globalAlpha=bodyCompOpacity;
-      ctx.drawImage(bcImg,drawX,drawY,imgW,imgH);
+  // Layer 1: Body Composition
+  if(showBody&&sz&&bodyCompImages[sz]&&bodyCompImages[sz].complete&&bodyCompImages[sz].naturalWidth){
+    const bc=bodyCompImages[sz];const iW=bc.naturalWidth*baseScale*1.4;const iH=bc.naturalHeight*baseScale*1.4;
+    ctx.save();ctx.globalAlpha=0.35;ctx.drawImage(bc,(cW-iW)/2+offX,(cH-iH)/2+offY,iW,iH);ctx.restore();
+  }
+
+  // Layer 2: CDN Silhouette
+  if(sz&&silImages[sz]&&silImages[sz].complete&&silImages[sz].naturalWidth){
+    const si=silImages[sz];const iW=si.naturalWidth*baseScale*1.4;const iH=si.naturalHeight*baseScale*1.4;
+    ctx.save();ctx.globalAlpha=0.8;ctx.drawImage(si,(cW-iW)/2+offX,(cH-iH)/2+offY,iW,iH);ctx.restore();
+    // Model measurement lines
+    if(qcSelectedModel&&spec){
+      const m=qcSelectedModel;const sc=baseScale*0.008*1.4;const cx=cW/2+offX;
+      const drawY=(cH-iH)/2+offY;const bTop=drawY+iH*0.22;const bBot=drawY+iH*0.88;
+      const bustY=bTop+(bBot-bTop)*0.22;const waistY=bTop+(bBot-bTop)*0.36;const hipY=bTop+(bBot-bTop)*0.50;
+      const mBR=m.bu*sc;const mWR=m.wa*sc;const mHR=m.hp*sc;
+      ctx.save();ctx.setLineDash([4,3]);ctx.lineWidth=2;ctx.strokeStyle='rgba(16,185,129,0.8)';
+      ctx.beginPath();ctx.moveTo(cx-mBR,bustY);ctx.lineTo(cx+mBR,bustY);ctx.stroke();
+      ctx.strokeStyle='rgba(16,185,129,0.7)';
+      ctx.beginPath();ctx.moveTo(cx-mWR,waistY);ctx.lineTo(cx+mWR,waistY);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cx-mHR,hipY);ctx.lineTo(cx+mHR,hipY);ctx.stroke();
+      ctx.setLineDash([]);ctx.textAlign='left';ctx.fillStyle='rgba(16,185,129,0.9)';ctx.font='bold 10px JetBrains Mono';
+      ctx.fillText(`B:${m.bu}`,cx+mBR+6,bustY+3);ctx.fillText(`W:${m.wa}`,cx+mWR+6,waistY+3);ctx.fillText(`H:${m.hp}`,cx+mHR+6,hipY+3);
+      ctx.fillStyle='rgba(16,185,129,0.7)';ctx.font='bold 11px Outfit';ctx.textAlign='center';
+      ctx.fillText(`${m.nm} · ${m.h}cm · ${(WT[m.id]||{w:'?'}).w}kg`,cW/2,cH-28);
       ctx.restore();
     }
+  } else if(spec){
+    ctx.fillStyle='rgba(139,92,246,0.5)';ctx.font='14px Outfit';ctx.textAlign='center';ctx.fillText('⏳ טוען סילואט '+sz+'...',cW/2,cH/2);
   }
 
-  // Layer 2: Technical Spec Silhouette
-  if(spec&&sz){
-    const silImg=silImages[sz];
-    if(silImg&&silImg.complete&&silImg.naturalWidth){
-      otDrawSilhouette(ctx,spec,otSelectedModel,sz,cW,cH,scale,offsetY,offsetX);
-    } else {
-      ctx.fillStyle='rgba(139,92,246,0.5)';
-      ctx.font='14px Outfit';
-      ctx.textAlign='center';
-      ctx.fillText('⏳ טוען סילואט '+sz+'...',cW/2,cH/2);
-    }
+  // Layer 3: Generated image
+  if(qcUploadedImg){
+    ctx.save();ctx.globalAlpha=opacity;
+    const ar=qcUploadedImg.width/qcUploadedImg.height;let dW,dH;
+    if(ar>cW/cH){dW=cW*0.85;dH=dW/ar}else{dH=cH*0.9;dW=dH*ar}
+    ctx.drawImage(qcUploadedImg,(cW-dW)/2,(cH-dH)/2,dW,dH);ctx.restore();
   }
 
-  // Layer 3: Uploaded/generated image on top with adjustable opacity
-  if(otUploadedImg){
-    ctx.save();
-    ctx.globalAlpha=opacity;
-    const imgAR=otUploadedImg.width/otUploadedImg.height;
-    let drawW,drawH;
-    if(imgAR>cW/cH){drawW=cW*0.85;drawH=drawW/imgAR}
-    else{drawH=cH*0.9;drawW=drawH*imgAR}
-    const drawX=(cW-drawW)/2;
-    const drawY=(cH-drawH)/2;
-    ctx.drawImage(otUploadedImg,drawX,drawY,drawW,drawH);
-    ctx.restore();
-  }
+  // Legend
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='9px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText('📐 Silhouette'+(showBody?' + Body Comp':'')+' | 🟢 Model meas. | 📷 Generated image',8,cH-10);
 
-  ctx.fillStyle='rgba(255,255,255,0.5)';
-  ctx.font='10px JetBrains Mono';
-  ctx.textAlign='left';
-  ctx.fillText('📐 Spec silhouette'+(showBodyComp?' + Body Comp':'')+' (background)   🟢 Model measurements',12,cH-12);
-
+  // Info
   let info='';
-  if(spec&&otSelectedModel){
-    const dB=(otSelectedModel.bu-spec.bust).toFixed(1);
-    const dW=(otSelectedModel.wa-spec.waist).toFixed(1);
-    const dH=(otSelectedModel.hp-spec.hips).toFixed(1);
-    info=`Δ Bust: ${dB>0?'+':''}${dB}cm | Δ Waist: ${dW>0?'+':''}${dW}cm | Δ Hips: ${dH>0?'+':''}${dH}cm | Scale: ${scale}% | Opacity: ${Math.round(opacity*100)}%`;
+  if(spec&&qcSelectedModel){
+    const dB=(qcSelectedModel.bu-spec.bust).toFixed(1);const dW=(qcSelectedModel.wa-spec.waist).toFixed(1);const dH=(qcSelectedModel.hp-spec.hips).toFixed(1);
+    info=`Δ B:${dB>0?'+':''}${dB} | Δ W:${dW>0?'+':''}${dW} | Δ H:${dH>0?'+':''}${dH} | Scale:${scale}% | Opacity:${Math.round(opacity*100)}%`;
   }
-  document.getElementById('otInfo').textContent=info;
+  document.getElementById('qcCanvasInfo').textContent=info;
 }
 
-function otDownloadCanvas(){
-  const canvas=document.getElementById('otCanvas');
-  if(!canvas||canvas.style.display==='none'){toast('אין תמונה להורדה');return}
-  const model=otSelectedModel;
-  const sz=document.getElementById('otSize').value;
-  const name=model?`QC_Overlay_${model.nm}_${model.id}_${sz}`:`QC_Overlay_${sz}`;
-  const a=document.createElement('a');
-  a.download=name+'.png';
-  a.href=canvas.toDataURL('image/png');
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  toast(`⬇️ ${name}.png`);
+function qcDownloadCanvas(){
+  const canvas=document.getElementById('qcCanvas');
+  if(!canvas||canvas.style.display==='none'){toast('אין תמונה');return}
+  const m=qcSelectedModel;const name=m?`QC_${m.nm}_${m.id}_${m.sz}`:'QC_Export';
+  const a=document.createElement('a');a.download=name+'.png';a.href=canvas.toDataURL('image/png');
+  document.body.appendChild(a);a.click();document.body.removeChild(a);toast(`⬇️ ${name}.png`);
 }
 
-function otReset(){
-  otUploadedImg=null;
-  otSelectedModel=null;
-  document.getElementById('otModel').value='';
-  document.getElementById('otSize').value='';
-  document.getElementById('otOpacity').value=50;document.getElementById('otOpVal').textContent='50%';
-  document.getElementById('otScale').value=100;document.getElementById('otScVal').textContent='100%';
-  document.getElementById('otOffsetY').value=0;document.getElementById('otOyVal').textContent='0px';
-  document.getElementById('otOffsetX').value=0;document.getElementById('otOxVal').textContent='0px';
-  document.getElementById('otShowBodyComp').checked=false;
-  document.getElementById('otBodyCompOpacity').value=40;document.getElementById('otBcOpVal').textContent='40%';
-  document.getElementById('otBodyCompOpacityWrap').style.display='none';
-  document.getElementById('otPoseImages').innerHTML='';
-  document.getElementById('otCanvas').style.display='none';
-  document.getElementById('otPlaceholder').style.display='block';
-  document.getElementById('otInfo').textContent='';
+function qcReset(){
+  qcUploadedImg=null;qcSelectedModel=null;
+  document.getElementById('qcModel').value='';
+  document.getElementById('qcOpacity').value=50;document.getElementById('qcOpVal').textContent='50%';
+  document.getElementById('qcScale').value=100;document.getElementById('qcScVal').textContent='100%';
+  document.getElementById('qcOffX').value=0;document.getElementById('qcOffY').value=0;
+  document.getElementById('qcShowBody').checked=false;
+  document.getElementById('qcPoseImages').innerHTML='';
+  document.getElementById('qcCanvas').style.display='none';
+  document.getElementById('qcPlaceholder').style.display='block';
+  document.getElementById('qcCanvasInfo').textContent='';
+  qcRenderProfile();qcRenderResults();qcRenderHeightBar();
 }
 
 // ══════════════════════════════
