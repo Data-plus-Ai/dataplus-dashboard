@@ -1777,35 +1777,41 @@ function renderCasting(){
   if(status==='done')models=models.filter(m=>getDoneCount(m.id)===6);
   models.sort((a,b)=>{const ai=SO.indexOf(a.sz),bi=SO.indexOf(b.sz);if(ai!==bi)return ai-bi;return a.h-b.h});
 
-  const grouped=[];
-  let currentSz='';
-  models.forEach(m=>{
-    if(m.sz!==currentSz){
-      currentSz=m.sz;
-      const spec=SILHOUETTE_SPEC[m.sz]||{color:'#888',desc:''};
-      grouped.push({type:'header',sz:m.sz,spec});
-    }
-    grouped.push({type:'card',model:m});
-  });
+  const groups=SO.map(size=>{
+    const list=models.filter(m=>m.sz===size);
+    return {size,list,spec:SILHOUETTE_SPEC[size]||{color:'#888',desc:''}};
+  }).filter(g=>g.list.length);
 
+  const CARDS_PER_PAGE=6;
+  const MIN_CARDS_AFTER_HEADER=2;
   const pages=[];
-  let page=[];
-  let units=0;
-  const MAX_UNITS=10;
-  grouped.forEach((item,idx)=>{
-    const next=grouped[idx+1];
-    const cost=item.type==='header'?1:2;
-    const needsPair=item.type==='header' && next && next.type==='card';
-    const pairCost=needsPair?3:cost;
-    if(page.length && units + (item.type==='header'?pairCost:cost) > MAX_UNITS){
-      pages.push(page);
-      page=[];
-      units=0;
+  let pageSections=[];
+  let cardsUsed=0;
+
+  function pushPage(){
+    if(pageSections.length){
+      pages.push(pageSections);
+      pageSections=[];
+      cardsUsed=0;
     }
-    page.push(item);
-    units+=cost;
+  }
+
+  groups.forEach(group=>{
+    let index=0;
+    while(index<group.list.length){
+      let slots=CARDS_PER_PAGE-cardsUsed;
+      if(cardsUsed>0 && slots<MIN_CARDS_AFTER_HEADER){
+        pushPage();
+        slots=CARDS_PER_PAGE;
+      }
+      const take=Math.min(group.list.length-index, slots);
+      pageSections.push({header:{sz:group.size,spec:group.spec,count:group.list.length},cards:group.list.slice(index,index+take)});
+      cardsUsed+=take;
+      index+=take;
+      if(cardsUsed>=CARDS_PER_PAGE) pushPage();
+    }
   });
-  if(page.length)pages.push(page);
+  pushPage();
 
   const buildCard=(m)=>{
     const wt=WT[m.id]||{w:'?',d:'?'};
@@ -1813,47 +1819,51 @@ function renderCasting(){
     const closeupImg=dbImages[m.id+'_Close-Up']||'';
     const mainImg=frontImg||closeupImg;
     const existingPoses=allPoses.filter(p=>dbImages[m.id+'_'+p]);
-    const poseImgs=existingPoses.map(p=>`<div style="width:56px;height:56px;border-radius:6px;overflow:hidden;border:1px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${dbImages[m.id+'_'+p]}" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block" title="${p}"/></div>`).join('');
+    const poseImgs=existingPoses.map(p=>`<div style="width:40px;height:58px;border-radius:7px;overflow:hidden;border:1px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${dbImages[m.id+'_'+p]}" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block" title="${p}"/></div>`).join('');
     let info='';
     if(showHeight)info+=`Height: ${m.h}cm<br>`;
     if(showWeight)info+=`Weight: ~${wt.w}kg (${wt.d})<br>`;
     if(showMeasure)info+=`B${m.bu} / W${m.wa} / H${m.hp}cm<br>`;
     if(showInseam&&m.ins)info+=`Inseam: ${m.ins}cm<br>`;
 
-    return `<div style="background:#fafafa;border:1px solid #ddd;border-radius:10px;overflow:hidden;break-inside:avoid;page-break-inside:avoid;box-shadow:0 1px 2px rgba(0,0,0,.04)">
-      <div style="display:grid;grid-template-columns:108px 1fr;gap:12px;padding:12px;align-items:start">
-        <div style="width:108px;height:132px;background:#f2f2f2;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
-          ${mainImg?`<img src="${mainImg}" style="width:100%;height:100%;object-fit:cover;object-position:center center;background:#fff;display:block"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc">👤</div>`}
+    return `<div style="background:#fff;border:1px solid #d9d9d9;border-radius:14px;overflow:hidden;break-inside:avoid;page-break-inside:avoid;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+      <div style="display:grid;grid-template-columns:132px 1fr;gap:14px;padding:14px 14px 10px;align-items:start">
+        <div style="width:132px;height:176px;background:#f6f6f6;border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid #ececec">
+          ${mainImg?`<img src="${mainImg}" style="width:100%;height:100%;object-fit:cover;object-position:center center;background:#fff;display:block"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#ccc">👤</div>`}
         </div>
-        <div style="min-width:0">
+        <div style="min-width:0;padding-top:2px">
           <div style="font-size:10px;color:#999;font-family:monospace">#${m.id} · ${m.sz}</div>
-          <div style="font-size:14px;font-weight:800;color:#222;margin:2px 0 4px">${m.nm}</div>
-          ${info?`<div style="font-size:10px;color:#555;line-height:1.45">${info}</div>`:''}
-          ${showAttrs?`<div style="font-size:8px;color:#888;margin-top:4px;line-height:1.35">${cap(m.bd)} · ${cap(m.sk)} · ${m.eth} · ${m.hr} · ${m.ey}</div>`:''}
-          <div style="font-size:8px;color:#b0b0b0;margin-top:4px">${existingPoses.length}/${allPoses.length} poses</div>
+          <div style="font-size:18px;font-weight:800;color:#222;margin:3px 0 6px;line-height:1.1">${m.nm}</div>
+          ${info?`<div style="font-size:11px;color:#555;line-height:1.55">${info}</div>`:''}
+          ${showAttrs?`<div style="font-size:9px;color:#888;margin-top:6px;line-height:1.45">${cap(m.bd)} · ${cap(m.sk)} · ${m.eth} · ${m.hr} · ${m.ey}</div>`:''}
+          <div style="font-size:9px;color:#b0b0b0;margin-top:6px">${existingPoses.length}/${allPoses.length} poses</div>
         </div>
       </div>
-      ${showPoses&&poseImgs?`<div style="padding:8px 12px 10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;border-top:1px solid #eee;background:#fff">${poseImgs}</div>`:''}
+      ${showPoses&&poseImgs?`<div style="padding:0 14px 14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;border-top:1px solid #efefef;background:#fff;padding-top:10px">${poseImgs}</div>`:''}
     </div>`;
   };
 
-  const buildHeader=(item)=>`<div style="grid-column:1/-1;padding:7px 12px;background:${item.spec.color}15;border-right:3px solid ${item.spec.color};border-radius:6px;font-size:12px;font-weight:800;color:${item.spec.color};break-inside:avoid;page-break-inside:avoid">${item.sz} - ${item.spec.desc||''}</div>`;
+  const buildHeader=(section)=>`<div style="grid-column:1/-1;padding:9px 14px;background:${section.header.spec.color}15;border-right:4px solid ${section.header.spec.color};border-radius:9px;font-size:14px;font-weight:800;color:${section.header.spec.color};break-inside:avoid;page-break-inside:avoid;display:flex;justify-content:space-between;align-items:center"><span>${section.header.sz} - ${section.header.spec.desc||''}</span><span style="font-size:11px;opacity:.75">${section.header.count} models</span></div>`;
 
   const sheet=document.getElementById('castingSheet');
   let html='';
-  pages.forEach((pageItems,pageIndex)=>{
-    html+=`<div class="casting-page" style="background:#fff;width:1123px;min-height:794px;margin:0 auto 20px;padding:22px 22px 18px;border:1px solid #e5e5e5;box-sizing:border-box;break-after:page;page-break-after:always">`;
-    html+=`<div style="text-align:center;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #ddd">
+  pages.forEach((sections,pageIndex)=>{
+    html+=`<div class="casting-page" style="background:#fff;width:1123px;min-height:794px;margin:0 auto 20px;padding:18px 22px 16px;border:1px solid #e5e5e5;box-sizing:border-box;break-after:page;page-break-after:always">`;
+    html+=`<div style="text-align:center;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #ddd">
       <h1 style="font-size:24px;font-weight:900;margin:0;color:#111">FY26 Casting Models - Batch 1 (${models.length} Models)</h1>
       <p style="font-size:12px;color:#666;margin:4px 0 0">Black tank + black biker shorts | White studio | 5 poses per model | A4 landscape</p>
     </div>`;
-    html+=`<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start">`;
-    pageItems.forEach(item=>{
-      html += item.type==='header' ? buildHeader(item) : buildCard(item.model);
+    html+=`<div style="display:flex;flex-direction:column;gap:14px">`;
+    sections.forEach(section=>{
+      html+=`<section style="break-inside:avoid;page-break-inside:avoid">`;
+      html+=buildHeader(section);
+      html+=`<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;margin-top:10px">`;
+      section.cards.forEach(model=>{ html+=buildCard(model); });
+      html+=`</div></section>`;
     });
     html+=`</div>`;
     if(showLogo){
-      html+=`<div style="margin-top:16px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:center">
+      html+=`<div style="margin-top:14px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:10px;color:#aaa">Generated ${new Date().toLocaleDateString()}</span>
         <span style="font-size:14px;font-weight:800;color:#333">Data<span style="color:#8b5cf6">Plus</span> × Walmart</span>
       </div>`;
@@ -1896,7 +1906,7 @@ async function downloadCasting(format){
       const pdf=new jsPDF({orientation:'l',unit:'mm',format:'a4',compress:true});
       const pageW=297;
       const pageH=210;
-      const margin=6;
+      const margin=4;
       const usableW=pageW-(margin*2);
       const usableH=pageH-(margin*2);
 
