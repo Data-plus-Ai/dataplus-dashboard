@@ -205,6 +205,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .ot-range{display:flex;align-items:center;gap:8px}
 .ot-range input[type=range]{accent-color:var(--ac);width:120px;cursor:pointer}
 .ot-range span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tx2);min-width:36px}
+.canvas-table-row-link{cursor:pointer;transition:background .15s}
+.canvas-table-row-link:hover td{background:rgba(139,92,246,.06)!important}
 .ot-upload-area{border:2px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--sf2)}
 .ot-upload-area:hover{border-color:var(--ac);background:var(--acd)}
 .ot-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -380,7 +382,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">שקיפות תמונה</label><input type="range" id="qcOpacity" min="0" max="100" value="50" oninput="qcRedraw();document.getElementById('qcOpVal').textContent=this.value+'%'"><span id="qcOpVal">50%</span></div>
-          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="qcScale" min="50" max="200" value="100" oninput="qcRedraw();document.getElementById('qcScVal').textContent=this.value+'%'"><span id="qcScVal">100%</span></div>
+          <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">גודל סילואט</label><input type="range" id="qcScale" min="1" max="50" value="25" oninput="qcRedraw();document.getElementById('qcScVal').textContent=this.value+'%'"><span id="qcScVal">25%</span></div>
           <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">X</label><input type="range" id="qcOffX" min="-200" max="200" value="0" oninput="qcRedraw()"></div>
           <div class="ot-range"><label style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace">Y</label><input type="range" id="qcOffY" min="-200" max="200" value="0" oninput="qcRedraw()"></div>
           <div style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="qcShowBody" onchange="qcRedraw()" style="accent-color:var(--cy);width:14px;height:14px;cursor:pointer"><label style="font-size:9px;color:var(--tx3)">Body Comp</label></div>
@@ -1523,26 +1525,21 @@ function qcRedraw(){
 
   const cW=600,cH=800;canvas.width=cW;canvas.height=cH;
   ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,cW,cH);
-  // Grid
   ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=0.5;
   for(let x=0;x<cW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cH);ctx.stroke()}
   for(let y=0;y<cH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cW,y);ctx.stroke()}
-  // Center
   ctx.strokeStyle='rgba(139,92,246,0.08)';ctx.beginPath();ctx.moveTo(cW/2,0);ctx.lineTo(cW/2,cH);ctx.stroke();
 
-  const baseScale=scale/100;
+  const baseScale=Math.max(0.04,scale/25);
 
-  // Layer 1: Body Composition
   if(showBody&&sz&&bodyCompImages[sz]&&bodyCompImages[sz].complete&&bodyCompImages[sz].naturalWidth){
     const bc=bodyCompImages[sz];const iW=bc.naturalWidth*baseScale*1.4;const iH=bc.naturalHeight*baseScale*1.4;
     ctx.save();ctx.globalAlpha=0.35;ctx.drawImage(bc,(cW-iW)/2+offX,(cH-iH)/2+offY,iW,iH);ctx.restore();
   }
 
-  // Layer 2: CDN Silhouette
   if(sz&&silImages[sz]&&silImages[sz].complete&&silImages[sz].naturalWidth){
     const si=silImages[sz];const iW=si.naturalWidth*baseScale*1.4;const iH=si.naturalHeight*baseScale*1.4;
     ctx.save();ctx.globalAlpha=0.8;ctx.drawImage(si,(cW-iW)/2+offX,(cH-iH)/2+offY,iW,iH);ctx.restore();
-    // Model measurement lines
     if(qcSelectedModel&&spec){
       const m=qcSelectedModel;const sc=baseScale*0.008*1.4;const cx=cW/2+offX;
       const drawY=(cH-iH)/2+offY;const bTop=drawY+iH*0.22;const bBot=drawY+iH*0.88;
@@ -1563,7 +1560,6 @@ function qcRedraw(){
     ctx.fillStyle='rgba(139,92,246,0.5)';ctx.font='14px Outfit';ctx.textAlign='center';ctx.fillText('⏳ טוען סילואט '+sz+'...',cW/2,cH/2);
   }
 
-  // Layer 3: Generated image
   if(qcUploadedImg){
     ctx.save();ctx.globalAlpha=opacity;
     const ar=qcUploadedImg.width/qcUploadedImg.height;let dW,dH;
@@ -1571,11 +1567,9 @@ function qcRedraw(){
     ctx.drawImage(qcUploadedImg,(cW-dW)/2,(cH-dH)/2,dW,dH);ctx.restore();
   }
 
-  // Legend
   ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='9px JetBrains Mono';ctx.textAlign='left';
   ctx.fillText('📐 Silhouette'+(showBody?' + Body Comp':'')+' | 🟢 Model meas. | 📷 Generated image',8,cH-10);
 
-  // Info
   let info='';
   if(spec&&qcSelectedModel){
     const dB=(qcSelectedModel.bu-spec.bust).toFixed(1);const dW=(qcSelectedModel.wa-spec.waist).toFixed(1);const dH=(qcSelectedModel.hp-spec.hips).toFixed(1);
@@ -1596,7 +1590,7 @@ function qcReset(){
   qcUploadedImg=null;qcSelectedModel=null;
   document.getElementById('qcModel').value='';
   document.getElementById('qcOpacity').value=50;document.getElementById('qcOpVal').textContent='50%';
-  document.getElementById('qcScale').value=100;document.getElementById('qcScVal').textContent='100%';
+  document.getElementById('qcScale').value=25;document.getElementById('qcScVal').textContent='25%';
   document.getElementById('qcOffX').value=0;document.getElementById('qcOffY').value=0;
   document.getElementById('qcShowBody').checked=false;
   document.getElementById('qcPoseImages').innerHTML='';
@@ -1753,7 +1747,30 @@ function getCastingCardData(m){
 }();
 
 
-async function renderCanvas(){
+async function gotoModelCard(mid){
+  const model=MD.find(m=>m.id===mid);
+  if(!model)return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  const galleryTab=document.querySelector('.tab[data-tab="gallery"]');
+  if(galleryTab)galleryTab.classList.add('active');
+  const galleryPanel=document.getElementById('p-gallery');
+  if(galleryPanel)galleryPanel.classList.add('active');
+  document.querySelectorAll('[data-f]').forEach(sel=>{sel.value='';});
+  const search=document.getElementById('gallerySearch');
+  if(search)search.value='';
+  rGal(MD);
+  requestAnimationFrame(()=>{
+    const card=document.querySelector(`#galleryGrid .card[data-mid="${mid}"]`);
+    if(card){
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      card.style.boxShadow='0 0 0 2px rgba(139,92,246,.55), 0 0 28px rgba(139,92,246,.18)';
+      setTimeout(()=>{card.style.boxShadow='';},1800);
+    }
+  });
+}
+
+function renderCanvas(){
   const sz=document.getElementById('canvasSize').value;
   const bd=document.getElementById('canvasBody').value;
   const spec=SILHOUETTE_SPEC[sz];
@@ -1763,102 +1780,86 @@ async function renderCanvas(){
   if(bd)models=models.filter(m=>m.bd===bd);
   models.sort((a,b)=>a.h-b.h);
 
-  const modelsEl = document.getElementById('canvasModels');
-  const scaleEl = document.getElementById('canvasScale');
-  const tableEl = document.getElementById('canvasTable');
-
   if(!models.length){
-    modelsEl.innerHTML='<div style="color:var(--tx3);padding:40px;text-align:center">אין מודלים</div>';
-    scaleEl.innerHTML='';
-    tableEl.innerHTML='';
+    document.getElementById('canvasModels').innerHTML='<div style="color:var(--tx3);padding:40px;text-align:center">אין מודלים</div>';
+    document.getElementById('canvasScale').innerHTML='';
+    document.getElementById('canvasTable').innerHTML='';
     return;
   }
 
-  const heights=models.map(m=>m.h);
-  const minH=Math.min(...heights)-3;
-  const maxH=Math.max(...heights)+3;
-  const range=maxH-minH||10;
-  const containerH=500;
+  const rulerMax=180;
+  const rulerMin=0;
+  const range=rulerMax-rulerMin;
+  const containerH=540;
+  const paddingTop=12;
+  const usableH=containerH-paddingTop;
 
+  const scaleEl=document.getElementById('canvasScale');
   let scaleHtml='';
-  for(let h=Math.ceil(maxH);h>=Math.floor(minH);h-=2){
-    const pct=((maxH-h)/range)*100;
-    const isMajor=h%5===0;
-    scaleHtml+=`<div style="position:absolute;top:${pct}%;left:0;right:0;border-top:1px ${isMajor?'solid':'dotted'} ${isMajor?'var(--bd)':'rgba(255,255,255,.03)'}"><span style="position:absolute;left:4px;top:-7px;font-size:${isMajor?'9':'7'}px;color:${isMajor?'var(--tx2)':'var(--tx3)'};font-family:'JetBrains Mono',monospace;font-weight:${isMajor?'700':'400'}">${h}</span></div>`;
+  for(let h=rulerMax;h>=rulerMin;h-=5){
+    const pct=((rulerMax-h)/range)*100;
+    const isMajor=h%10===0;
+    scaleHtml+=`<div style="position:absolute;top:${pct}%;left:0;right:0;border-top:1px ${isMajor?'solid':'dotted'} ${isMajor?'var(--bd)':'rgba(255,255,255,.03)'}"><span style="position:absolute;left:6px;top:-8px;font-size:${isMajor?'9':'7'}px;color:${isMajor?'var(--tx2)':'var(--tx3)'};font-family:'JetBrains Mono',monospace;font-weight:${isMajor?'700':'400'}">${h}</span></div>`;
   }
-  const specPct=((maxH-spec.height)/range)*100;
-  scaleHtml+=`<div style="position:absolute;top:${specPct}%;left:0;right:0;border-top:2px dashed ${spec.color};z-index:2"><span style="position:absolute;right:2px;top:-14px;font-size:7px;color:${spec.color};font-weight:700;font-family:'JetBrains Mono',monospace">SPEC ${spec.height}</span></div>`;
-  scaleEl.style.background=`linear-gradient(180deg,${spec.color}12,transparent)`;
+  const specPct=((rulerMax-spec.height)/range)*100;
+  scaleHtml+=`<div style="position:absolute;top:${specPct}%;left:0;right:0;border-top:2px dashed ${spec.color};z-index:2"><span style="position:absolute;right:4px;top:-14px;font-size:8px;color:${spec.color};font-weight:700;font-family:'JetBrains Mono',monospace">SPEC ${spec.height}</span></div>`;
+  scaleHtml+=`<div style="position:absolute;left:0;right:0;bottom:0;border-top:2px solid rgba(255,255,255,.12)"></div>`;
+  scaleEl.style.background=`linear-gradient(180deg,${spec.color}10,transparent 55%)`;
   scaleEl.style.height=containerH+'px';
   scaleEl.innerHTML=scaleHtml;
 
-  modelsEl.style.height=containerH+'px';
-  modelsEl.style.alignItems='flex-end';
-  modelsEl.style.position='relative';
+  const container=document.getElementById('canvasModels');
+  container.style.height=containerH+'px';
+  container.style.alignItems='flex-end';
+  container.style.position='relative';
 
-  const figBaseH=containerH*0.86;
-  const tallest=Math.max(...heights);
-
-  modelsEl.innerHTML=models.map(m=>{
-    const frontImg=dbImages[m.id+'_Front'] || '';
-    const figH=Math.round((m.h/tallest)*figBaseH);
-    const figW=Math.max(120, Math.round(figH*0.56));
-    const colW=figW+28;
+  container.innerHTML=models.map(m=>{
+    const frontImg=dbImages[m.id+'_Front']||'';
+    const figH=Math.max(60, Math.round((Math.min(m.h,rulerMax)/rulerMax)*usableH));
+    const figW=Math.max(118, Math.round(figH*0.62));
+    const colW=figW+26;
     const heightDiff=m.h-spec.height;
     const diffColor=heightDiff>0?'var(--gn)':heightDiff<0?'var(--rs)':'var(--tx2)';
     const diffSign=heightDiff>0?'+':'';
 
-    return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex-shrink:0;width:${colW}px;height:${containerH}px">
-      <div style="height:${figH}px;width:${figW}px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:10px 10px 0 0;background:transparent">
-        ${frontImg
-          ? `<img data-trim-src="${frontImg}" data-trim-mode="canvas" src="${frontImg}" style="height:100%;width:100%;object-fit:contain;object-position:center bottom;display:block"/>`
-          : `<div style="height:100%;width:100%;background:linear-gradient(180deg,var(--sf2),var(--sf3));display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.2;border-radius:10px 10px 0 0">👤</div>`}
+    return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex-shrink:0;width:${colW}px;height:100%;cursor:pointer" onclick="gotoModelCard(${m.id})" title="פתחי כרטיס דוגמנית">
+      <div style="height:${figH}px;width:${figW}px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:8px 8px 0 0;box-sizing:border-box;background:transparent">
+        ${frontImg?`<img src="${frontImg}" class="canvas-model-figure" style="width:100%;height:100%"/>`
+        :`<div style="height:100%;width:100%;background:linear-gradient(180deg,var(--sf2),var(--sf3));display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.2;border-radius:8px 8px 0 0">👤</div>`}
       </div>
-      <div style="width:${figW}px;height:2px;background:${spec.color}60;border-radius:1px"></div>
-      <div style="text-align:center;padding:8px 0 0;width:100%">
-        <div style="font-size:11px;font-weight:800;color:${m.cl}">${escHtml(m.nm)}</div>
-        <div style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">XS ${m.sz ? '·' : ''} #${m.id}</div>
-        <div style="font-size:10px;font-weight:800;color:var(--tx);margin-top:4px">${m.h}cm</div>
-        <div style="font-size:9px;font-weight:800;color:${diffColor};font-family:'JetBrains Mono',monospace">${diffSign}${heightDiff}cm vs spec</div>
+      <div style="width:${figW}px;height:2px;background:${spec.color}80;border-radius:1px"></div>
+      <div style="text-align:center;padding:6px 0 0;width:100%">
+        <div style="font-size:11px;font-weight:800;color:${m.cl}">${m.nm}</div>
+        <div style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">#${m.id} · ${m.sz}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--tx);margin-top:2px;font-family:'JetBrains Mono',monospace">${m.h}cm</div>
+        <div style="font-size:8px;color:${diffColor};font-weight:700;font-family:'JetBrains Mono',monospace">${diffSign}${heightDiff}cm vs spec</div>
       </div>
     </div>`;
   }).join('');
 
-  requestAnimationFrame(async ()=>{
-    const imgs=[...modelsEl.querySelectorAll('img[data-trim-src]')];
-    await Promise.all(imgs.map(async imgEl=>{
-      try{
-        const trimmed=await getTrimmedImage(imgEl.dataset.trimSrc,{mode:imgEl.dataset.trimMode||'canvas'});
-        if(trimmed) imgEl.src=trimmed;
-      }catch(e){}
-    }));
-  });
-
-  tableEl.innerHTML=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden">
-    <div style="padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-      <div style="font-size:11px;font-weight:800;color:${spec.color}">${sz} - ${models.length} Models · Spec height: ${spec.height}cm</div>
-    </div>
-    <div style="overflow:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:10px">
-        <thead>
-          <tr style="background:var(--sf2);text-align:left">
-            <th style="padding:8px 12px;color:var(--tx3);font-size:8px;font-family:'JetBrains Mono',monospace">NAME</th>
-            <th style="padding:8px 12px;color:var(--tx3);font-size:8px;font-family:'JetBrains Mono',monospace">ID</th>
-            <th style="padding:8px 12px;color:var(--tx3);font-size:8px;font-family:'JetBrains Mono',monospace">SIZE</th>
-            <th style="padding:8px 12px;color:var(--tx3);font-size:8px;font-family:'JetBrains Mono',monospace">HEIGHT</th>
-            <th style="padding:8px 12px;color:var(--tx3);font-size:8px;font-family:'JetBrains Mono',monospace">Δ SPEC</th>
-          </tr>
-        </thead>
-        <tbody>${models.map(m=>{const d=m.h-spec.height;const dc=d>0?'var(--gn)':d<0?'var(--rs)':'var(--tx2)';return `<tr style="border-top:1px solid var(--bd)">
-          <td style="padding:6px 12px;font-weight:700;color:${m.cl}">${escHtml(m.nm)}</td>
+  document.getElementById('canvasTable').innerHTML=`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-top:16px">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;font-weight:700;color:${spec.color}">${sz} — ${models.length} Models · Spec height: ${spec.height}cm</span>
+        <span style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">קליק על שורה יעביר לכרטיס דוגמנית</span>
+      </div>
+      <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:11px;direction:ltr;text-align:left">
+        <thead><tr style="background:var(--sf2)">
+          <th style="padding:8px 12px;font-weight:600;color:var(--tx2);font-size:9px">Name</th>
+          <th style="padding:8px 12px;color:var(--tx2);font-size:9px">ID</th>
+          <th style="padding:8px 12px;color:var(--tx2);font-size:9px">Size</th>
+          <th style="padding:8px 12px;color:var(--tx2);font-size:9px">Height</th>
+          <th style="padding:8px 12px;color:var(--tx2);font-size:9px">Δ Spec</th>
+        </tr></thead>
+        <tbody>${models.map(m=>{const d=m.h-spec.height;const dc=d>0?'var(--gn)':d<0?'var(--rs)':'var(--tx2)';return `<tr class="canvas-table-row-link" style="border-top:1px solid var(--bd)" onclick="gotoModelCard(${m.id})" title="פתחי כרטיס דוגמנית">
+          <td style="padding:6px 12px;font-weight:700;color:${m.cl}">${m.nm}</td>
           <td style="padding:6px 12px;color:var(--tx3);font-family:'JetBrains Mono',monospace">#${m.id}</td>
           <td style="padding:6px 12px"><span style="background:${spec.color}20;color:${spec.color};padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700">${m.sz}</span></td>
           <td style="padding:6px 12px;font-weight:700;font-family:'JetBrains Mono',monospace">${m.h}cm</td>
           <td style="padding:6px 12px;font-weight:700;color:${dc};font-family:'JetBrains Mono',monospace">${d>0?'+':''}${d}cm</td>
         </tr>`}).join('')}</tbody>
-      </table>
-    </div>
-  </div>`;
+      </table></div>
+    </div>`;
 }
 
 
