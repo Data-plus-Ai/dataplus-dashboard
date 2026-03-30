@@ -1219,7 +1219,10 @@ async function dlCasting(fmt){
 // ══════════════════════════════════════════════
 // AI STUDIO
 // ══════════════════════════════════════════════
-const GEMS=['gemini-2.5-flash-preview-05-20','gemini-2.0-flash-preview-image-generation'];
+const GEMS=[
+  'gemini-2.0-flash-preview-image-generation',
+  'gemini-2.5-flash-preview-05-20'
+];
 let aiKey=null, aiHist=[];
 function aiConnect(){
   const k=mw('aiKey').value.trim();
@@ -1234,7 +1237,42 @@ function aiConnect(){
 function aiPreview(){const mid=parseInt(mw('aiMSel').value);const m=MD.find(x=>x.id===mid);mw('aiMPrev').innerHTML=m?`<div style="font-size:9px;color:var(--tx2);margin-top:4px">${m.sz}·${m.h}${m.g==='M'?'"':'cm'}·~${mwt(m)}kg·${m.sk}·${m.eth}</div>`:'';aiAssemble();}
 function aiAssemble(){const mid=parseInt(mw('aiMSel').value);const m=MD.find(x=>x.id===mid);const pose=mw('aiPSel').value||'Front';const custom=mw('aiCustom').value||'';mw('aiPrompt').textContent=m?(mkP(m,pose)+(custom?'\n\nADDITIONAL: '+custom:'')):'בחרי מודל...';}
 function aiCopy(){const t=mw('aiPrompt').textContent;navigator.clipboard.writeText(t).then(()=>toast('📋 הועתק!'));}
-async function aiTry(prompt,idx){const model=GEMS[idx];if(!model)throw new Error('כל המודלים נכשלו');const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${aiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:["TEXT","IMAGE"],temperature:1,topP:.95}})});if(r.status===404||r.status===400){return aiTry(prompt,idx+1);}if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${r.status}`);}const d=await r.json();if(d.candidates?.[0]?.content?.parts)for(const p of d.candidates[0].content.parts)if(p.inlineData)return{img:p.inlineData,model};return{img:null,model};}
+async function aiTry(prompt, idx) {
+  const model = GEMS[idx];
+  if (!model) throw new Error('כל המודלים נכשלו — בדקי שה-API key תומך ב-image generation');
+  console.log('Trying model:', model);
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${aiKey}`,
+    {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        contents: [{parts: [{text: prompt}]}],
+        generationConfig: {responseModalities: ["TEXT","IMAGE"], temperature: 1, topP: 0.95}
+      })
+    }
+  );
+  if (r.status === 404 || r.status === 400) {
+    console.warn(model, 'not available, trying next...');
+    return aiTry(prompt, idx + 1);
+  }
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    const msg = e.error?.message || `HTTP ${r.status}`;
+    console.error('API error:', msg, e);
+    throw new Error(msg);
+  }
+  const d = await r.json();
+  console.log('Response:', d);
+  if (d.candidates?.[0]?.content?.parts) {
+    for (const p of d.candidates[0].content.parts) {
+      if (p.inlineData) return {img: p.inlineData, model};
+    }
+  }
+  // no image in response
+  const textPart = d.candidates?.[0]?.content?.parts?.find(p => p.text);
+  throw new Error('Gemini לא החזיר תמונה' + (textPart ? ': ' + textPart.text.slice(0,120) : ''));
+}
 async function aiRun(){
   if(!aiKey){toast('חברי API key');return;}const mid=parseInt(mw('aiMSel').value);if(!mid){toast('בחרי מודל');return;}
   const prompt=mw('aiPrompt').textContent;const out=mw('aiOut');const btn=mw('aiRunBtn');
