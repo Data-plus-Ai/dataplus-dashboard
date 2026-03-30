@@ -255,8 +255,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   <div class="progress-bar" id="progressBar"></div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="gallery">גלריה & ניהול</button>
-    <button class="tab" data-tab="overview">סקירה</button>
+    <button class="tab active" data-tab="overview">סקירה</button>
+    <button class="tab" data-tab="gallery">גלריה & ניהול</button>
     <button class="tab" data-tab="profiles">פרופילים</button>
     <button class="tab" data-tab="compare">השוואה</button>
     <button class="tab" data-tab="prompts">פרומפטים</button>
@@ -267,8 +267,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     <button class="tab" data-tab="table">טבלה</button>
   </div>
 
-  <div id="p-gallery" class="panel active"><div class="filters" id="filters"></div><div class="grid" id="galleryGrid"></div></div>
-  <div id="p-overview" class="panel"><div class="ss" id="statsStrip"></div><div id="liveGallery" style="margin-bottom:18px"></div><div class="cg"><div class="cb"><h4>Size Distribution</h4><canvas id="c1"></canvas></div><div class="cb"><h4>Ethnicity</h4><canvas id="c2"></canvas></div><div class="cb"><h4>Body Type × Size</h4><canvas id="c3"></canvas></div><div class="cb"><h4>Height vs Bust</h4><canvas id="c4"></canvas></div></div><div class="cg"><div class="cb"><h4>Skin Tone</h4><canvas id="c5"></canvas></div><div class="cb"><h4>Top 15 Usage</h4><canvas id="c6"></canvas></div></div></div>
+  <div id="p-overview" class="panel active"></div>
+  <div id="p-gallery" class="panel"><div class="filters" id="filters"></div><div class="grid" id="galleryGrid"></div></div>
+  <div id="p-overview" class="panel"><div class="ss" id="statsStrip"></div>
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:11px;color:var(--tx2)">
+    <strong style="color:var(--tx)">💡 Total Usage</strong> — מספר הפעמים שהדוגמנית שימשה ב-renders ב-Walmart FY26 (רלוונטי לנשים Batch 1–2 בלבד; לבאצ'ים החדשים הנתון לא קיים עדיין).
+  </div>
+  <div id="liveGallery" style="margin-bottom:18px"></div><div class="cg"><div class="cb"><h4>Size Distribution</h4><canvas id="c1"></canvas></div><div class="cb"><h4>Ethnicity</h4><canvas id="c2"></canvas></div><div class="cb"><h4>Body Type × Size</h4><canvas id="c3"></canvas></div><div class="cb"><h4>Height vs Bust</h4><canvas id="c4"></canvas></div></div><div class="cg"><div class="cb"><h4>Skin Tone</h4><canvas id="c5"></canvas></div><div class="cb"><h4>Top 15 Usage</h4><canvas id="c6"></canvas></div></div></div>
   <div id="p-profiles" class="panel"><h3 style="font-size:15px;margin-bottom:4px">מה מייחד כל מודל?</h3><p style="color:var(--tx2);font-size:11px;margin-bottom:14px">שם, סממנים, הבדלים</p><div class="tg" id="traitsGrid"></div></div>
   <div id="p-compare" class="panel"><div class="chdr"><span style="font-size:12px;color:var(--tx2)">בחרי 2 מגלריה ←</span><span class="ccnt" id="ccnt">0/2</span><button class="btn btn-ac" id="cbtn" disabled onclick="runCompare()">השווי</button><button class="btn btn-ghost" onclick="clearSel()">נקי</button></div><div id="cmpR"></div></div>
   <div id="p-prompts" class="panel"><p style="color:var(--tx2);margin-bottom:10px;font-size:11px">פרומפטים מלאים — פוזות מרובות. כפתור העתקה על כל פרומפט.</p><div class="filters" style="margin-bottom:10px"><div class="fg"><label>אחראי/ת</label><select id="pmsAssign" onchange="genPrompts()"><option value="">הכל</option><option value="שלומית">שלומית</option><option value="שקד">שקד</option></select></div><div class="fg"><label>מודל</label><select id="pms" onchange="genPrompts()"><option value="all">כל המודלים</option></select></div><div class="fg"><label>סטטוס</label><select id="pmsStatus" onchange="genPrompts()"><option value="">הכל</option><option value="done">הושלם</option><option value="partial">הושלם חלקית</option><option value="none">לא התחיל</option></select></div></div><div id="pCon"></div></div>
@@ -444,46 +449,46 @@ const MD_WOMEN = [
   {id:675,nm:"Aisha",cnt:14929,sz:"4XL",bd:"curvy",sk:"dark brown",hr:"black",eth:"african",st:"tall",ag:"regular",ey:"Brown",h:173,bu:149.86,wa:129.54,hp:154.94,ins:29,gender:"WOMAN",tr:"Only African; LARGEST BUST (149.9)",tg:["only African"],cl:"#ef4444"}
 ];
 
-// ── PROJECT B: Men Batch 1 + Women Batch 3/4 ──
+  // ── PROJECT B: Men Batch 1 + Women Batch 3/4 (anonymized names) ──
 const MD_MEN_B1 = [
-  {id:1103,nm:"Alex Benjamin",cnt:0,sz:"L",bd:"athletic",sk:"olive",hr:"black",eth:"caucasian",st:"tall",ag:"35-40",ey:"brown",h:71,bu:33,wa:41,hp:40,ins:29,gender:"MAN",tr:"Tall Caucasian L athletic, olive skin",tg:["olive caucasian","athletic L"],cl:"#8b5cf6"},
-  {id:1133,nm:"Andrew Dahreddinе",cnt:0,sz:"XXL",bd:"broad",sk:"fair",hr:"brunette",eth:"middle eastern",st:"tall",ag:"35",ey:"brown",h:71,bu:48,wa:52,hp:52,ins:29,gender:"MAN",tr:"Tall Middle Eastern XXL broad",tg:["middle eastern XXL"],cl:"#06b6d4"},
-  {id:1104,nm:"Andrew Stratton",cnt:0,sz:"M",bd:"athletic",sk:"fair",hr:"blonde",eth:"caucasian",st:"short",ag:"25-35",ey:"blue",h:66,bu:34,wa:41,hp:42,ins:28,gender:"MAN",tr:"Short fair Caucasian M, blue eyes",tg:["blonde blue-eyed","short M"],cl:"#10b981"},
-  {id:1174,nm:"Arden Maden",cnt:0,sz:"3XL",bd:"broad",sk:"fair",hr:"brunette",eth:"caucasian",st:"regular",ag:"50",ey:"brown",h:70,bu:45,wa:53,hp:50,ins:27,gender:"MAN",tr:"Mature 3XL broad Caucasian",tg:["mature 3XL"],cl:"#f59e0b"},
-  {id:1188,nm:"Brandon Madden",cnt:0,sz:"XXL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"30",ey:"brown",h:76,bu:46,wa:54,hp:53,ins:32,gender:"MAN",tr:"Tall Black XXL broad",tg:["tall Black XXL"],cl:"#f43f5e"},
-  {id:1135,nm:"Cayman Cardiff",cnt:0,sz:"L",bd:"athletic",sk:"light brown",hr:"brunette",eth:"caucasian",st:"tall",ag:"37",ey:"blue",h:76,bu:38,wa:45,hp:45,ins:33,gender:"MAN",tr:"Tall L athletic, blue-eyed brunette",tg:["tall L athletic"],cl:"#ec4899"},
-  {id:1097,nm:"Danny Joseph",cnt:0,sz:"M",bd:"lean",sk:"dark brown",hr:"black",eth:"black",st:"regular",ag:"30-40",ey:"brown",h:69,bu:32,wa:39,hp:40,ins:28,gender:"MAN",tr:"Regular M lean Black",tg:["lean M Black"],cl:"#8b5cf6"},
-  {id:1138,nm:"Dindo Gacias",cnt:0,sz:"XL",bd:"athletic",sk:"light brown",hr:"black",eth:"pacific islander",st:"tall",ag:"43",ey:"brown",h:73,bu:36,wa:43,hp:42,ins:32,gender:"MAN",tr:"Pacific Islander XL athletic tall",tg:["pacific islander"],cl:"#06b6d4"},
-  {id:1186,nm:"Elijah Cyrus",cnt:0,sz:"3XL",bd:"broad",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"34",ey:"brown",h:75,bu:53,wa:57,hp:53,ins:32,gender:"MAN",tr:"Tall Black 3XL broad",tg:["tall 3XL Black"],cl:"#10b981"},
-  {id:1098,nm:"Evan Strand",cnt:0,sz:"L",bd:"athletic",sk:"fair",hr:"brown",eth:"caucasian",st:"tall",ag:"30-40",ey:"brown",h:72,bu:33,wa:41,hp:41,ins:30,gender:"MAN",tr:"Tall Caucasian L athletic",tg:["tall Caucasian L"],cl:"#f59e0b"},
-  {id:1100,nm:"Howard Cai",cnt:0,sz:"XS",bd:"lean",sk:"olive",hr:"black",eth:"asian",st:"short",ag:"20-30",ey:"brown",h:64,bu:30,wa:34,hp:35,ins:25,gender:"MAN",tr:"Only Asian XS lean short",tg:["asian XS","only Asian"],cl:"#f43f5e"},
-  {id:1184,nm:"Isaac Sundberg",cnt:0,sz:"XXL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"32",ey:"brown",h:72,bu:45,wa:49,hp:47,ins:31,gender:"MAN",tr:"Tall Black XXL broad",tg:["Black XXL tall"],cl:"#ec4899"},
-  {id:1107,nm:"Jason Gonzalez",cnt:0,sz:"XL",bd:"broad",sk:"light brown",hr:"black",eth:"hispanic",st:"regular",ag:"20-30",ey:"brown",h:69,bu:40,wa:44,hp:42,ins:27,gender:"MAN",tr:"Young Hispanic XL broad",tg:["hispanic XL"],cl:"#8b5cf6"},
-  {id:1183,nm:"Jorchual Gregory",cnt:0,sz:"S",bd:"lean",sk:"olive",hr:"dark brown",eth:"hispanic",st:"short",ag:"29",ey:"brown",h:65,bu:31,wa:36,hp:39,ins:28,gender:"MAN",tr:"Short Hispanic S lean",tg:["short Hispanic S"],cl:"#06b6d4"},
-  {id:1122,nm:"Kris Clinton",cnt:0,sz:"XL",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"40",ey:"brown",h:77,bu:38,wa:44,hp:43,ins:33,gender:"MAN",tr:"Tall Black XL athletic",tg:["tall Black XL"],cl:"#10b981"},
-  {id:1123,nm:"Kyan Solon",cnt:0,sz:"S",bd:"lean",sk:"light brown",hr:"black",eth:"asian",st:"short",ag:"20-25",ey:"brown",h:67,bu:28,wa:35,hp:34,ins:29,gender:"MAN",tr:"Short Asian S lean",tg:["asian S lean"],cl:"#f59e0b"},
-  {id:1142,nm:"Lincoln Adim",cnt:0,sz:"L",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"39",ey:"brown",h:73,bu:32,wa:42,hp:40,ins:32,gender:"MAN",tr:"Tall Black L athletic",tg:["Black L tall"],cl:"#f43f5e"},
-  {id:1087,nm:"Malcolm Nichols",cnt:0,sz:"XL",bd:"broad",sk:"fair",hr:"light brown",eth:"caucasian",st:"tall",ag:"37",ey:"green",h:77,bu:45,wa:47,hp:48,ins:33,gender:"MAN",tr:"Tall fair Caucasian XL, green eyes",tg:["green eyes XL","tall Caucasian"],cl:"#ec4899"},
-  {id:1145,nm:"Marcus Mullins",cnt:0,sz:"XL",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"32",ey:"brown",h:75,bu:37,wa:45,hp:44,ins:31,gender:"MAN",tr:"Tall Black XL athletic, big & tall",tg:["Black XL tall"],cl:"#8b5cf6"},
-  {id:1179,nm:"Oneill Cassels",cnt:0,sz:"3XL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"37",ey:"brown",h:72,bu:47,wa:56,hp:50,ins:43,gender:"MAN",tr:"Tall Black 3XL broad, long inseam",tg:["3XL Black tall"],cl:"#06b6d4"},
-  {id:1178,nm:"Raymond Riveria",cnt:0,sz:"XXL",bd:"broad",sk:"olive",hr:"black",eth:"hispanic",st:"tall",ag:"43",ey:"brown",h:71,bu:49,wa:55,hp:52,ins:29,gender:"MAN",tr:"Tall Hispanic XXL broad",tg:["hispanic XXL"],cl:"#10b981"},
-  {id:1156,nm:"Robert Moore",cnt:0,sz:"XL",bd:"athletic",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"27",ey:"brown",h:73,bu:36,wa:43,hp:42,ins:32,gender:"MAN",tr:"Young tall Black XL athletic",tg:["young Black XL"],cl:"#f59e0b"},
-  {id:1112,nm:"Rodney Mitchell",cnt:0,sz:"XL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"regular",ag:"50+",ey:"brown",h:70,bu:41,wa:47,hp:44,ins:30,gender:"MAN",tr:"Mature Black XL broad",tg:["mature Black XL"],cl:"#f43f5e"},
-  {id:1113,nm:"Ryan Sadaghiani",cnt:0,sz:"S",bd:"lean",sk:"light brown",hr:"brunette",eth:"middle eastern",st:"short",ag:"20-25",ey:"brown",h:66,bu:29,wa:36,hp:36,ins:28,gender:"MAN",tr:"Short Middle Eastern S lean",tg:["middle eastern S"],cl:"#ec4899"},
-  {id:1114,nm:"Ryan Wirtz",cnt:0,sz:"M",bd:"lean",sk:"light brown",hr:"black",eth:"latino",st:"short",ag:"30-35",ey:"brown",h:66,bu:32,wa:38,hp:39,ins:28,gender:"MAN",tr:"Short Latino M lean",tg:["short Latino M"],cl:"#8b5cf6"},
-  {id:1147,nm:"Saafir Mcghee",cnt:0,sz:"XXL",bd:"broad",sk:"light brown",hr:"black",eth:"black",st:"short",ag:"34",ey:"brown",h:63,bu:47,wa:53,hp:52,ins:27,gender:"MAN",tr:"Short Black XXL broad",tg:["short Black XXL"],cl:"#06b6d4"},
-  {id:1102,nm:"Simrin Phull",cnt:0,sz:"XS",bd:"lean",sk:"dark brown",hr:"black",eth:"indian",st:"short",ag:"30-40",ey:"brown",h:62,bu:29,wa:35,hp:36,ins:24,gender:"MAN",tr:"Only Indian XS lean short",tg:["indian XS","only Indian"],cl:"#10b981"},
-  {id:1176,nm:"Steve Moulton",cnt:0,sz:"3XL",bd:"broad",sk:"fair",hr:"brunette",eth:"caucasian",st:"tall",ag:"41",ey:"hazel",h:77,bu:55,wa:56,hp:55,ins:31,gender:"MAN",tr:"Tall Caucasian 3XL broad, hazel eyes",tg:["caucasian 3XL","hazel eyes"],cl:"#f59e0b"},
-  {id:1130,nm:"Todd Biggerstaff",cnt:0,sz:"XXL",bd:"broad",sk:"fair",hr:"blonde",eth:"caucasian",st:"tall",ag:"40",ey:"blue",h:78,bu:46,wa:49,hp:48,ins:30,gender:"MAN",tr:"Tallest man (78\"), fair blonde XXL",tg:["tallest man","blonde XXL"],cl:"#f43f5e"},
-  {id:1115,nm:"Umar Sadiq",cnt:0,sz:"L",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"30-40",ey:"brown",h:76,bu:34,wa:41,hp:39,ins:35,gender:"MAN",tr:"Tall Black L athletic, long inseam",tg:["tall Black L"],cl:"#ec4899"},
-  {id:1150,nm:"Xander Caine",cnt:0,sz:"XL",bd:"broad",sk:"light brown",hr:"black",eth:"hispanic",st:"regular",ag:"51",ey:"brown",h:68,bu:41,wa:46,hp:44,ins:28,gender:"MAN",tr:"Mature Hispanic XL broad",tg:["mature hispanic XL"],cl:"#8b5cf6"}
+  {id:1103,nm:"Tyler",cnt:0,sz:"L",bd:"athletic",sk:"olive",hr:"black",eth:"caucasian",st:"tall",ag:"35-40",ey:"brown",h:71,bu:33,wa:41,hp:40,ins:29,gender:"MAN",tr:"Tall Caucasian L athletic, olive skin",tg:["olive caucasian","athletic L"],cl:"#8b5cf6"},
+  {id:1133,nm:"Derek",cnt:0,sz:"XXL",bd:"broad",sk:"fair",hr:"brunette",eth:"middle eastern",st:"tall",ag:"35",ey:"brown",h:71,bu:48,wa:52,hp:52,ins:29,gender:"MAN",tr:"Tall Middle Eastern XXL broad",tg:["middle eastern XXL"],cl:"#06b6d4"},
+  {id:1104,nm:"Connor",cnt:0,sz:"M",bd:"athletic",sk:"fair",hr:"blonde",eth:"caucasian",st:"short",ag:"25-35",ey:"blue",h:66,bu:34,wa:41,hp:42,ins:28,gender:"MAN",tr:"Short fair Caucasian M, blue eyes",tg:["blonde blue-eyed","short M"],cl:"#10b981"},
+  {id:1174,nm:"Gerald",cnt:0,sz:"3XL",bd:"broad",sk:"fair",hr:"brunette",eth:"caucasian",st:"regular",ag:"50",ey:"brown",h:70,bu:45,wa:53,hp:50,ins:27,gender:"MAN",tr:"Mature 3XL broad Caucasian",tg:["mature 3XL"],cl:"#f59e0b"},
+  {id:1188,nm:"Terrell",cnt:0,sz:"XXL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"30",ey:"brown",h:76,bu:46,wa:54,hp:53,ins:32,gender:"MAN",tr:"Tall Black XXL broad",tg:["tall Black XXL"],cl:"#f43f5e"},
+  {id:1135,nm:"Blake",cnt:0,sz:"L",bd:"athletic",sk:"light brown",hr:"brunette",eth:"caucasian",st:"tall",ag:"37",ey:"blue",h:76,bu:38,wa:45,hp:45,ins:33,gender:"MAN",tr:"Tall L athletic, blue-eyed brunette",tg:["tall L athletic"],cl:"#ec4899"},
+  {id:1097,nm:"Darius",cnt:0,sz:"M",bd:"lean",sk:"dark brown",hr:"black",eth:"black",st:"regular",ag:"30-40",ey:"brown",h:69,bu:32,wa:39,hp:40,ins:28,gender:"MAN",tr:"Regular M lean Black",tg:["lean M Black"],cl:"#8b5cf6"},
+  {id:1138,nm:"Patrick",cnt:0,sz:"XL",bd:"athletic",sk:"light brown",hr:"black",eth:"pacific islander",st:"tall",ag:"43",ey:"brown",h:73,bu:36,wa:43,hp:42,ins:32,gender:"MAN",tr:"Pacific Islander XL athletic tall",tg:["pacific islander"],cl:"#06b6d4"},
+  {id:1186,nm:"Jerome",cnt:0,sz:"3XL",bd:"broad",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"34",ey:"brown",h:75,bu:53,wa:57,hp:53,ins:32,gender:"MAN",tr:"Tall Black 3XL broad",tg:["tall 3XL Black"],cl:"#10b981"},
+  {id:1098,nm:"Nathan",cnt:0,sz:"L",bd:"athletic",sk:"fair",hr:"brown",eth:"caucasian",st:"tall",ag:"30-40",ey:"brown",h:72,bu:33,wa:41,hp:41,ins:30,gender:"MAN",tr:"Tall Caucasian L athletic",tg:["tall Caucasian L"],cl:"#f59e0b"},
+  {id:1100,nm:"Kevin",cnt:0,sz:"XS",bd:"lean",sk:"olive",hr:"black",eth:"asian",st:"short",ag:"20-30",ey:"brown",h:64,bu:30,wa:34,hp:35,ins:25,gender:"MAN",tr:"Only Asian XS lean short",tg:["asian XS","only Asian"],cl:"#f43f5e"},
+  {id:1184,nm:"Dwayne",cnt:0,sz:"XXL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"32",ey:"brown",h:72,bu:45,wa:49,hp:47,ins:31,gender:"MAN",tr:"Tall Black XXL broad",tg:["Black XXL tall"],cl:"#ec4899"},
+  {id:1107,nm:"Miguel",cnt:0,sz:"XL",bd:"broad",sk:"light brown",hr:"black",eth:"hispanic",st:"regular",ag:"20-30",ey:"brown",h:69,bu:40,wa:44,hp:42,ins:27,gender:"MAN",tr:"Young Hispanic XL broad",tg:["hispanic XL"],cl:"#8b5cf6"},
+  {id:1183,nm:"Carlos",cnt:0,sz:"S",bd:"lean",sk:"olive",hr:"dark brown",eth:"hispanic",st:"short",ag:"29",ey:"brown",h:65,bu:31,wa:36,hp:39,ins:28,gender:"MAN",tr:"Short Hispanic S lean",tg:["short Hispanic S"],cl:"#06b6d4"},
+  {id:1122,nm:"Curtis",cnt:0,sz:"XL",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"40",ey:"brown",h:77,bu:38,wa:44,hp:43,ins:33,gender:"MAN",tr:"Tall Black XL athletic",tg:["tall Black XL"],cl:"#10b981"},
+  {id:1123,nm:"Jimmy",cnt:0,sz:"S",bd:"lean",sk:"light brown",hr:"black",eth:"asian",st:"short",ag:"20-25",ey:"brown",h:67,bu:28,wa:35,hp:34,ins:29,gender:"MAN",tr:"Short Asian S lean",tg:["asian S lean"],cl:"#f59e0b"},
+  {id:1142,nm:"Lamar",cnt:0,sz:"L",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"39",ey:"brown",h:73,bu:32,wa:42,hp:40,ins:32,gender:"MAN",tr:"Tall Black L athletic",tg:["Black L tall"],cl:"#f43f5e"},
+  {id:1087,nm:"Greg",cnt:0,sz:"XL",bd:"broad",sk:"fair",hr:"light brown",eth:"caucasian",st:"tall",ag:"37",ey:"green",h:77,bu:45,wa:47,hp:48,ins:33,gender:"MAN",tr:"Tall fair Caucasian XL, green eyes",tg:["green eyes XL","tall Caucasian"],cl:"#ec4899"},
+  {id:1145,nm:"DeShawn",cnt:0,sz:"XL",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"32",ey:"brown",h:75,bu:37,wa:45,hp:44,ins:31,gender:"MAN",tr:"Tall Black XL athletic, big & tall",tg:["Black XL tall"],cl:"#8b5cf6"},
+  {id:1179,nm:"Wendell",cnt:0,sz:"3XL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"37",ey:"brown",h:72,bu:47,wa:56,hp:50,ins:43,gender:"MAN",tr:"Tall Black 3XL broad, long inseam",tg:["3XL Black tall"],cl:"#06b6d4"},
+  {id:1178,nm:"Rico",cnt:0,sz:"XXL",bd:"broad",sk:"olive",hr:"black",eth:"hispanic",st:"tall",ag:"43",ey:"brown",h:71,bu:49,wa:55,hp:52,ins:29,gender:"MAN",tr:"Tall Hispanic XXL broad",tg:["hispanic XXL"],cl:"#10b981"},
+  {id:1156,nm:"Kendrick",cnt:0,sz:"XL",bd:"athletic",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"27",ey:"brown",h:73,bu:36,wa:43,hp:42,ins:32,gender:"MAN",tr:"Young tall Black XL athletic",tg:["young Black XL"],cl:"#f59e0b"},
+  {id:1112,nm:"Clifton",cnt:0,sz:"XL",bd:"broad",sk:"brown",hr:"black",eth:"black",st:"regular",ag:"50+",ey:"brown",h:70,bu:41,wa:47,hp:44,ins:30,gender:"MAN",tr:"Mature Black XL broad",tg:["mature Black XL"],cl:"#f43f5e"},
+  {id:1113,nm:"Jordan",cnt:0,sz:"S",bd:"lean",sk:"light brown",hr:"brunette",eth:"middle eastern",st:"short",ag:"20-25",ey:"brown",h:66,bu:29,wa:36,hp:36,ins:28,gender:"MAN",tr:"Short Middle Eastern S lean",tg:["middle eastern S"],cl:"#ec4899"},
+  {id:1114,nm:"Eddie",cnt:0,sz:"M",bd:"lean",sk:"light brown",hr:"black",eth:"latino",st:"short",ag:"30-35",ey:"brown",h:66,bu:32,wa:38,hp:39,ins:28,gender:"MAN",tr:"Short Latino M lean",tg:["short Latino M"],cl:"#8b5cf6"},
+  {id:1147,nm:"Shawn",cnt:0,sz:"XXL",bd:"broad",sk:"light brown",hr:"black",eth:"black",st:"short",ag:"34",ey:"brown",h:63,bu:47,wa:53,hp:52,ins:27,gender:"MAN",tr:"Short Black XXL broad",tg:["short Black XXL"],cl:"#06b6d4"},
+  {id:1102,nm:"Raj",cnt:0,sz:"XS",bd:"lean",sk:"dark brown",hr:"black",eth:"indian",st:"short",ag:"30-40",ey:"brown",h:62,bu:29,wa:35,hp:36,ins:24,gender:"MAN",tr:"Only Indian XS lean short",tg:["indian XS","only Indian"],cl:"#10b981"},
+  {id:1176,nm:"Craig",cnt:0,sz:"3XL",bd:"broad",sk:"fair",hr:"brunette",eth:"caucasian",st:"tall",ag:"41",ey:"hazel",h:77,bu:55,wa:56,hp:55,ins:31,gender:"MAN",tr:"Tall Caucasian 3XL broad, hazel eyes",tg:["caucasian 3XL","hazel eyes"],cl:"#f59e0b"},
+  {id:1130,nm:"Brad",cnt:0,sz:"XXL",bd:"broad",sk:"fair",hr:"blonde",eth:"caucasian",st:"tall",ag:"40",ey:"blue",h:78,bu:46,wa:49,hp:48,ins:30,gender:"MAN",tr:"Tallest man (78\"), fair blonde XXL",tg:["tallest man","blonde XXL"],cl:"#f43f5e"},
+  {id:1115,nm:"Marcus",cnt:0,sz:"L",bd:"athletic",sk:"dark brown",hr:"black",eth:"black",st:"tall",ag:"30-40",ey:"brown",h:76,bu:34,wa:41,hp:39,ins:35,gender:"MAN",tr:"Tall Black L athletic, long inseam",tg:["tall Black L"],cl:"#ec4899"},
+  {id:1150,nm:"Victor",cnt:0,sz:"XL",bd:"broad",sk:"light brown",hr:"black",eth:"hispanic",st:"regular",ag:"51",ey:"brown",h:68,bu:41,wa:46,hp:44,ins:28,gender:"MAN",tr:"Mature Hispanic XL broad",tg:["mature hispanic XL"],cl:"#8b5cf6"}
 ];
 
 const MD_WOMEN_B34 = [
-  {id:586,nm:"Liris Crosee",cnt:0,sz:"XL",bd:"regular",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"35-45",ey:"Brown",h:170,bu:111.76,wa:99.06,hp:124.46,ins:73.66,gender:"WOMAN",tr:"Tall Black XL regular",tg:["Black XL tall"],cl:"#f43f5e"},
-  {id:622,nm:"Connie Andrade",cnt:0,sz:"L",bd:"regular",sk:"olive",hr:"dark brown",eth:"caucasian",st:"regular",ag:"30-40",ey:"Brown",h:170,bu:106.68,wa:91.44,hp:121.92,ins:67.94,gender:"WOMAN",tr:"Regular Caucasian L olive",tg:["caucasian L"],cl:"#8b5cf6"},
-  {id:691,nm:"Montanys Pierre",cnt:0,sz:"XL",bd:"regular",sk:"olive",hr:"light brown",eth:"mixed",st:"tall",ag:"35-45",ey:"Brown",h:177,bu:114.3,wa:93.98,hp:119.38,ins:83.2,gender:"WOMAN",tr:"Tall Mixed XL, longest inseam women",tg:["mixed XL","long inseam"],cl:"#10b981"},
-  {id:629,nm:"Anissa Drabo",cnt:0,sz:"L",bd:"regular",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"30-40",ey:"Brown",h:180,bu:106.68,wa:93.98,hp:111.76,ins:88,gender:"WOMAN",tr:"Tallest woman B3/4 (180cm); Black L",tg:["tallest B3/4","Black L"],cl:"#06b6d4"}
+  {id:586,nm:"Renee",cnt:0,sz:"XL",bd:"regular",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"35-45",ey:"Brown",h:170,bu:111.76,wa:99.06,hp:124.46,ins:73.66,gender:"WOMAN",tr:"Tall Black XL regular",tg:["Black XL tall"],cl:"#f43f5e"},
+  {id:622,nm:"Diana",cnt:0,sz:"L",bd:"regular",sk:"olive",hr:"dark brown",eth:"caucasian",st:"regular",ag:"30-40",ey:"Brown",h:170,bu:106.68,wa:91.44,hp:121.92,ins:67.94,gender:"WOMAN",tr:"Regular Caucasian L olive",tg:["caucasian L"],cl:"#8b5cf6"},
+  {id:691,nm:"Simone",cnt:0,sz:"XL",bd:"regular",sk:"olive",hr:"light brown",eth:"mixed",st:"tall",ag:"35-45",ey:"Brown",h:177,bu:114.3,wa:93.98,hp:119.38,ins:83.2,gender:"WOMAN",tr:"Tall Mixed XL, longest inseam women",tg:["mixed XL","long inseam"],cl:"#10b981"},
+  {id:629,nm:"Tanya",cnt:0,sz:"L",bd:"regular",sk:"brown",hr:"black",eth:"black",st:"tall",ag:"30-40",ey:"Brown",h:180,bu:106.68,wa:93.98,hp:111.76,ins:88,gender:"WOMAN",tr:"Tallest woman B3/4 (180cm); Black L",tg:["tallest B3/4","Black L"],cl:"#06b6d4"}
 ];
 
 // ── COMBINED BATCH B ──
@@ -768,10 +773,20 @@ function rGal(l){
       </div>`;}).join('');
     const checks=allPoses.map(p=>{const checked=st[poseDB[p]]?'checked':'';const cls=st[poseDB[p]]?'chk-group done':'chk-group';return `<span class="${cls}"><input type="checkbox" ${checked} onchange="event.stopPropagation();updateCheck(${m.id},'${p}',this.checked)"/>${p.replace('Profile ','P').replace('Close-Up','CU')}</span>`}).join('');
     const genderTag=m.gender==='MAN'?'<span style="background:rgba(6,182,212,.15);color:var(--cy);padding:1px 6px;border-radius:3px;font-size:8px">♂</span>':'';
+    const dlv=getLatestDelivery(m.id);const dlvStatus=dlv?DELIVERY_STATUS[dlv.status]||DELIVERY_STATUS.pending:null;
     return `<div class="card ${sel.includes(m.id)?'selected':''}" data-mid="${m.id}" onclick="openModelPage(${m.id})" style="cursor:pointer">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${m.cl};opacity:${sel.includes(m.id)?1:0}"></div>
       <div class="card-top"><div><div class="card-name">${m.nm} ${genderTag}</div><div class="card-id">#${m.id}</div></div><span class="sz" style="background:${SC[m.sz]||'#888'}20;color:${SC[m.sz]||'#888'};border:1px solid ${SC[m.sz]||'#888'}40">${m.sz}</span></div>
       <div class="trait-badge" style="background:${m.cl}15;color:${m.cl};border:1px solid ${m.cl}28">${m.tr.substring(0,50)}</div>
+      <div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+        <span style="font-size:9px;color:var(--tx3);font-weight:600;flex-shrink:0">📦</span>
+        ${Object.entries(DELIVERY_STATUS).filter(([k])=>k!=='pending').map(([k,v])=>{
+          const isActive=dlv&&dlv.status===k;
+          return `<span onclick="saveDeliveryInline(${m.id},'${k}')" style="padding:2px 8px;border-radius:10px;font-size:9px;font-weight:${isActive?'800':'500'};cursor:pointer;background:${isActive?v.bg:'var(--sf3)'};color:${isActive?v.color:'var(--tx3)'};border:1px solid ${isActive?v.color+'60':'var(--bd)'};transition:all .15s" title="${v.label}">${v.label}</span>`;
+        }).join('')}
+        ${dlv&&dlv.created_at?`<span style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${dlv.created_at.slice(5,10)}${dlv.created_by?' · '+dlv.created_by:''}</span>`:''}
+      </div>
+      ${dlv&&dlv.note?`<div onclick="event.stopPropagation();openDeliveryModal(${m.id})" style="font-size:9px;color:var(--am);margin-bottom:4px;cursor:pointer;padding:3px 8px;background:rgba(245,158,11,.08);border-radius:5px;border:1px solid rgba(245,158,11,.2)">💬 ${escHtml(dlv.note.substring(0,60))}${dlv.note.length>60?'…':''}</div>`:''}
       <div class="clbl">${m.cnt?m.cnt.toLocaleString()+' uses · ':''} ${dc}/6 generated${fbc.approved?` · ✅${fbc.approved}`:''}${fbc.rejected?` · ❌${fbc.rejected}`:''}</div>
       <div class="cbar"><div class="cbar-f" style="width:${(dc/6*100).toFixed(0)}%;background:${dc===6?'var(--gn)':m.cl}"></div></div>
       <div class="attrs"><span class="attr">${m.bd}</span><span class="attr">${m.sk}</span><span class="attr">${m.hr}</span><span class="attr">${m.eth}</span><span class="attr">${m.ey}</span><span class="attr">${m.st}</span></div>
@@ -878,19 +893,37 @@ function renderLiveGallery(){
 
 // ── DATA TABLE ──
 function renderDataTable(){
-  const cols=[{k:'nm',l:'Name'},{k:'id',l:'ID'},{k:'gender',l:'Gender'},{k:'_assign',l:'Assigned'},{k:'_status',l:'Status'},{k:'_done',l:'Progress'},{k:'sz',l:'Size'},{k:'h',l:'Height'},{k:'bd',l:'Body'},{k:'sk',l:'Skin'},{k:'hr',l:'Hair'},{k:'eth',l:'Eth'},{k:'ey',l:'Eyes'},{k:'bu',l:'B'},{k:'wa',l:'W'},{k:'hp',l:'H'},{k:'ins',l:'Ins'},{k:'tr',l:'Trait'}];
+  const ATTR_FIELDS=['sk','hr','eth','ey','bd','st','ag'];
+  const ATTR_LABELS={sk:'Skin',hr:'Hair',eth:'Ethnicity',ey:'Eyes',bd:'Body',st:'Stature',ag:'Age'};
+  const cols=[{k:'nm',l:'Name'},{k:'id',l:'ID'},{k:'gender',l:'G'},{k:'_assign',l:'Assigned'},{k:'_status',l:'Status'},{k:'_done',l:'Progress'},{k:'_dlv',l:'📦 משלוח'},{k:'sz',l:'Size'},{k:'h',l:'H'},{k:'bu',l:'B'},{k:'wa',l:'W'},{k:'hp',l:'Hp'},...ATTR_FIELDS.map(k=>({k:'_edit_'+k,l:ATTR_LABELS[k]})),{k:'tr',l:'Trait'}];
   let h='<thead><tr>'+cols.map(c=>`<th>${c.l}</th>`).join('')+'</tr></thead><tbody>';
-  MD.forEach(m=>{const st=getStatus(m.id);const dc=getDoneCount(m.id);const isDone=dc===6;const assignColor=st.assigned_to==='שלומית'?'var(--gn)':st.assigned_to==='שקד'?'var(--ac)':'var(--tx3)';
+  MD.forEach(m=>{
+    const st=getStatus(m.id);const dc=getDoneCount(m.id);const isDone=dc===6;
+    const assignColor=st.assigned_to==='שלומית'?'var(--gn)':st.assigned_to==='שקד'?'var(--ac)':'var(--tx3)';
+    const dlv=getLatestDelivery(m.id);const dlvS=dlv?DELIVERY_STATUS[dlv.status]:null;
+    const attrs=getModelAttrs(m);
     h+=`<tr style="background:${isDone?'rgba(16,185,129,.06)':''}">`;
     cols.forEach(c=>{let v;
       if(c.k==='_assign')v=`<span style="color:${assignColor};font-weight:600">${st.assigned_to||'—'}</span>`;
       else if(c.k==='_status')v=isDone?`<span style="color:var(--gn);font-weight:700">✅ הושלם</span>`:dc>0?`<span style="color:var(--am)">🔄 ${dc}/6</span>`:`<span style="color:var(--tx3)">⬜</span>`;
-      else if(c.k==='_done')v=`<div style="width:60px;height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle"><div style="height:100%;width:${(dc/6*100).toFixed(0)}%;background:${isDone?'var(--gn)':'var(--ac)'};border-radius:3px"></div></div> <span style="font-size:9px;color:var(--tx3)">${dc}/6</span>`;
+      else if(c.k==='_done')v=`<div style="width:50px;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle"><div style="height:100%;width:${(dc/6*100).toFixed(0)}%;background:${isDone?'var(--gn)':'var(--ac)'};border-radius:2px"></div></div> <span style="font-size:9px;color:var(--tx3)">${dc}/6</span>`;
+      else if(c.k==='_dlv')v=dlvS?`<span style="color:${dlvS.color};font-size:9px;font-weight:700;cursor:pointer" onclick="openDeliveryModal(${m.id})">${dlvS.label}</span>`:`<span style="color:var(--tx3);font-size:9px;cursor:pointer" onclick="openDeliveryModal(${m.id})">+</span>`;
       else if(c.k==='gender')v=`<span style="color:${m.gender==='MAN'?'var(--cy)':'var(--pk)'}">${m.gender==='MAN'?'♂':'♀'}</span>`;
       else if(c.k==='id')v='#'+m[c.k];
+      else if(c.k.startsWith('_edit_')){
+        const field=c.k.replace('_edit_','');const curVal=attrs[field]||'';
+        v=`<input value="${escHtml(curVal)}" style="background:transparent;border:none;border-bottom:1px dashed var(--bd);color:var(--tx);width:80px;font-size:10px;padding:1px 3px;font-family:'Outfit',sans-serif" onchange="saveAttrOverride(${m.id},'${field}',this.value)" onclick="event.stopPropagation()" title="ערכי לשנות — ישתנה בכל הפרומפטים"/>`;
+      }
       else v=m[c.k]??'—';
-      h+=`<td>${v}</td>`;});h+='</tr>';});
-  h+='</tbody>';document.getElementById('dataTable').innerHTML=h;
+      h+=`<td>${v}</td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  document.getElementById('dataTable').innerHTML=h;
+  // add helper note
+  const tw=document.querySelector('.tw');
+  if(tw&&!tw.querySelector('.attr-note')){const note=document.createElement('div');note.className='attr-note';note.style.cssText='font-size:10px;color:var(--tx3);padding:8px 14px;border-top:1px solid var(--bd)';note.textContent='✏️ שדות Skin / Hair / Ethnicity / Eyes / Body / Stature / Age ניתנים לעריכה ישירה — כל שינוי מסתנכרן אוטומטית לפרומפטים';tw.appendChild(note)}
 }
 
 // ── QC SYSTEM ──
@@ -1039,21 +1072,140 @@ async function downloadCasting(format){
   }catch(e){toast('שגיאה בייצוא')}
 }
 
-// ── AI STUDIO ──
+// ── DELIVERY STATUS SYSTEM ──
+// dbDelivery: { modelId: [{id, status, note, changed, by, date}] }
+let dbDelivery = {};
+const DELIVERY_STATUS = {
+  sent:      {label:'נשלח ללקוח',    color:'var(--cy)',   bg:'rgba(6,182,212,.12)'},
+  approved:  {label:'מאושר ✅',       color:'var(--gn)',   bg:'var(--gnd)'},
+  revision:  {label:'נדרש תיקון ✏️', color:'var(--am)',   bg:'rgba(245,158,11,.12)'},
+  rejected:  {label:'נדחה ❌',        color:'var(--rs)',   bg:'var(--rsd)'},
+  pending:   {label:'ממתין',          color:'var(--tx3)',  bg:'var(--sf3)'}
+};
+
+async function loadDeliveryData(){
+  if(!sb)return;
+  try{const{data}=await sb.from('model_delivery').select('*').order('created_at',{ascending:false});
+    if(data)data.forEach(r=>{if(!dbDelivery[r.model_id])dbDelivery[r.model_id]=[];dbDelivery[r.model_id].push(r)})}catch(e){console.warn('delivery load:',e)}
+}
+
+async function saveDeliveryInline(mid,status){
+  const note=dbDelivery[mid]?.[0]?.note||'';
+  const changed=dbDelivery[mid]?.[0]?.changed_fields||'';
+  await saveDelivery(mid,status,note,changed);
+}
+
+async function saveDelivery(mid,status,note,changed){
+  const rec={model_id:mid,status,note:note||'',changed_fields:changed||'',created_by:currentUser,created_at:new Date().toISOString()};
+  if(!dbDelivery[mid])dbDelivery[mid]=[];dbDelivery[mid].unshift(rec);
+  if(sb){try{await sb.from('model_delivery').insert(rec)}catch(e){console.warn('delivery save:',e)}}
+  fGal();toast('סטטוס משלוח נשמר ✅');
+}
+
+function getLatestDelivery(mid){return(dbDelivery[mid]||[])[0]||null}
+
+function openDeliveryModal(mid){
+  const m=MD.find(x=>x.id===mid);if(!m)return;
+  const history=dbDelivery[mid]||[];
+  const latest=history[0]||null;
+  const curStatus=latest?latest.status:'pending';
+  const histHtml=history.slice(0,5).map(h=>{const ds=DELIVERY_STATUS[h.status]||DELIVERY_STATUS.pending;return`<div style="padding:8px 10px;border-radius:7px;background:${ds.bg};margin-bottom:6px;border:1px solid ${ds.color}30"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:11px;font-weight:700;color:${ds.color}">${ds.label}</span><span style="font-size:9px;color:var(--tx3)">${h.created_by||''} · ${h.created_at?h.created_at.slice(0,10):''}</span></div>${h.note?`<div style="font-size:10px;color:var(--tx2)">${escHtml(h.note)}</div>`:''}${h.changed_fields?`<div style="font-size:9px;color:var(--tx3);margin-top:2px">שינויים: ${escHtml(h.changed_fields)}</div>`:''}</div>`}).join('');
+
+  document.getElementById('fbModal').innerHTML=`<div class="fb-modal-overlay" onclick="if(event.target===this)closeFBModal()">
+    <div class="fb-modal" style="width:460px;max-width:95vw">
+      <h4>📦 סטטוס משלוח — ${escHtml(m.nm)} #${m.id}</h4>
+      <div style="font-size:10px;color:var(--tx2);margin-bottom:12px">${m.sz} · ${m.bd} · ${m.eth}</div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px">עדכון סטטוס חדש:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px" id="dlvBtns">
+          ${Object.entries(DELIVERY_STATUS).filter(([k])=>k!=='pending').map(([k,v])=>`<div class="fb-m-btn ${curStatus===k?'sel-approved':''}" style="flex:0;padding:7px 12px;font-size:11px;border-color:${v.color}30;background:${v.bg}" onclick="selectDlvStatus('${k}')">${v.label}</div>`).join('')}
+        </div>
+        <div class="fg" style="margin-bottom:8px"><label>הערה / תגובת לקוח</label><textarea id="dlvNote" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px;border-radius:6px;font-family:'Outfit',sans-serif;font-size:12px;resize:vertical">${latest?.note||''}</textarea></div>
+        <div class="fg"><label>שינויים נדרשים (אם יש)</label><input id="dlvChanged" type="text" placeholder="לדוג׳: לשנות תאורה, לתקן רקע..." style="width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px;border-radius:6px;font-size:12px" value="${latest?.changed_fields||''}"/></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:10px;font-weight:700;color:var(--tx2)">היסטוריה (${history.length}):</span>
+      </div>
+      <div style="max-height:180px;overflow-y:auto">${histHtml||'<div style="font-size:10px;color:var(--tx3);text-align:center;padding:16px">אין היסטוריה עדיין</div>'}</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn btn-ghost" onclick="closeFBModal()">סגור</button>
+        <button class="btn btn-ac" onclick="submitDelivery(${mid})">שמור סטטוס</button>
+      </div>
+    </div>
+  </div>`;
+  window._dlvStatus=curStatus;
+}
+
+function selectDlvStatus(s){
+  window._dlvStatus=s;
+  document.querySelectorAll('#dlvBtns .fb-m-btn').forEach((btn,i)=>{const keys=Object.keys(DELIVERY_STATUS).filter(k=>k!=='pending');btn.style.fontWeight=keys[i]===s?'800':'600';btn.style.opacity=keys[i]===s?'1':'0.6'});
+}
+function submitDelivery(mid){const note=document.getElementById('dlvNote')?.value||'';const changed=document.getElementById('dlvChanged')?.value||'';saveDelivery(mid,window._dlvStatus||'pending',note,changed);closeFBModal()}
+
+// ── EDITABLE ATTRIBUTES ──
+// Store per-model overrides in memory + Supabase
+let dbAttrOverrides = {}; // { modelId: {sk,hr,eth,ey,bd,st,ag} }
+
+async function loadAttrOverrides(){
+  if(!sb)return;
+  try{const{data}=await sb.from('model_attr_overrides').select('*');
+    if(data)data.forEach(r=>{dbAttrOverrides[r.model_id]={sk:r.sk,hr:r.hr,eth:r.eth,ey:r.ey,bd:r.bd,st:r.st,ag:r.ag}})}catch(e){console.warn('attr overrides load:',e)}
+}
+
+function getModelAttrs(m){
+  const ov=dbAttrOverrides[m.id]||{};
+  return{sk:ov.sk||m.sk,hr:ov.hr||m.hr,eth:ov.eth||m.eth,ey:ov.ey||m.ey,bd:ov.bd||m.bd,st:ov.st||m.st,ag:ov.ag||m.ag};
+}
+
+async function saveAttrOverride(mid,field,value){
+  if(!dbAttrOverrides[mid])dbAttrOverrides[mid]={};
+  dbAttrOverrides[mid][field]=value;
+  if(sb){try{await sb.from('model_attr_overrides').upsert({model_id:mid,...dbAttrOverrides[mid]},{onConflict:'model_id'})}catch(e){console.warn('attr save:',e)}}
+  // Refresh prompts tab if visible
+  const promptsPanel=document.getElementById('p-prompts');
+  if(promptsPanel&&promptsPanel.classList.contains('active'))genPrompts();
+  toast(`✏️ עודכן: ${field} → ${value}`);
+}
+
+// Override mkPrompt to use editable attrs
+const _origMkPrompt = mkPrompt;
+function mkPrompt(m,poseName){
+  const attrs=getModelAttrs(m);
+  const mEff={...m,...attrs};
+  return _origMkPrompt(mEff,poseName);
+}
+
+// ── AI STUDIO (updated Gemini model) ──
+// Model priority: gemini-3.1-flash-image-preview → gemini-2.0-flash-preview-image-generation
+const GEMINI_IMAGE_MODELS=[
+  'gemini-2.5-flash-preview-05-20',
+  'gemini-2.0-flash-preview-image-generation'
+];
 let aiGeminiKey=null,aiHistory=[];
-function connectGemini(){const key=document.getElementById('aiApiKey').value.trim();if(!key||key.length<20){toast('מפתח לא תקין');return}aiGeminiKey=key;document.getElementById('aiConnStatus').innerHTML='<span style="color:var(--gn)">🟢 מחובר</span>';document.getElementById('aiStudioMain').style.display='block';const sel=document.getElementById('aiModelSelect');sel.innerHTML='<option value="">בחרי מודל...</option>';MD.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=`${m.nm} #${m.id} — ${m.sz} ${m.bd}`;sel.appendChild(opt)});aiAssemblePrompt();toast('מחובר! 🟢')}
+
+function connectGemini(){const key=document.getElementById('aiApiKey').value.trim();if(!key||key.length<20){toast('מפתח לא תקין');return}aiGeminiKey=key;document.getElementById('aiConnStatus').innerHTML='<span style="color:var(--gn)">🟢 מחובר · Gemini 3.1 Flash Image</span>';document.getElementById('aiStudioMain').style.display='block';const sel=document.getElementById('aiModelSelect');sel.innerHTML='<option value="">בחרי מודל...</option>';MD.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=`${m.nm} #${m.id} — ${m.sz} ${m.bd}`;sel.appendChild(opt)});aiAssemblePrompt();toast('מחובר! 🟢')}
 function aiUpdatePreview(){const mid=parseInt(document.getElementById('aiModelSelect').value);const m=MD.find(x=>x.id===mid);if(!m){document.getElementById('aiModelPreview').innerHTML='';return}const wt=WT[m.id]||{w:'?',d:'?'};document.getElementById('aiModelPreview').innerHTML=`<div style="font-size:9px;color:var(--tx2);margin-top:4px">${m.nm} · ${m.sz} · ${m.h}${m.gender==='MAN'?'"':'cm'} · ~${wt.w}kg · ${m.sk} · ${m.eth}</div>`;aiAssemblePrompt()}
 function aiAssemblePrompt(){const mid=parseInt(document.getElementById('aiModelSelect')?.value);const m=MD.find(x=>x.id===mid);const pose=document.getElementById('aiPoseSelect')?.value||'Front';const custom=document.getElementById('aiCustomPrompt')?.value||'';if(!m){document.getElementById('aiPromptPreview').textContent='בחרי מודל לבניית פרומפט...';return}document.getElementById('aiPromptPreview').textContent=mkPrompt(m,pose)+(custom?'\n\nADDITIONAL: '+custom:'')}
 function aiCopyPrompt(){const t=document.getElementById('aiPromptPreview').textContent;navigator.clipboard.writeText(t).then(()=>toast('פרומפט הועתק! 📋'))}
+
+async function aiTryGenerate(prompt,modelIdx){
+  const model=GEMINI_IMAGE_MODELS[modelIdx];if(!model)throw new Error('כל המודלים נכשלו');
+  const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${aiGeminiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:["TEXT","IMAGE"],temperature:1,topP:0.95}})});
+  if(resp.status===404||resp.status===400){console.warn(`Model ${model} not available, trying next...`);return aiTryGenerate(prompt,modelIdx+1)}
+  if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error?.message||`HTTP ${resp.status}`)}
+  const data=await resp.json();
+  if(data.candidates&&data.candidates[0]?.content?.parts)for(const part of data.candidates[0].content.parts)if(part.inlineData)return{imageData:part.inlineData,model};
+  return{imageData:null,model};
+}
+
 async function aiRunPipeline(){
   if(!aiGeminiKey){toast('חברי API key');return}const mid=parseInt(document.getElementById('aiModelSelect')?.value);if(!mid){toast('בחרי מודל');return}
   const prompt=document.getElementById('aiPromptPreview').textContent;const outBody=document.getElementById('aiOutputBody');const runBtn=document.getElementById('aiRunBtn');runBtn.disabled=true;runBtn.textContent='⏳ Generating...';
-  outBody.innerHTML='<div class="ai-generating"><div class="spinner"></div>Gemini מייצר...</div>';
-  try{const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${aiGeminiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:["TEXT","IMAGE"],temperature:1,topP:0.95}})});
-    if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error?.message||`HTTP ${resp.status}`)}
-    const data=await resp.json();let imageData=null;if(data.candidates&&data.candidates[0]?.content?.parts)for(const part of data.candidates[0].content.parts)if(part.inlineData)imageData=part.inlineData;
+  outBody.innerHTML='<div class="ai-generating"><div class="spinner"></div>Gemini 3.1 מייצר...</div>';
+  try{
+    const{imageData,model}=await aiTryGenerate(prompt,0);
     if(imageData){const imgSrc=`data:${imageData.mimeType};base64,${imageData.data}`;const m=MD.find(x=>x.id===mid);const pose=document.getElementById('aiPoseSelect').value;
-      outBody.innerHTML=`<img class="ai-output-img" src="${imgSrc}" alt="Generated"/><div style="display:flex;gap:6px;margin-top:8px"><a href="${imgSrc}" download="${m?m.nm:'model'}_${pose}.png" class="btn btn-ghost" style="font-size:9px;text-decoration:none">💾 שמירה</a><button class="btn btn-ghost" style="font-size:9px" onclick="aiUploadToModel(${mid},'${pose}')">📤 העלאה לדשבורד</button></div>`;
+      outBody.innerHTML=`<div style="font-size:8px;color:var(--tx3);font-family:'JetBrains Mono',monospace;margin-bottom:6px">via ${model}</div><img class="ai-output-img" src="${imgSrc}" alt="Generated"/><div style="display:flex;gap:6px;margin-top:8px"><a href="${imgSrc}" download="${m?m.nm:'model'}_${pose}.png" class="btn btn-ghost" style="font-size:9px;text-decoration:none">💾 שמירה</a><button class="btn btn-ghost" style="font-size:9px" onclick="aiUploadToModel(${mid},'${pose}')">📤 העלאה לדשבורד</button></div>`;
       aiHistory.unshift({img:imgSrc,model:m?.nm||'?',pose,time:new Date().toLocaleTimeString('he-IL')});aiRenderHistory();
     }else outBody.innerHTML=`<div class="ai-error">Gemini לא החזיר תמונה</div>`;
   }catch(err){outBody.innerHTML=`<div class="ai-error">❌ שגיאה: ${err.message}</div>`}finally{runBtn.disabled=false;runBtn.textContent='▶️ Generate'}
@@ -1071,8 +1223,9 @@ async function captureScreen(){toast('📸 מכין...');try{const activePanel=d
 async function boot(){
   if(sb){try{const{error}=await sb.from('model_status').select('id',{count:'exact',head:true});if(error){document.getElementById('connBanner').classList.add('show');isConnected=false}}catch(e){}}
   await loadAllData();
+  await loadDeliveryData();
+  await loadAttrOverrides();
   document.getElementById('syncStatus').innerHTML=isConnected?'<span class="live-dot"></span> מחובר ב-Real-Time':'⚡ מצב מקומי';
-  // Init project A
   initProjectUI();
   updateProgress();
   fGal();
