@@ -1221,7 +1221,16 @@ async function dlCasting(fmt){
 // ══════════════════════════════════════════════
 const GEMS=['gemini-2.5-flash-preview-05-20','gemini-2.0-flash-preview-image-generation'];
 let aiKey=null, aiHist=[];
-function aiConnect(){const k=mw('aiKey').value.trim();if(k.length<20){toast('מפתח לא תקין');return;}aiKey=k;mw('aiStat').innerHTML='<span style="color:var(--gn)">🟢 מחובר</span>';mw('aiMain').style.display='block';mw('aiMSel').innerHTML='<option value="">בחרי מודל...</option>'+MD.map(m=>`<option value="${m.id}">${m.nm} #${m.id}—${m.sz}</option>`).join('');aiAssemble();toast('🟢 מחובר!');}
+function aiConnect(){
+  const k=mw('aiKey').value.trim();
+  if(k.length<20){toast('מפתח לא תקין');return;}
+  aiKey=k;
+  mw('aiStat').innerHTML='<span style="color:var(--gn)">🟢 מחובר · Gemini 2.5 Flash</span>';
+  mw('aiMain').style.display='block';
+  mw('aiMSel').innerHTML='<option value="">בחרי מודל...</option>'+MD.map(m=>`<option value="${m.id}">${m.nm} #${m.id}—${m.sz}</option>`).join('');
+  aiAssemble();
+  toast('🟢 מחובר!');
+}
 function aiPreview(){const mid=parseInt(mw('aiMSel').value);const m=MD.find(x=>x.id===mid);mw('aiMPrev').innerHTML=m?`<div style="font-size:9px;color:var(--tx2);margin-top:4px">${m.sz}·${m.h}${m.g==='M'?'"':'cm'}·~${mwt(m)}kg·${m.sk}·${m.eth}</div>`:'';aiAssemble();}
 function aiAssemble(){const mid=parseInt(mw('aiMSel').value);const m=MD.find(x=>x.id===mid);const pose=mw('aiPSel').value||'Front';const custom=mw('aiCustom').value||'';mw('aiPrompt').textContent=m?(mkP(m,pose)+(custom?'\n\nADDITIONAL: '+custom:'')):'בחרי מודל...';}
 function aiCopy(){const t=mw('aiPrompt').textContent;navigator.clipboard.writeText(t).then(()=>toast('📋 הועתק!'));}
