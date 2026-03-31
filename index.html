@@ -219,6 +219,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-he
     <button class="tab-btn" data-tab="qc">QC מידות</button>
     <button class="tab-btn" data-tab="canvas">📊 Canvas</button>
     <button class="tab-btn" data-tab="casting">📋 Casting</button>
+    <button class="tab-btn" data-tab="teamkits" id="tabBtnKits" style="display:none">👕 Team Kits</button>
     <button class="tab-btn" data-tab="ai">🎨 AI Studio</button>
     <button class="tab-btn" data-tab="table">טבלה</button>
   </div>
@@ -348,6 +349,25 @@ body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-he
       <label style="font-size:10px;display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" checked id="csP" onchange="renderCasting()" style="accent-color:var(--ac)"> Poses</label>
     </div>
     <div id="castingOut" style="background:#fff;border-radius:10px;padding:22px;color:#111"></div>
+  </div>
+
+  <!-- TEAM KITS -->
+  <div id="tab-teamkits" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h3 style="font-size:17px;font-weight:800">👕 Team Kits — Uniform Reference</h3>
+        <p style="color:var(--tx2);font-size:11px">ג׳נרטו מדים אחידים לכל נבחרת. התמונה תשמש כ-reference ב-AI Studio עבור כל שחקני הנבחרת.</p>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="password" id="kitGemKey" placeholder="Gemini API Key" style="background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:7px 11px;border-radius:7px;font-size:11px;width:180px"/>
+        <button class="btn btn-p" style="font-size:10px" onclick="kitConnect()">חיבור</button>
+        <div id="kitStat" style="font-size:9px;color:var(--tx3)">⚪</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--tx3);padding:6px 10px;background:var(--sf);border:1px solid var(--bd);border-radius:7px;margin-bottom:14px">
+      ⚡ תהליך: <strong>Generate Kit</strong> → תמונה נשמרת → ב-AI Studio תמונת ה-Kit נשלחת אוטומטית כ-reference לכל פוזה של שחקני הנבחרת
+    </div>
+    <div id="kitsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
   </div>
 
   <!-- AI -->
@@ -1480,7 +1500,10 @@ function doSwitchProj(idx){
   else if(idx===2){MD=WEFL_MD;SO=WEFL_SO;WT_BASE=WEFL_WT;SPEC={};mw('hdrSub').textContent='Private · 20 Teams · 220 Players';}
   document.querySelectorAll('.psw-btn').forEach(b=>b.classList.remove('on'));
   const pbtn=mw('pb'+idx);if(pbtn)pbtn.classList.add('on');
+  // Show/hide Team Kits tab for WEFL only
+  const kitsBtn=mw('tabBtnKits');if(kitsBtn)kitsBtn.style.display=idx===2?'':'none';
   initUI();
+  if(idx===2)renderTeamKits();
   showTab(idx===2?'casting':'overview');
 }
 
@@ -4316,6 +4339,113 @@ async function dlCasting(fmt){
 }
 
 // ══════════════════════════════════════════════
+// TEAM KITS TAB
+// ══════════════════════════════════════════════
+let kitImages={}; // {teamName: {data, mimeType}} — stored kit images per team
+let kitGemKey=null;
+function kitConnect(){
+  const k=mw('kitGemKey').value.trim();
+  if(k.length<20){toast('מפתח לא תקין');return;}
+  kitGemKey=k;
+  mw('kitStat').innerHTML='<span style="color:var(--gn)">🟢</span>';
+  toast('🟢 Kit Studio מחובר!');
+  renderTeamKits();
+}
+function renderTeamKits(){
+  if(typeof WEFL_TEAMS==='undefined')return;
+  const grid=mw('kitsGrid');if(!grid)return;
+  grid.innerHTML=WEFL_TEAMS.map((t,ti)=>{
+    const u=(typeof WEFL_UNIFORMS!=='undefined')?WEFL_UNIFORMS[t.name]:null;
+    const hasKit=!!kitImages[t.name];
+    const prompt=mkKitPrompt(t.name);
+    return `<div style="border:2px solid ${t.cl}40;border-radius:12px;overflow:hidden;background:var(--sf)">
+      <div style="background:${t.cl};color:white;padding:8px 14px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px">
+        <span>${t.name}</span>
+        <span style="font-size:10px;font-weight:400;opacity:.8">${t.nat} · ${t.colors}</span>
+        ${hasKit?'<span style="margin-left:auto;font-size:11px">✅</span>':''}
+      </div>
+      <div style="padding:10px;display:grid;grid-template-columns:1fr 140px;gap:10px">
+        <div>
+          <div style="font-size:9px;color:var(--tx2);margin-bottom:4px;font-weight:600">Uniform Details</div>
+          ${u?`<div style="font-size:9px;color:var(--tx3);line-height:1.5;margin-bottom:6px">
+            <div><b>Jersey:</b> ${esc(u.jersey).substring(0,80)}...</div>
+            <div><b>Shorts:</b> ${esc(u.shorts).substring(0,60)}...</div>
+            <div><b>Socks:</b> ${esc(u.socks).substring(0,60)}...</div>
+          </div>`:'<div style="font-size:9px;color:var(--rs)">No uniform data</div>'}
+          <details style="margin-bottom:6px">
+            <summary style="font-size:9px;color:var(--ac);cursor:pointer;font-weight:600">📝 Full Prompt</summary>
+            <textarea id="kitPrompt_${ti}" class="pbox" style="width:100%;min-height:80px;resize:vertical;cursor:text;font-size:8px;margin-top:4px">${esc(prompt)}</textarea>
+          </details>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="btn btn-p" style="font-size:9px;padding:4px 10px" onclick="genTeamKit(${ti})" ${kitGemKey?'':'disabled'}>▶️ Generate Kit</button>
+            <label class="btn btn-g" style="font-size:9px;padding:4px 10px;cursor:pointer">📤 Upload<input type="file" accept="image/*" style="display:none" onchange="uploadTeamKit(${ti},event)"/></label>
+            <button class="btn btn-g" style="font-size:9px;padding:4px 10px" onclick="navigator.clipboard.writeText(document.getElementById('kitPrompt_${ti}')?.value||'');toast('📋 הועתק!')">📋 Copy</button>
+          </div>
+        </div>
+        <div id="kitImg_${ti}" style="min-height:120px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:8px;border:1px solid var(--bd)">
+          ${hasKit?`<img src="data:${kitImages[t.name].mimeType};base64,${kitImages[t.name].data}" style="width:100%;max-height:160px;object-fit:contain;border-radius:7px"/>`
+          :`<div style="text-align:center;color:var(--tx3);font-size:10px"><div style="font-size:22px;margin-bottom:4px">👕</div>No kit yet</div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function genTeamKit(teamIdx){
+  if(!kitGemKey){toast('חברי API key ב-Team Kits');return;}
+  const t=WEFL_TEAMS[teamIdx];
+  const promptEl=document.getElementById('kitPrompt_'+teamIdx);
+  const prompt=promptEl?promptEl.value:mkKitPrompt(t.name);
+  const imgBox=document.getElementById('kitImg_'+teamIdx);
+  imgBox.innerHTML='<div class="ai-gen"><div class="spin"></div>Gemini מייצר kit...</div>';
+  
+  const models=['gemini-3.1-flash-image-preview','gemini-2.5-flash-image-preview','gemini-2.0-flash-preview-image-generation'];
+  for(let i=0;i<models.length;i++){
+    try{
+      const url=`https://generativelanguage.googleapis.com/v1beta/models/${models[i]}:generateContent?key=${kitGemKey}`;
+      const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{responseModalities:['TEXT','IMAGE']}
+      })});
+      const data=await resp.json();
+      if(data.error)continue;
+      const parts=data.candidates?.[0]?.content?.parts||[];
+      const imgPart=parts.find(p=>p.inlineData);
+      if(imgPart){
+        const img={data:imgPart.inlineData.data, mimeType:imgPart.inlineData.mimeType||'image/png'};
+        kitImages[t.name]=img;
+        // Also set as aiKitImg if this team is selected in AI Studio
+        const src=`data:${img.mimeType};base64,${img.data}`;
+        imgBox.innerHTML=`<img src="${src}" style="width:100%;max-height:160px;object-fit:contain;border-radius:7px"/>`;
+        toast('✅ '+t.name+' kit generated!');
+        // Auto-download
+        const a=document.createElement('a');a.href=src;a.download=t.name.replace(/\\s+/g,'_')+'_kit.png';
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        return;
+      }
+    }catch(e){continue;}
+  }
+  imgBox.innerHTML='<div style="color:var(--rs);font-size:10px;text-align:center;padding:12px">❌ Generation failed</div>';
+  toast('❌ Kit generation failed');
+}
+
+function uploadTeamKit(teamIdx,e){
+  const file=e.target.files[0];if(!file)return;
+  const t=WEFL_TEAMS[teamIdx];
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const dataUrl=ev.target.result;
+    const base64=dataUrl.split(',')[1];
+    const mimeType=file.type||'image/png';
+    kitImages[t.name]={data:base64, mimeType};
+    const imgBox=document.getElementById('kitImg_'+teamIdx);
+    imgBox.innerHTML=`<img src="${dataUrl}" style="width:100%;max-height:160px;object-fit:contain;border-radius:7px"/>`;
+    toast('👕 '+t.name+' kit uploaded!');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════════
 // AI STUDIO
 // ══════════════════════════════════════════════
 const GEMS=[
@@ -4371,10 +4501,20 @@ function aiAssemble(){
   if(proj===2 && m && m._team){
     kitPanel.style.display='block';
     mw('aiPromptKit').textContent=mkKitPrompt(m._team);
+    // Auto-load kit from Team Kits tab if available
+    if(kitImages[m._team] && !aiKitImg){
+      aiKitImg=kitImages[m._team];
+      mw('aiOutKit').innerHTML=`<img src="data:${aiKitImg.mimeType};base64,${aiKitImg.data}" style="width:100%;max-height:180px;object-fit:contain;border-radius:7px;border:1px solid var(--bd)"/>`;
+    } else if(kitImages[m._team]){
+      // Update if team changed
+      const curTeam=m._team;
+      aiKitImg=kitImages[curTeam];
+      mw('aiOutKit').innerHTML=`<img src="data:${aiKitImg.mimeType};base64,${aiKitImg.data}" style="width:100%;max-height:180px;object-fit:contain;border-radius:7px;border:1px solid var(--bd)"/>`;
+    }
     if(aiKitImg){
       mw('aiKitStatus').innerHTML='<span style="color:var(--gn)">✅ Kit reference loaded for '+esc(m._team)+'</span>';
     }else{
-      mw('aiKitStatus').innerHTML='<span style="color:var(--or)">⚠️ Generate or upload kit image</span>';
+      mw('aiKitStatus').innerHTML='<span style="color:var(--or)">⚠️ Generate kit in 👕 Team Kits tab first, or upload here</span>';
     }
   }else{
     kitPanel.style.display='none';
