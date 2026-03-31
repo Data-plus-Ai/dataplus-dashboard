@@ -367,20 +367,73 @@ body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-he
     </div>
     <div id="aiMain" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px">
-        <div><h3 style="font-size:17px;font-weight:800">🎨 AI Fashion Model Studio</h3>        <p style="color:var(--tx2);font-size:11px">Gemini 3.1 Flash Image · prompt → image</p></div>
-        <div style="display:flex;gap:6px"><button class="btn btn-g" onclick="aiReset()">🗑️ נקה</button><button class="btn btn-p" id="aiRunBtn" onclick="aiRun()">▶️ Generate</button></div>
+        <div><h3 style="font-size:17px;font-weight:800">🎨 AI Studio — Reference Pipeline</h3>
+        <p style="color:var(--tx2);font-size:11px">Step 1: Portrait → Step 2: Body poses with reference image</p></div>
+        <div style="display:flex;gap:6px"><button class="btn btn-g" onclick="aiReset()">🗑️ נקה</button></div>
       </div>
-      <div style="border:1px solid var(--bd);border-radius:12px;background:var(--bg);overflow:auto;height:580px;position:relative">
-        <div style="position:relative;width:880px;height:560px;background-image:radial-gradient(circle,var(--bd) 1px,transparent 1px);background-size:20px 20px" id="aiCv">
-          <div class="ai-node" id="aiNm" style="left:20px;top:20px"><div class="ai-nh" style="background:var(--ac)">👤 Model</div><div class="ai-nb"><select id="aiMSel" onchange="aiPreview()" style="width:100%"><option value="">בחרי מודל...</option></select><div id="aiMPrev" style="margin-top:6px;font-size:9px;color:var(--tx3)"></div></div></div>
-          <div class="ai-node" id="aiNp" style="left:300px;top:20px"><div class="ai-nh" style="background:var(--gn)">🧍 Pose</div><div class="ai-nb"><select id="aiPSel" style="width:100%" onchange="aiAssemble()"><option>Front</option><option>45° Left</option><option>45° Right</option><option>Profile 90°</option><option>Back</option><option>Close-Up</option></select></div></div>
-          <div class="ai-node" id="aiNc" style="left:300px;top:150px"><div class="ai-nh" style="background:var(--pk)">✏️ Custom</div><div class="ai-nb"><textarea id="aiCustom" placeholder="תוספת חופשית..." style="width:100%;min-height:44px" oninput="aiAssemble()"></textarea></div></div>
-          <div class="ai-node" id="aiNpr" style="left:580px;top:20px"><div class="ai-nh" style="background:var(--or)">📝 Prompt</div><div class="ai-nb"><div id="aiPrompt" class="ai-prev" style="max-height:190px;overflow-y:auto">בחרי מודל...</div><button class="btn btn-g" style="margin-top:5px;width:100%;font-size:9px" onclick="aiCopy()">📋 העתק</button></div></div>
-          <div class="ai-node" id="aiNo" style="left:580px;top:300px;min-width:270px"><div class="ai-nh" style="background:linear-gradient(135deg,var(--ac),var(--pk))">🖼️ Output</div><div class="ai-nb" id="aiOut"><div class="ai-ph"><div style="font-size:28px;margin-bottom:6px">🎨</div>לחצי Generate</div></div></div>
+
+```
+  <!-- Model Selector -->
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <label style="font-size:10px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">👤 Model</label>
+      <select id="aiMSel" onchange="aiPreview()" style="width:100%;background:var(--sf);border:1px solid var(--bd);color:var(--tx);padding:7px 11px;border-radius:7px;font-size:11px"><option value="">בחרי מודל...</option></select>
+    </div>
+    <div id="aiMPrev" style="font-size:9px;color:var(--tx3);min-width:150px"></div>
+    <div>
+      <label style="font-size:10px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">✏️ Custom</label>
+      <input id="aiCustom" placeholder="תוספת חופשית..." style="background:var(--sf);border:1px solid var(--bd);color:var(--tx);padding:7px 11px;border-radius:7px;font-size:11px;width:200px" oninput="aiAssemble()"/>
+    </div>
+  </div>
+
+  <!-- 2-Step Pipeline -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <!-- STEP 1: Portrait -->
+    <div style="border:2px solid var(--ac);border-radius:12px;overflow:hidden">
+      <div style="background:var(--ac);color:white;padding:8px 14px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px">
+        <span>1️⃣ Portrait (Reference)</span>
+        <button class="btn" style="margin-left:auto;font-size:9px;padding:3px 10px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3)" id="aiRunPortrait" onclick="aiRunStep('portrait')">▶️ Generate</button>
+      </div>
+      <div style="padding:10px">
+        <div id="aiPromptPortrait" style="font-size:9px;color:var(--tx2);max-height:80px;overflow-y:auto;margin-bottom:8px;padding:6px;background:var(--sf);border-radius:6px;border:1px solid var(--bd)">בחרי מודל...</div>
+        <div id="aiOutPortrait" style="min-height:120px;display:flex;align-items:center;justify-content:center">
+          <div class="ai-ph" style="font-size:11px;color:var(--tx3);text-align:center"><div style="font-size:24px;margin-bottom:4px">📸</div>Step 1: Portrait</div>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn btn-g" style="font-size:9px;flex:1" onclick="aiCopyPrompt('portrait')">📋 העתק פרומפט</button>
+          <label class="btn btn-g" style="font-size:9px;flex:1;text-align:center;cursor:pointer">📤 העלה תמונה<input type="file" accept="image/*" style="display:none" onchange="aiLoadRef(event)"/></label>
         </div>
       </div>
-      <div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:7px">📜 היסטוריה</div><div class="ai-hist" id="aiHist"><div style="text-align:center;padding:18px;color:var(--tx3);font-size:10px">עדיין לא נוצרו</div></div></div>
     </div>
+
+    <!-- STEP 2: Body Poses -->
+    <div style="border:2px solid var(--gn);border-radius:12px;overflow:hidden">
+      <div style="background:var(--gn);color:white;padding:8px 14px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px">
+        <span>2️⃣ Body Pose (+ Reference)</span>
+        <select id="aiPSel" style="margin-left:auto;font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.2);color:white" onchange="aiAssemble()">
+          <option>Front</option><option>45R</option><option>Profile 90</option><option>Back</option>
+        </select>
+        <button class="btn" style="font-size:9px;padding:3px 10px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3)" id="aiRunBody" onclick="aiRunStep('body')">▶️ Generate</button>
+      </div>
+      <div style="padding:10px">
+        <div id="aiRefStatus" style="font-size:9px;padding:5px 8px;background:var(--sf);border-radius:6px;border:1px solid var(--bd);margin-bottom:6px;color:var(--tx3)">⚠️ קודם צרי Portrait (Step 1) — ישמש כ-reference</div>
+        <div id="aiPromptBody" style="font-size:9px;color:var(--tx2);max-height:80px;overflow-y:auto;margin-bottom:8px;padding:6px;background:var(--sf);border-radius:6px;border:1px solid var(--bd)">בחרי מודל...</div>
+        <div id="aiOutBody" style="min-height:120px;display:flex;align-items:center;justify-content:center">
+          <div class="ai-ph" style="font-size:11px;color:var(--tx3);text-align:center"><div style="font-size:24px;margin-bottom:4px">🧍</div>Step 2: Body Pose</div>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn btn-g" style="font-size:9px;flex:1" onclick="aiCopyPrompt('body')">📋 העתק פרומפט</button>
+          <button class="btn btn-g" style="font-size:9px;flex:1" onclick="aiRunAll()">🔄 Generate All Poses</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div><div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:7px">📜 היסטוריה</div><div class="ai-hist" id="aiHist"><div style="text-align:center;padding:18px;color:var(--tx3);font-size:10px">עדיין לא נוצרו</div></div></div>
+</div>
+```
+
   </div>
 
   <!-- TABLE -->
@@ -18292,91 +18345,152 @@ const GEMS=[
 ‘gemini-2.5-flash-image-preview’,
 ‘gemini-2.0-flash-preview-image-generation’
 ];
-let aiKey=null, aiHist=[];
+let aiKey=null, aiHist=[], aiRefImg=null;
 function aiConnect(){
 const k=mw(‘aiKey’).value.trim();
 if(k.length<20){toast(‘מפתח לא תקין’);return;}
 aiKey=k;
-mw(‘aiStat’).innerHTML=’<span style="color:var(--gn)">🟢 מחובר · Gemini 2.5 Flash</span>’;
+mw(‘aiStat’).innerHTML=’<span style="color:var(--gn)">🟢 מחובר · Gemini</span>’;
 mw(‘aiMain’).style.display=‘block’;
-mw(‘aiMSel’).innerHTML=’<option value="">בחרי מודל…</option>’+MD.map(m=>`<option value="${m.id}">${m.nm} #${m.id}—${m.sz}</option>`).join(’’);
+mw(‘aiMSel’).innerHTML=’<option value="">בחרי מודל…</option>’+MD.map(m=>`<option value="${m.id}">${m.nm} #${m.id}—${m.sz||m._pos||''}</option>`).join(’’);
 aiAssemble();
 toast(‘🟢 מחובר!’);
 }
-function aiPreview(){const mid=parseInt(mw(‘aiMSel’).value);const m=MD.find(x=>x.id===mid);mw(‘aiMPrev’).innerHTML=m?`<div style="font-size:9px;color:var(--tx2);margin-top:4px">${m.sz}·${m.h}${m.g==='M'?'"':'cm'}·~${mwt(m)}kg·${m.sk}·${m.eth}</div>`:’’;aiAssemble();}
-function aiAssemble(){const mid=parseInt(mw(‘aiMSel’).value);const m=MD.find(x=>x.id===mid);const pose=mw(‘aiPSel’).value||‘Front’;const custom=mw(‘aiCustom’).value||’’;mw(‘aiPrompt’).textContent=m?(mkP(m,pose)+(custom?’\n\nADDITIONAL: ‘+custom:’’)):‘בחרי מודל…’;}
-function aiCopy(){const t=mw(‘aiPrompt’).textContent;navigator.clipboard.writeText(t).then(()=>toast(‘📋 הועתק!’));}
-async function aiTry(prompt, idx) {
+function aiPreview(){const mid=parseInt(mw(‘aiMSel’).value);const m=MD.find(x=>x.id===mid);mw(‘aiMPrev’).innerHTML=m?`<div style="font-size:9px;color:var(--tx2)">${m._team?m._team+' · ':''}${m._pos||m.sz}·${(m.h/100).toFixed(2)}m·${m._wt||mwt(m)}kg</div>`:’’;aiAssemble();}
+function aiAssemble(){
+const mid=parseInt(mw(‘aiMSel’).value);const m=MD.find(x=>x.id===mid);
+const pose=mw(‘aiPSel’).value||‘Front’;
+const custom=mw(‘aiCustom’).value||’’;
+// Portrait prompt
+const pp=m?mkP(m,‘Close-Up’)+(custom?’\n\nADDITIONAL: ‘+custom:’’):‘בחרי מודל…’;
+mw(‘aiPromptPortrait’).textContent=pp;
+// Body prompt
+const bp=m?mkP(m,pose)+(custom?’\n\nADDITIONAL: ‘+custom:’’):‘בחרי מודל…’;
+mw(‘aiPromptBody’).textContent=bp;
+// Update ref status
+if(aiRefImg){
+mw(‘aiRefStatus’).innerHTML=’<span style="color:var(--gn)">✅ Reference image loaded — will be sent with body prompts</span>’;
+}else{
+mw(‘aiRefStatus’).innerHTML=’<span style="color:var(--or)">⚠️ קודם צרי Portrait (Step 1) — ישמש כ-reference</span>’;
+}
+}
+function aiCopyPrompt(step){
+const el=step===‘portrait’?mw(‘aiPromptPortrait’):mw(‘aiPromptBody’);
+navigator.clipboard.writeText(el.textContent).then(()=>toast(‘📋 הועתק!’));
+}
+function aiLoadRef(e){
+const file=e.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=function(ev){
+const dataUrl=ev.target.result;
+const base64=dataUrl.split(’,’)[1];
+const mimeType=file.type||‘image/png’;
+aiRefImg={data:base64, mimeType};
+mw(‘aiOutPortrait’).innerHTML=`<img src="${dataUrl}" style="width:100%;max-height:250px;object-fit:contain;border-radius:7px;border:1px solid var(--bd)"/>`;
+mw(‘aiRefStatus’).innerHTML=’<span style="color:var(--gn)">✅ Reference image loaded — will be sent with body prompts</span>’;
+toast(‘📸 Reference image loaded!’);
+aiAssemble();
+};
+reader.readAsDataURL(file);
+}
+async function aiTry(prompt, idx, refImage) {
 const model = GEMS[idx];
-if (!model) throw new Error(‘כל המודלים נכשלו — בדקי שה-API key תומך ב-image generation’);
-console.log(‘Trying model:’, model);
+if (!model) throw new Error(‘כל המודלים נכשלו’);
+console.log(‘Trying model:’, model, refImage?‘with ref image’:‘text only’);
+const parts = [];
+if (refImage) {
+parts.push({text: “Here is a reference portrait of this player. Generate the next image maintaining the EXACT same face, build, and identity:\n\n”});
+parts.push({inlineData: {mimeType: refImage.mimeType, data: refImage.data}});
+parts.push({text: “\n\nNow generate this pose:\n\n” + prompt});
+} else {
+parts.push({text: prompt});
+}
 const r = await fetch(
 `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${aiKey}`,
 {
 method: ‘POST’,
 headers: {‘Content-Type’: ‘application/json’},
 body: JSON.stringify({
-contents: [{parts: [{text: prompt}]}],
+contents: [{parts}],
 generationConfig: {responseModalities: [“TEXT”,“IMAGE”], temperature: 1, topP: 0.95}
 })
 }
 );
 if (r.status === 404 || r.status === 400) {
 console.warn(model, ‘not available, trying next…’);
-return aiTry(prompt, idx + 1);
+return aiTry(prompt, idx + 1, refImage);
 }
 if (!r.ok) {
 const e = await r.json().catch(() => ({}));
-const msg = e.error?.message || `HTTP ${r.status}`;
-console.error(‘API error:’, msg, e);
-throw new Error(msg);
+throw new Error(e.error?.message || `HTTP ${r.status}`);
 }
 const d = await r.json();
-console.log(‘Response:’, d);
 if (d.candidates?.[0]?.content?.parts) {
 for (const p of d.candidates[0].content.parts) {
 if (p.inlineData) return {img: p.inlineData, model};
 }
 }
-// no image in response
 const textPart = d.candidates?.[0]?.content?.parts?.find(p => p.text);
-throw new Error(‘Gemini לא החזיר תמונה’ + (textPart ? ‘: ’ + textPart.text.slice(0,120) : ‘’));
+throw new Error(‘Gemini לא החזיר תמונה’ + (textPart ? ’: ’ + textPart.text.slice(0,120) : ‘’));
 }
-async function aiRun(){
+async function aiRunStep(step){
 if(!aiKey){toast(‘חברי API key’);return;}
 const mid=parseInt(mw(‘aiMSel’).value);if(!mid){toast(‘בחרי מודל’);return;}
-const prompt=mw(‘aiPrompt’).textContent;
-const out=mw(‘aiOut’);const btn=mw(‘aiRunBtn’);
-btn.disabled=true;btn.textContent=‘⏳’;
-out.innerHTML=’<div class="ai-gen"><div class="spin"></div>Gemini מייצר 4K 1:1…</div>’;
+const m=MD.find(x=>x.id===mid);
+const isPortrait = step===‘portrait’;
+const outEl = isPortrait ? mw(‘aiOutPortrait’) : mw(‘aiOutBody’);
+const btnEl = isPortrait ? mw(‘aiRunPortrait’) : mw(‘aiRunBody’);
+const prompt = isPortrait ? mw(‘aiPromptPortrait’).textContent : mw(‘aiPromptBody’).textContent;
+const pose = isPortrait ? ‘Close-Up’ : mw(‘aiPSel’).value;
+const refImage = isPortrait ? null : aiRefImg;
+
+if(!isPortrait && !aiRefImg){
+toast(‘⚠️ קודם צרי Portrait או העלי reference image’);return;
+}
+
+btnEl.disabled=true;btnEl.textContent=‘⏳’;
+outEl.innerHTML=’<div class="ai-gen"><div class="spin"></div>Gemini מייצר…</div>’;
 try{
-const{img,model}=await aiTry(prompt,0);
+const{img,model}=await aiTry(prompt,0,refImage);
 if(img){
 const src=`data:${img.mimeType};base64,${img.data}`;
-const m=MD.find(x=>x.id===mid);
-const pose=mw(‘aiPSel’).value;
 const ts=new Date();
-const fname=`${m?m.nm.replace(/\s+/g,'_'):'model'}_${pose}_${ts.toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+const fname=`${m?m.nm.replace(/\\s+/g,'_'):'model'}_${pose}_${ts.toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
 // auto-download
 const a=document.createElement(‘a’);a.href=src;a.download=fname;
 document.body.appendChild(a);a.click();document.body.removeChild(a);
-out.innerHTML=` <div style="font-size:8px;color:var(--tx3);margin-bottom:4px">via ${model} · 1:1 · 4K</div> <img src="${src}" style="width:100%;border-radius:7px;border:1px solid var(--bd)"/> <div style="display:flex;gap:6px;margin-top:7px"> <a href="${src}" download="${fname}" class="btn btn-g" style="font-size:9px;text-decoration:none">💾 שמור שוב</a> <button class="btn btn-g" style="font-size:9px" onclick="aiUpload(${mid},'${pose}')">📤 לדשבורד</button> </div>`;
-// push to history with download
-aiHist.unshift({src, fname, nm:m?.nm||’?’, pose, model,
-time: ts.toLocaleTimeString(‘he-IL’),
-date: ts.toLocaleDateString(‘he-IL’)});
+outEl.innerHTML=` <div style="font-size:8px;color:var(--tx3);margin-bottom:4px">via ${model} ${refImage?'+ ref':''}· 4K</div> <img src="${src}" style="width:100%;max-height:250px;object-fit:contain;border-radius:7px;border:1px solid var(--bd)"/> <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap"> <a href="${src}" download="${fname}" class="btn btn-g" style="font-size:8px;text-decoration:none">💾 שמור</a> <button class="btn btn-g" style="font-size:8px" onclick="aiUpload(${mid},'${pose}')">📤 לדשבורד</button> </div>`;
+// If portrait, set as reference
+if(isPortrait){
+aiRefImg={data:img.data, mimeType:img.mimeType};
+mw(‘aiRefStatus’).innerHTML=’<span style="color:var(--gn)">✅ Portrait set as reference for body poses</span>’;
+}
+aiHist.unshift({src, fname, nm:m?.nm||’?’, pose, model, time:ts.toLocaleTimeString(‘he-IL’), date:ts.toLocaleDateString(‘he-IL’)});
 aiRenderHist();
-toast(‘✅ נוצר ונשמר אוטומטית!’);
+toast(isPortrait?‘✅ Portrait created — now use as reference!’:‘✅ Body pose created with reference!’);
 }else{
-out.innerHTML=’<div class="ai-err">לא הוחזרה תמונה</div>’;
+outEl.innerHTML=’<div class="ai-err">לא הוחזרה תמונה</div>’;
 }
 }catch(e){
-out.innerHTML=`<div class="ai-err">❌ ${e.message}</div>`;
+outEl.innerHTML=`<div class="ai-err">❌ ${e.message}</div>`;
 }finally{
-btn.disabled=false;btn.textContent=‘▶️ Generate’;
+btnEl.disabled=false;btnEl.textContent=‘▶️ Generate’;
 }
 }
-function aiUpload(mid,pose){const imgEl=document.querySelector(’#aiOut img’);if(!imgEl)return;fetch(imgEl.src).then(r=>r.blob()).then(blob=>{upImg(mid,pose,new File([blob],`${mid}_${pose}.png`,{type:‘image/png’}));toast(‘📤 הועלה!’);});}
+async function aiRunAll(){
+if(!aiKey){toast(‘חברי API key’);return;}
+if(!aiRefImg){toast(‘⚠️ קודם צרי Portrait’);return;}
+const mid=parseInt(mw(‘aiMSel’).value);if(!mid){toast(‘בחרי מודל’);return;}
+const poses=[‘Front’,‘45R’,‘Profile 90’,‘Back’];
+const pSel=mw(‘aiPSel’);
+for(const pose of poses){
+pSel.value=pose;aiAssemble();
+await aiRunStep(‘body’);
+await new Promise(r=>setTimeout(r,2000));
+}
+toast(‘🎉 All 4 body poses generated!’);
+}
+function aiUpload(mid,pose){const outEl=mw(‘aiOutBody’)||mw(‘aiOutPortrait’);const imgEl=outEl?.querySelector(‘img’)||document.querySelector(’#aiOutPortrait img’);if(!imgEl)return;fetch(imgEl.src).then(r=>r.blob()).then(blob=>{upImg(mid,pose,new File([blob],`${mid}_${pose}.png`,{type:‘image/png’}));toast(‘📤 הועלה!’);});}
 function aiRenderHist(){
 const el=mw(‘aiHist’);
 if(!aiHist.length){
@@ -18407,9 +18521,8 @@ a.download=aiHist[i].fname||`image_${i+1}.png`;
 document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 }
-function aiReset(){mw(‘aiMSel’).value=’’;mw(‘aiCustom’).value=’’;mw(‘aiOut’).innerHTML=’<div class="ai-ph"><div style="font-size:28px;margin-bottom:6px">🎨</div>לחצי Generate</div>’;aiAssemble();}
+function aiReset(){mw(‘aiMSel’).value=’’;mw(‘aiCustom’).value=’’;aiRefImg=null;mw(‘aiOutPortrait’).innerHTML=’<div class="ai-ph" style="font-size:11px;color:var(--tx3);text-align:center"><div style="font-size:24px;margin-bottom:4px">📸</div>Step 1: Portrait</div>’;mw(‘aiOutBody’).innerHTML=’<div class="ai-ph" style="font-size:11px;color:var(--tx3);text-align:center"><div style="font-size:24px;margin-bottom:4px">🧍</div>Step 2: Body Pose</div>’;mw(‘aiRefStatus’).innerHTML=’<span style="color:var(--or)">⚠️ קודם צרי Portrait (Step 1) — ישמש כ-reference</span>’;aiAssemble();}
 document.getElementById(‘aiPSel’).addEventListener(‘change’,aiAssemble);
-document.getElementById(‘aiCustom’).addEventListener(‘input’,aiAssemble);
 
 // ══════════════════════════════════════════════
 // SCREENSHOT
