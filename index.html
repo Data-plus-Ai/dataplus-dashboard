@@ -1081,18 +1081,30 @@ async function loadAll(){
 async function saveStatus(mid,col,val){
   const s={...gst(mid),[col]:val,updated_by:curUser,updated_at:new Date().toISOString()};
   dbSt[mid]=s;
-  if(sb)try{await sb.from('model_status').update({[col]:val,updated_by:curUser,updated_at:s.updated_at}).eq('id',mid);}catch(e){}
+  if(sb)try{
+    const row={id:mid,[col]:val,updated_by:curUser,updated_at:s.updated_at};
+    await sb.from('model_status').upsert(row,{onConflict:'id'});
+  }catch(e){}
 }
 async function saveAssign(mid,val){
   const s={...gst(mid),assigned_to:val,updated_by:curUser,updated_at:new Date().toISOString()};
   dbSt[mid]=s;
-  if(sb)try{await sb.from('model_status').update({assigned_to:val,updated_by:curUser,updated_at:s.updated_at}).eq('id',mid);}catch(e){}
+  if(sb)try{
+    await sb.from('model_status').upsert({id:mid,assigned_to:val,updated_by:curUser,updated_at:s.updated_at},{onConflict:'id'});
+  }catch(e){}
   updateProg(); renderTable();
 }
 async function upImg(mid,pose,file){
   const key=mid+'_'+pose;
   if(sb){
     try{
+      // Ensure model_status row exists (needed for FK constraint)
+      if(!dbSt[mid]?.id){
+        const m=MD.find(x=>x.id===mid);
+        const row={id:mid,assigned_to:'',pose_front:false,pose_45l:false,pose_45r:false,pose_profile:false,pose_back:false,pose_closeup:false,updated_by:curUser,updated_at:new Date().toISOString()};
+        await sb.from('model_status').upsert(row,{onConflict:'id'});
+        dbSt[mid]=row;
+      }
       const ext=file.name.split('.').pop()||'jpg';
       const path=`${mid}/${pose.replace(/ /g,'_')}.${ext}`;
       await sb.storage.from(BUCKET).remove([path]);
@@ -4677,7 +4689,16 @@ async function aiRunAll(){
   }
   toast('🎉 All 4 body poses generated!');
 }
-function aiUpload(mid,pose){const outEl=mw('aiOutBody')||mw('aiOutPortrait');const imgEl=outEl?.querySelector('img')||document.querySelector('#aiOutPortrait img');if(!imgEl)return;fetch(imgEl.src).then(r=>r.blob()).then(blob=>{upImg(mid,pose,new File([blob],`${mid}_${pose}.png`,{type:'image/png'}));toast('📤 הועלה!');});}
+function aiUpload(mid,pose){
+  let imgEl=null;
+  if(pose==='Close-Up'){
+    imgEl=document.querySelector('#aiOutPortrait img');
+  }else{
+    imgEl=document.querySelector('#aiOutBody img');
+  }
+  if(!imgEl){toast('אין תמונה להעלאה');return;}
+  fetch(imgEl.src).then(r=>r.blob()).then(blob=>{upImg(mid,pose,new File([blob],`${mid}_${pose}.png`,{type:'image/png'}));toast('📤 הועלה!');});
+}
 function aiRenderHist(){
   const el=mw('aiHist');
   if(!aiHist.length){
