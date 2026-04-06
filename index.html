@@ -1048,7 +1048,7 @@ function ma(m){
 }
 
 // supabase status
-function gst(mid){return dbSt[mid]||{assigned_to:'',pose_front:false,pose_45l:false,pose_45r:false,pose_profile:false,pose_back:false,pose_closeup:false};}
+function gst(mid){return dbSt[mid]||{id:mid,assigned_to:'',pose_front:false,pose_45l:false,pose_45r:false,pose_profile:false,pose_back:false,pose_closeup:false};}
 function gdone(mid){const s=gst(mid); return POSES.filter(p=>s[PKEY[p]]).length;}
 function gfb(mid,pose){return dbFb[mid+'_'+pose]||null;}
 function gfbc(mid){let a=0,r=0;POSES.forEach(p=>{const f=gfb(mid,p);if(f){if(f.status==='approved')a++;if(f.status==='rejected')r++;}});return{a,r};}
@@ -1080,41 +1080,47 @@ async function loadAll(){
 }
 
 async function saveStatus(mid,col,val){
-  const s={...gst(mid),[col]:val,updated_by:curUser,updated_at:new Date().toISOString()};
+  const s={id:mid,...gst(mid),[col]:val,updated_by:curUser,updated_at:new Date().toISOString()};
   dbSt[mid]=s;
   if(sb)try{
     const row={id:mid,[col]:val,updated_by:curUser,updated_at:s.updated_at};
     await sb.from('model_status').upsert(row,{onConflict:'id'});
-  }catch(e){}
+  }catch(e){console.warn('saveStatus err:',e);}
 }
 async function saveAssign(mid,val){
-  const s={...gst(mid),assigned_to:val,updated_by:curUser,updated_at:new Date().toISOString()};
+  const s={id:mid,...gst(mid),assigned_to:val,updated_by:curUser,updated_at:new Date().toISOString()};
   dbSt[mid]=s;
   if(sb)try{
     await sb.from('model_status').upsert({id:mid,assigned_to:val,updated_by:curUser,updated_at:s.updated_at},{onConflict:'id'});
-  }catch(e){}
+  }catch(e){console.warn('saveAssign err:',e);}
   updateProg(); renderTable();
+}
+async function ensureModelStatus(mid){
+  // Always ensure model_status row exists in Supabase (needed for FK on model_images)
+  if(!sb)return;
+  try{
+    const row={id:mid,assigned_to:'',pose_front:false,pose_45l:false,pose_45r:false,pose_profile:false,pose_back:false,pose_closeup:false,updated_by:curUser,updated_at:new Date().toISOString()};
+    const{error}=await sb.from('model_status').upsert(row,{onConflict:'id',ignoreDuplicates:true});
+    if(error)console.warn('ensureModelStatus err:',error);
+    if(!dbSt[mid]?.id)dbSt[mid]={id:mid,...row};
+  }catch(e){console.warn('ensureModelStatus:',e);}
 }
 async function upImg(mid,pose,file){
   const key=mid+'_'+pose;
   if(sb){
     try{
-      // Ensure model_status row exists (needed for FK constraint)
-      if(!dbSt[mid]?.id){
-        const m=MD.find(x=>x.id===mid);
-        const row={id:mid,assigned_to:'',pose_front:false,pose_45l:false,pose_45r:false,pose_profile:false,pose_back:false,pose_closeup:false,updated_by:curUser,updated_at:new Date().toISOString()};
-        await sb.from('model_status').upsert(row,{onConflict:'id'});
-        dbSt[mid]=row;
-      }
+      // Always ensure model_status row exists (FK constraint)
+      await ensureModelStatus(mid);
       const ext=file.name.split('.').pop()||'jpg';
       const path=`${mid}/${pose.replace(/ /g,'_')}.${ext}`;
       await sb.storage.from(BUCKET).remove([path]);
       const{error}=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type});
-      if(error){toast('שגיאה: '+error.message);return;}
+      if(error){toast('שגיאה בהעלאה: '+error.message);console.error('upload err:',error);return;}
       const{data:u}=sb.storage.from(BUCKET).getPublicUrl(path);
       dbIm[key]=u.publicUrl;
-      await sb.from('model_images').upsert({model_id:mid,pose,image_url:u.publicUrl,uploaded_by:curUser},{onConflict:'model_id,pose'});
-    }catch(e){toast('שגיאה: '+e.message);return;}
+      const{error:dbErr}=await sb.from('model_images').upsert({model_id:mid,pose,image_url:u.publicUrl,uploaded_by:curUser},{onConflict:'model_id,pose'});
+      if(dbErr){toast('שגיאה בשמירה: '+dbErr.message);console.error('model_images err:',dbErr);return;}
+    }catch(e){toast('שגיאה: '+e.message);console.error('upImg catch:',e);return;}
   }else{dbIm[key]=URL.createObjectURL(file);}
   renderGallery(); renderLiveGal(); toast('הועלה!');
 }
