@@ -209,6 +209,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-he
       <option value="שקד">שקד</option>
     </select>
     <div class="sync" id="syncLbl"><span class="dot"></span> מחובר</div>
+    <button onclick="syncStorageImages()" style="background:none;border:1px solid var(--ac);border-radius:6px;color:var(--ac);font-size:13px;padding:3px 10px;cursor:pointer;margin-right:6px;font-weight:600" title="סנכרן תמונות מ-Storage">🔄 Sync</button>
     <button onclick="openAdminPanel()" style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--tx2);font-size:14px;padding:3px 8px;cursor:pointer;margin-right:6px" title="Admin Settings">⚙️</button>
   </div>
 
@@ -1143,18 +1144,67 @@ async function upImg(mid,pose,file){
     try{
       // Always ensure model_status row exists (FK constraint)
       await ensureModelStatus(mid);
-      const ext=file.name.split('.').pop()||'jpg';
+      const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
       const path=`${mid}/${pose.replace(/ /g,'_')}.${ext}`;
-      await sb.storage.from(BUCKET).remove([path]);
-      const{error}=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type});
-      if(error){toast('שגיאה בהעלאה: '+error.message);console.error('upload err:',error);return;}
+      // Delete any existing first
+      try{await sb.storage.from(BUCKET).remove([path]);}catch(_){}
+      // Upload
+      const{error:upErr}=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:true});
+      if(upErr){toast('❌ Storage: '+upErr.message);console.error('Storage upload err:',upErr);return;}
+      // Get public URL
       const{data:u}=sb.storage.from(BUCKET).getPublicUrl(path);
-      dbIm[key]=u.publicUrl;
-      const{error:dbErr}=await sb.from('model_images').upsert({model_id:mid,pose,image_url:u.publicUrl,uploaded_by:curUser},{onConflict:'model_id,pose'});
-      if(dbErr){toast('שגיאה בשמירה: '+dbErr.message);console.error('model_images err:',dbErr);return;}
+      const publicUrl=u.publicUrl;
+      // Save to local cache immediately so UI shows it
+      dbIm[key]=publicUrl;
+      // Try to save to model_images table
+      const{error:dbErr,data:dbData}=await sb.from('model_images').upsert({model_id:mid,pose,image_url:publicUrl,uploaded_by:curUser||'unknown'},{onConflict:'model_id,pose'}).select();
+      if(dbErr){
+        console.error('❌ DB insert failed:',dbErr);
+        toast('⚠️ העלה ל-Storage אך לא נשמר ב-DB: '+dbErr.message);
+        // Still render the image since Storage worked
+      }else{
+        console.log('✅ Saved:',dbData);
+      }
     }catch(e){toast('שגיאה: '+e.message);console.error('upImg catch:',e);return;}
   }else{dbIm[key]=URL.createObjectURL(file);}
-  renderGallery(); renderLiveGal(); toast('הועלה!');
+  renderGallery(); renderLiveGal(); toast('✅ הועלה: '+pose);
+}
+
+// Diagnostic: scan storage folders and sync missing images into dbIm
+async function syncStorageImages(){
+  if(!sb){toast('לא מחובר');return;}
+  toast('⏳ סורק Storage...');
+  let found=0, added=0;
+  const poseMap={'Front':'Front','45L':'45L','45R':'45R','Profile_90':'Profile 90','Back':'Back','Close-Up':'Close-Up','Close_Up':'Close-Up','Profile 90':'Profile 90'};
+  try{
+    // List all model folders in storage
+    const{data:folders,error:lErr}=await sb.storage.from(BUCKET).list('',{limit:1000});
+    if(lErr){toast('❌ '+lErr.message);return;}
+    for(const folder of folders||[]){
+      if(!folder.name||folder.name.includes('.'))continue;
+      const mid=parseInt(folder.name);
+      if(!mid)continue;
+      // List files in this folder
+      const{data:files}=await sb.storage.from(BUCKET).list(folder.name,{limit:100});
+      for(const f of files||[]){
+        found++;
+        const baseName=f.name.split('.')[0];
+        const pose=poseMap[baseName]||baseName;
+        const{data:u}=sb.storage.from(BUCKET).getPublicUrl(`${folder.name}/${f.name}`);
+        const key=mid+'_'+pose;
+        if(!dbIm[key]){
+          dbIm[key]=u.publicUrl;
+          added++;
+          // Also ensure DB row exists
+          await ensureModelStatus(mid);
+          try{await sb.from('model_images').upsert({model_id:mid,pose,image_url:u.publicUrl,uploaded_by:curUser||'sync'},{onConflict:'model_id,pose'});}catch(e){}
+        }
+      }
+    }
+    renderGallery();renderLiveGal();renderTable();
+    toast(`✅ סונכרן: ${added}/${found} תמונות`);
+    console.log(`Sync complete: scanned ${found} files, added ${added} new`);
+  }catch(e){console.error('Sync err:',e);toast('❌ '+e.message);}
 }
 async function delImg(mid,pose){
   delete dbIm[mid+'_'+pose];
