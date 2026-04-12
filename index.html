@@ -289,10 +289,20 @@ body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-he
           </div>
           <div class="rng"><label>X</label><input type="range" id="qcX" min="-200" max="200" value="0" style="width:70px" oninput="qcDraw()"></div>
           <div class="rng"><label>Y</label><input type="range" id="qcY" min="-200" max="200" value="0" style="width:70px" oninput="qcDraw()"></div>
+          <label style="font-size:10px;color:var(--tx2);display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="qcRulerMode" checked onchange="qcDraw()" style="accent-color:var(--ac)"/>
+            📏 מד גובה
+          </label>
+          <button class="btn btn-g" style="font-size:10px;padding:4px 8px" onclick="qcAutoMeasure()">🎯 Auto-Detect</button>
         </div>
-        <div class="qc-oc">
-          <div class="qc-ph" id="qcPh"><div style="font-size:36px;opacity:.15;margin-bottom:8px">🔬</div>בחרי מודל</div>
-          <canvas id="qcCv" width="580" height="760" style="display:none;max-width:100%"></canvas>
+        <div class="qc-oc" style="display:flex;gap:8px;align-items:stretch">
+          <!-- Vertical height ruler 0-200cm -->
+          <div id="qcRulerCol" style="position:relative;width:58px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;flex-shrink:0"></div>
+          <!-- Image canvas area -->
+          <div style="flex:1;position:relative">
+            <div class="qc-ph" id="qcPh" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;min-height:760px"><div style="text-align:center"><div style="font-size:36px;opacity:.15;margin-bottom:8px">🔬</div>בחרי מודל</div></div>
+            <canvas id="qcCv" width="520" height="760" style="display:none;max-width:100%"></canvas>
+          </div>
         </div>
         <div id="qcInfo" style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace;text-align:center"></div>
       </div>
@@ -2370,13 +2380,13 @@ function renderTable(){
 // ══════════════════════════════════════════════
 // QC
 // ══════════════════════════════════════════════
-let qcM=null, qcImg=null, qcTblVis=false;
+let qcM=null, qcImg=null, qcTblVis=false, qcDetectedBounds=null;
 
 function qcToggle(){qcTblVis=!qcTblVis;mw('qcMain').style.display=qcTblVis?'none':'grid';mw('qcTable').style.display=qcTblVis?'block':'none';mw('qcViewBtn').textContent=qcTblVis?'🔬 QC':'📊 טבלה';if(qcTblVis)renderQCTable();}
 function qcFilterSz(){const sz=mw('qcSzF').value;mw('qcModel').innerHTML='<option value="">— בחרי מודל —</option>'+(sz?MD.filter(m=>m.sz===sz):MD).map(m=>`<option value="${m.id}">${m.nm} #${m.id} — ${m.sz}</option>`).join('');}
-function qcPick(){const mid=parseInt(mw('qcModel').value);if(!mid){qcM=null;qcDraw();qcRenderProf();qcRenderRes();return;}qcM=MD.find(m=>m.id===mid);if(qcM){qcRenderProf();qcLoadPoseImgs();qcLoadPose();qcHBar();qcCheck();qcDraw();}}
-function qcLoadPose(){if(!qcM)return;const url=dbIm[qcM.id+'_'+mw('qcPose').value];if(url){const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{qcImg=img;qcDraw();};img.src=url;}}
-function qcUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{qcImg=img;qcDraw();toast('נטען');};img.src=ev.target.result;};r.readAsDataURL(f);}
+function qcPick(){const mid=parseInt(mw('qcModel').value);if(!mid){qcM=null;qcDetectedBounds=null;qcDraw();qcRenderProf();qcRenderRes();return;}qcM=MD.find(m=>m.id===mid);qcDetectedBounds=null;if(qcM){qcRenderProf();qcLoadPoseImgs();qcLoadPose();qcHBar();qcCheck();qcDraw();}}
+function qcLoadPose(){if(!qcM)return;qcDetectedBounds=null;const url=dbIm[qcM.id+'_'+mw('qcPose').value];if(url){const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{qcImg=img;qcDraw();setTimeout(()=>{try{qcAutoMeasure();}catch(e){}},200);};img.src=url;}}
+function qcUpload(e){const f=e.target.files[0];if(!f)return;qcDetectedBounds=null;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{qcImg=img;qcDraw();setTimeout(()=>{try{qcAutoMeasure();}catch(e){}},200);toast('נטען');};img.src=ev.target.result;};r.readAsDataURL(f);}
 function qcLoadPoseImgs(){if(!qcM)return;let h='';POSES.forEach(p=>{const url=dbIm[qcM.id+'_'+p];if(url)h+=`<img src="${url}" style="width:34px;height:46px;border-radius:5px;object-fit:cover;border:2px solid var(--gn);cursor:pointer" onclick="qcUseImg('${url}')" title="${p}"/>`});mw('qcPoseImgs').innerHTML=h||'<div style="font-size:8px;color:var(--tx3)">אין תמונות</div>';}
 function qcUseImg(url){const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{qcImg=img;qcDraw();toast('נטען');};img.src=url;}
 function qcReset(){qcM=null;qcImg=null;mw('qcModel').value='';mw('qcCv').style.display='none';mw('qcPh').style.display='block';mw('qcInfo').textContent='';qcRenderProf();qcRenderRes();mw('qcHBar').innerHTML='';}
@@ -2530,6 +2540,9 @@ async function qcAutoMeasure(){
   const heightCm=m.g==='M'&&m.h<100 ? m.h*2.54 : m.h;
   const cmPerPx=heightCm/pixelHeight;
   
+  // Store detection for qcDraw to use in ruler mode
+  qcDetectedBounds={topY, bottomY, pixelHeight, cmPerPx, actualCm: heightCm, imgW: W, imgH: H};
+  
   // Step 4: Find anatomical landmarks
   // Head top ≈ topY, top of head typically ~1/8 of body height
   // Shoulder ≈ ~0.82-0.85 from feet (i.e. 15-18% down from top)
@@ -2634,6 +2647,9 @@ async function qcAutoMeasure(){
   
   out.innerHTML=html;
   toast('🎯 ניתוח הושלם');
+  
+  // Refresh canvas to align image with ruler
+  qcDraw();
 }
 
 function drawAutoMeasureOverlay(shoulder, waist, hips, topY, bottomY, imgW, imgH, cmPerPx){
@@ -2673,28 +2689,165 @@ function qcDraw(){
   const op=parseInt(mw('qcOp').value)/100;
   const sc=parseInt(mw('qcSc').value)||100;
   const offX=parseInt(mw('qcX').value);const offY=parseInt(mw('qcY').value);
-  if(!sp&&!qcImg){cv.style.display='none';mw('qcPh').style.display='block';mw('qcInfo').textContent='';return;}
+  const rulerMode=mw('qcRulerMode')?.checked;
+  
+  if(!sp&&!qcImg){cv.style.display='none';mw('qcPh').style.display='flex';mw('qcInfo').textContent='';qcRenderRuler(null);return;}
   cv.style.display='block';mw('qcPh').style.display='none';
-  const W=580,H=760;cv.width=W;cv.height=H;
+  
+  const W=520,H=800;cv.width=W;cv.height=H;
   ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,W,H);
+  
+  // Grid
   ctx.strokeStyle='rgba(255,255,255,.03)';ctx.lineWidth=.5;
   for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  if(sz&&silImgs[sz]&&silImgs[sz].complete&&silImgs[sz].naturalWidth){
+  
+  // RULER MODE: align image so feet=0cm (bottom), head=target_height (up)
+  // Canvas represents 0-200cm, so pxPerCm = H / 200
+  const maxCm=200;
+  const pxPerCm=H/maxCm;
+  const groundY=H-20; // 20px padding at bottom = 0cm mark
+  
+  if(rulerMode && qcM){
+    // Draw 0-200cm reference lines inside canvas
+    ctx.save();
+    for(let cm=0;cm<=maxCm;cm+=10){
+      const y=groundY-cm*pxPerCm;
+      const isMajor=cm%50===0;
+      const isMid=cm%25===0;
+      ctx.strokeStyle=isMajor?'rgba(139,92,246,.35)':isMid?'rgba(139,92,246,.15)':'rgba(139,92,246,.07)';
+      ctx.lineWidth=isMajor?1.5:isMid?1:0.5;
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+      if(isMajor||isMid){
+        ctx.fillStyle=isMajor?'rgba(139,92,246,.8)':'rgba(139,92,246,.4)';
+        ctx.font=isMajor?'bold 11px JetBrains Mono':'9px JetBrains Mono';
+        ctx.textAlign='left';
+        ctx.fillText(cm+'cm',5,y-3);
+      }
+    }
+    // Ground line (feet)
+    ctx.strokeStyle='#8b5cf6';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+    
+    // Target height marker (red dashed line at model's expected height)
+    const targetCm=qcM.g==='M'&&qcM.h<100?qcM.h*2.54:qcM.h;
+    const targetY=groundY-targetCm*pxPerCm;
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.setLineDash([8,4]);
+    ctx.beginPath();ctx.moveTo(0,targetY);ctx.lineTo(W,targetY);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ef4444';ctx.font='bold 13px Outfit';ctx.textAlign='right';
+    ctx.fillText(`🎯 Target: ${targetCm.toFixed(1)}cm`,W-8,targetY-5);
+    ctx.restore();
+  }
+  
+  // Silhouette overlay (behind or in front of image)
+  if(!rulerMode && sz && silImgs[sz]&&silImgs[sz].complete&&silImgs[sz].naturalWidth){
     const si=silImgs[sz];const bsc=(sc/100)*0.7;const iW=si.naturalWidth*bsc;const iH=si.naturalHeight*bsc;
     ctx.save();ctx.globalAlpha=.85;ctx.drawImage(si,(W-iW)/2+offX,(H-iH)/2+offY,iW,iH);ctx.restore();
-    if(qcM){
-      const m=qcM;const msc=bsc*.008;const cx=W/2+offX;
-      const dY=(H-iH)/2+offY;const bT=dY+iH*.22;const bB=dY+iH*.88;
-      const bY=bT+(bB-bT)*.22;const wY=bT+(bB-bT)*.36;const hY=bT+(bB-bT)*.50;
-      const bR=m.bu*msc;const wR=m.wa*msc;const hR=m.hp*msc;
-      ctx.save();ctx.setLineDash([4,3]);ctx.lineWidth=2;ctx.strokeStyle='rgba(16,185,129,.8)';
-      [[bR,bY,'B:'+m.bu],[wR,wY,'W:'+m.wa],[hR,hY,'H:'+m.hp]].forEach(([r,y,lbl])=>{ctx.beginPath();ctx.moveTo(cx-r,y);ctx.lineTo(cx+r,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(16,185,129,.9)';ctx.font='bold 9px JetBrains Mono';ctx.textAlign='left';ctx.fillText(lbl,cx+r+5,y+3);ctx.setLineDash([4,3]);});
-      ctx.setLineDash([]);ctx.fillStyle='rgba(16,185,129,.7)';ctx.font='bold 10px Outfit';ctx.textAlign='center';ctx.fillText(`${m.nm}·${m.h}${m.g==='M'?'"':'cm'}·${mwt(m)}kg`,W/2,H-22);ctx.restore();
+  }
+  
+  // Image render — in ruler mode, align feet to groundY
+  if(qcImg){
+    ctx.save();ctx.globalAlpha=op;
+    const ar=qcImg.width/qcImg.height;
+    
+    if(rulerMode){
+      // Use detected silhouette bounds if available, else default scaling
+      const bounds=qcDetectedBounds;
+      if(bounds && bounds.topY!==undefined){
+        // Scale image so detected pixel height = target cm
+        const targetCm=qcM.g==='M'&&qcM.h<100?qcM.h*2.54:qcM.h;
+        const targetPx=targetCm*pxPerCm;
+        const scaleFactor=targetPx/(bounds.bottomY-bounds.topY);
+        const dW=qcImg.width*scaleFactor*(sc/100);
+        const dH=qcImg.height*scaleFactor*(sc/100);
+        // Position: feet detected in original image at bounds.bottomY → align to groundY
+        const dX=(W-dW)/2+offX;
+        const dY=groundY-bounds.bottomY*scaleFactor*(sc/100)+offY;
+        ctx.drawImage(qcImg,dX,dY,dW,dH);
+        // Mark actual head position
+        ctx.restore();
+        ctx.save();
+        const actualHeadY=dY+bounds.topY*scaleFactor*(sc/100);
+        const actualCm=(groundY-actualHeadY)/pxPerCm;
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+        ctx.beginPath();ctx.moveTo(0,actualHeadY);ctx.lineTo(W,actualHeadY);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='#10b981';ctx.font='bold 13px Outfit';ctx.textAlign='left';
+        ctx.fillText(`✅ Actual: ${actualCm.toFixed(1)}cm`,8,actualHeadY-5);
+        // Deviation badge
+        const dev=actualCm-targetCm;
+        const devPct=Math.abs(dev)/targetCm*100;
+        const badgeCol=devPct<2?'#10b981':devPct<5?'#f59e0b':'#ef4444';
+        const badgeIcon=devPct<2?'✅':devPct<5?'⚠️':'❌';
+        ctx.fillStyle=badgeCol;ctx.font='bold 14px Outfit';ctx.textAlign='center';
+        ctx.fillText(`${badgeIcon} Δ${dev>=0?'+':''}${dev.toFixed(1)}cm (${devPct.toFixed(1)}%)`,W/2,15);
+      }else{
+        // No detection yet — scale by naive assumption (fill height)
+        const dH=H*.9;const dW=dH*ar;
+        ctx.drawImage(qcImg,(W-dW)/2+offX,H-dH-10+offY,dW,dH);
+      }
+    }else{
+      // Legacy mode — center fit
+      let dW,dH;
+      if(ar>W/H){dW=W*.85;dH=dW/ar;}else{dH=H*.9;dW=dH*ar;}
+      ctx.drawImage(qcImg,(W-dW)/2,(H-dH)/2,dW,dH);
     }
-  }else if(sz){ctx.fillStyle='rgba(139,92,246,.5)';ctx.font='13px Outfit';ctx.textAlign='center';ctx.fillText('⏳ '+sz,W/2,H/2);}
-  if(qcImg){ctx.save();ctx.globalAlpha=op;const ar=qcImg.width/qcImg.height;let dW,dH;if(ar>W/H){dW=W*.85;dH=dW/ar;}else{dH=H*.9;dW=dH*ar;}ctx.drawImage(qcImg,(W-dW)/2,(H-dH)/2,dW,dH);ctx.restore();}
-  mw('qcInfo').textContent=qcM?`${qcM.nm}·${qcM.sz}·Scale:${sc}%·Opacity:${Math.round(op*100)}%`:'';
+    ctx.restore();
+  }
+  
+  mw('qcInfo').textContent=qcM?`${qcM.nm}·${qcM.sz}·Scale:${sc}%·Opacity:${Math.round(op*100)}%${rulerMode?'·RULER':''}`:'';
+  
+  // Also render the side ruler column
+  qcRenderRuler(qcM);
+}
+
+// Side vertical height ruler (0-200cm) — visual reference to verify model heights
+function qcRenderRuler(m){
+  const col=mw('qcRulerCol');if(!col)return;
+  if(!m){col.innerHTML='<div style="text-align:center;padding:20px 4px;color:var(--tx3);font-size:9px">בחרי<br>מודל</div>';return;}
+  const maxCm=200;
+  const targetCm=m.g==='M'&&m.h<100?m.h*2.54:m.h;
+  // Build ruler - rendered 0 at bottom, 200 at top
+  let h='<div style="position:absolute;top:0;bottom:0;left:0;right:0;padding:6px 4px">';
+  // Draw major/minor ticks
+  for(let cm=0;cm<=maxCm;cm+=5){
+    const pct=100-(cm/maxCm*100);
+    const isMajor=cm%50===0;
+    const isMid=cm%25===0;
+    const isMinor=cm%10===0;
+    if(isMajor){
+      h+=`<div style="position:absolute;top:${pct}%;left:0;right:0;transform:translateY(-50%);display:flex;align-items:center;gap:3px">
+        <div style="flex:1;height:1.5px;background:var(--ac)"></div>
+        <span style="font-size:9px;font-weight:800;color:var(--ac);font-family:'JetBrains Mono',monospace">${cm}</span>
+      </div>`;
+    }else if(isMid){
+      h+=`<div style="position:absolute;top:${pct}%;left:0;right:0;transform:translateY(-50%);display:flex;align-items:center;gap:3px">
+        <div style="flex:1;height:1px;background:rgba(139,92,246,.5)"></div>
+        <span style="font-size:7px;color:var(--tx2);font-family:'JetBrains Mono',monospace">${cm}</span>
+      </div>`;
+    }else if(isMinor){
+      h+=`<div style="position:absolute;top:${pct}%;left:0;right:14px;height:1px;background:rgba(139,92,246,.2)"></div>`;
+    }else{
+      h+=`<div style="position:absolute;top:${pct}%;left:0;right:24px;height:1px;background:rgba(139,92,246,.08)"></div>`;
+    }
+  }
+  // Target marker
+  const tPct=100-(targetCm/maxCm*100);
+  h+=`<div style="position:absolute;top:${tPct}%;left:-2px;right:-2px;transform:translateY(-50%);height:3px;background:#ef4444;border-radius:2px;box-shadow:0 0 6px rgba(239,68,68,.7);z-index:5"></div>
+    <div style="position:absolute;top:${tPct}%;left:-30px;transform:translateY(-50%);background:#ef4444;color:#fff;padding:2px 4px;border-radius:3px;font-size:9px;font-weight:800;z-index:6">${targetCm.toFixed(0)}</div>`;
+  
+  // Actual marker (if detected)
+  if(qcDetectedBounds&&qcDetectedBounds.actualCm){
+    const aCm=qcDetectedBounds.actualCm;
+    const aPct=100-(aCm/maxCm*100);
+    const dev=aCm-targetCm;const devPct=Math.abs(dev)/targetCm*100;
+    const col2=devPct<2?'#10b981':devPct<5?'#f59e0b':'#ef4444';
+    h+=`<div style="position:absolute;top:${aPct}%;left:-2px;right:-2px;transform:translateY(-50%);height:3px;background:${col2};border-radius:2px;z-index:5"></div>
+      <div style="position:absolute;top:calc(${aPct}% + 8px);right:2px;background:${col2};color:#fff;padding:1px 3px;border-radius:3px;font-size:8px;font-weight:700;z-index:6">${aCm.toFixed(0)}</div>`;
+  }
+  h+='</div>';
+  col.innerHTML=h;
 }
 function qcDl(){const cv=mw('qcCv');if(!cv||cv.style.display==='none'){toast('אין תמונה');return;}const a=document.createElement('a');a.download=`QC_${qcM?qcM.nm:'export'}.png`;a.href=cv.toDataURL('image/png');document.body.appendChild(a);a.click();document.body.removeChild(a);toast('⬇️ PNG');}
 function renderQCTable(){
